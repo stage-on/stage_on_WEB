@@ -1,2 +1,2 @@
 pr test2
-dev deploy test
+dev deploy test2
