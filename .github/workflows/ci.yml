@@ -26,3 +26,5 @@ jobs:
       # 빌드
       - name: Build Vite app
         run: npm run build
+
+      # 테스트
