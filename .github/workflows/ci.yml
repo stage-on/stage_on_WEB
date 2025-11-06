@@ -1,0 +1,28 @@
+name: Continuous Integration # workflow 이름
+
+on:
+  pull_request: # main 브랜치로 PR 작성 시 실행
+    branches: ["main"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest # 우분투 최신 버전 환경에서 실행
+
+    steps:
+      # 코드 checkout
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Node.js 설정
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18" # Vite + React 권장 Node 버전
+
+      # 의존성 설치
+      - name: Install dependencies
+        run: npm install
+
+      # 빌드
+      - name: Build Vite app
+        run: npm run build
