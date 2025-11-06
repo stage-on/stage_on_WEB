@@ -17,7 +17,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: "18" # Vite + React 권장 Node 버전
+          node-version: "20" # Vite + React 권장 Node 버전
 
       # 의존성 설치
       - name: Install dependencies
