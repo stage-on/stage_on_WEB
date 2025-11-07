@@ -35,7 +35,7 @@ jobs:
         with:
           # VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID는 GitHub Secrets에 등록해야 합니다.
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          github-token: ${{ secrets.GITHUB_TOKEN }} # 기본값, 필요 시 토큰 등록
+          github-token: ${{ secrets.GITHUB_TOKEN }} # 기본값, 필요 시 토큰 등록합니다.
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
           # main 브랜치 푸시는 Production 배포로 설정 (prod: true)
