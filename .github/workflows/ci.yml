@@ -1,36 +1,42 @@
-name: CI/CD for Main Branch
+name: Production CI/CD (Main Branch)
 
 on:
   push:
+    # main 브랜치에 코드가 push/merge 될 때만 실행
     branches:
       - main
 
 jobs:
-  build-test-deploy:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - name: 🗄️ Checkout Code
+        uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
+      - name: 🟢 Setup Node.js Environment
+        uses: actions/setup-node@v4
         with:
-          node-version: "18"
+          node-version: "20" # 프로젝트에 맞는 Node.js 버전으로 변경하세요
 
-      - name: Install dependencies
+      - name: 📦 Install Dependencies
         run: npm install
 
-      - name: Run Tests
+      - name: 🧪 Run Tests
+        # 테스트 스크립트가 'npm test'인 경우
         run: npm test
 
-      - name: Build Project
+      - name: 🏗️ Build Project
+        # 빌드 스크립트가 'npm run build'인 경우
         run: npm run build
 
-      - name: Deploy to Vercel
+      - name: 🚀 Deploy to Vercel Production
         uses: amondnet/vercel-action@v20
         with:
+          # VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID는 GitHub Secrets에 등록해야 합니다.
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }} # 기본값, 필요 시 토큰 등록
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          prod: true
+          # main 브랜치 푸시는 Production 배포로 설정 (prod: true)
+          scope: production # Production 배포임을 명시 (Vercel Action의 파라미터에 따라 'prod: true' 옵션이 필요한 경우도 있습니다.)
