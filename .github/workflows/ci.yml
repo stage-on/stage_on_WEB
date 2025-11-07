@@ -2,7 +2,7 @@ name: Production CI/CD (Main Branch)
 
 on:
   push:
-    # main 브랜치에 코드가 push/merge 될 때만 실행
+    # main 브랜치에 코드가 push/merge 될 때만 실행합니다.
     branches:
       - main
 
