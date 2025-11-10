@@ -16,12 +16,12 @@ export default defineConfig({
         theme_color: "#C66CD9",
         icons: [
           {
-            src: "/stageon-192.png",
+            src: "/stageon_192.png",
             sizes: "192x192",
             type: "image/png",
           },
           {
-            src: "/stageon-512.png",
+            src: "/stageon_512.png",
             sizes: "512x512",
             type: "image/png",
           },
