@@ -47,6 +47,7 @@ export default function Search() {
 
   // 검색 함수
   const handleSearch = async (inputText: string) => {
+    console.log(inputText);
     // 검색 api 연동 하기
     // if (res.status === 200) {
     //   setIsSearch(true);
