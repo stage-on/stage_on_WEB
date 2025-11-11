@@ -1,8 +1,6 @@
 @font-face {
   font-family: 'JejuGothic';
-  src: url('../../assets/fonts/JejuGothic.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
+  src: url('../assets/fonts/JejuGothic.ttf') format('truetype');
 }
 
 @keyframes fadeOut { 
