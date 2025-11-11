@@ -83,3 +83,47 @@
   cursor: pointer;
 }
 /* 추천 검색어 */
+
+/* 검색 후 */
+.searchResultDiv {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.festivalAndBand {
+  display: flex;
+  align-items: center;
+  width: calc(100% + 40px);
+  padding: 0 20px;
+  box-sizing: border-box;
+  height: 65px;
+  /* border: 1px solid black; */
+  border-bottom: 1px solid #ebebeb;
+}
+.festivalDiv,
+.bandDiv {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  cursor: pointer;
+}
+.festival,
+.band {
+  font-size: 12px;
+  font-weight: bold;
+}
+.count {
+  font-size: 10px;
+  background-color: rgba(198, 108, 217, 0.2);
+  border-radius: 10px;
+  padding: 0 6px;
+  text-align: center;
+  margin-left: 3px;
+}
+.selected {
+  color: #693c73;
+}
+.default {
+  color: #8f8f8f;
+}
+/* 검색 후 */
