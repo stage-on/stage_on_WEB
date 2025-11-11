@@ -80,5 +80,6 @@
 .recommendSearchItem {
   color: #1a1a1a;
   font-size: 10px;
+  cursor: pointer;
 }
 /* 추천 검색어 */
