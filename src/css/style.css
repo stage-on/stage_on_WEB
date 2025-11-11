@@ -8,7 +8,7 @@ body {
   padding: 0;
   max-width: 600px;
   min-height: 100dvh;
-  overflow-y: auto;
+  overflow-y: auto; /* ✅ */
   font-family: "Inter", sans-serif;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
@@ -22,4 +22,12 @@ body {
   padding: 20px;
   box-sizing: border-box;
   overflow: visible;
+}
+
+ul,
+li {
+  text-decoration: none;
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
