@@ -2,6 +2,8 @@ import searchStyle from "../css/pages/search.module.css";
 import searchSVG from "../assets/search/search.svg";
 import menuSVG from "../assets/search/menu.svg";
 import xSVG from "../assets/search/x.svg";
+import heartSVG from "../assets/search/heart.svg";
+import arrowSVG from "../assets/search/arrow-right.svg";
 import { useEffect, useState } from "react";
 
 export default function Search() {
@@ -167,7 +169,30 @@ export default function Search() {
                 </span>
               </div>
             </div>
-            <div className={searchStyle.searchResultDiv}></div>
+            <ul className={searchStyle.searchResultDiv}>
+              {onFestival && (
+                <li className={searchStyle.searchResultItem}>
+                  <span className={searchStyle.testImg}>test</span>
+                  <div className={searchStyle.titleAndInfo}>
+                    <span className={searchStyle.title}>
+                      쏜애플 콘서트 ‘바다와 구름과 무대
+                    </span>
+                    <div className={searchStyle.info}>
+                      <span className={searchStyle.heart}>
+                        <img src={heartSVG} alt="좋아요" />
+                        999
+                      </span>
+                      | <span>쏜애플</span>| <span>2025.12.20 - 12.21</span>
+                    </div>
+                  </div>
+                  <img
+                    src={arrowSVG}
+                    alt="이동"
+                    className={searchStyle.arrowIcon}
+                  />
+                </li>
+              )}
+            </ul>
           </div>
         </>
       )}

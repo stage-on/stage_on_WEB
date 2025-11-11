@@ -84,16 +84,19 @@
 }
 /* 추천 검색어 */
 
-/* 검색 후 */
+/* 검색 후 공연, 밴드 선택 카테고리 */
 .searchResultDiv {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  padding: 20px 0;
+  /* align-items: center; */
 }
 .festivalAndBand {
   display: flex;
   align-items: center;
   width: calc(100% + 40px);
+  margin-left: -20px;
+  margin-right: -20px;
   padding: 0 20px;
   box-sizing: border-box;
   height: 65px;
@@ -126,4 +129,56 @@
 .default {
   color: #8f8f8f;
 }
-/* 검색 후 */
+/* 검색 후 공연, 밴드 선택 카테고리 */
+
+/* 검색 후 결과 리스트 */
+.searchResultItem {
+  display: flex;
+  width: 100%;
+  height: 70px;
+  /* border: 1px solid black; */
+  align-items: center;
+}
+.testImg {
+  height: 100%;
+  width: 55px;
+  background-color: #ebebeb;
+}
+.titleAndInfo {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  height: 80%;
+  flex: 1;
+  margin-left: 10px;
+}
+.title {
+  width: 250px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 14px;
+  color: #1a1a1a;
+  font-weight: 600;
+}
+.info {
+  display: flex;
+  font-size: 11px;
+  color: #8f8f8f;
+  gap: 4px;
+}
+.heart {
+  display: flex;
+  align-items: center;
+}
+.heart img {
+  color: #8f8f8f;
+  width: 11px;
+  width: 11px;
+  margin-right: 2px;
+}
+.arrowIcon {
+  width: 18px;
+  height: 18px;
+}
+/* 검색 후 결과 리스트 */
