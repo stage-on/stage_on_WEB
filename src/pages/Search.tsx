@@ -57,7 +57,12 @@ export default function Search() {
   return (
     <>
       <div className={searchStyle.inputDiv}>
-        <img src={searchSVG} alt="검색" className={searchStyle.searchIcon} />
+        <img
+          src={searchSVG}
+          alt="검색"
+          className={searchStyle.searchIcon}
+          onClick={(prev) => setIsSearch(!prev)}
+        />
         <input
           placeholder="검색어를 입력하세요"
           type="text"
