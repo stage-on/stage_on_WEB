@@ -59,23 +59,71 @@ export default function Search() {
   }, [inputText]);
   return (
     <>
-      <div className={searchStyle.inputDiv}>
-        <img
-          src={searchSVG}
-          alt="검색"
-          className={searchStyle.searchIcon}
-          onClick={() => setIsSearch((prev) => !prev)}
-        />
-        <input
-          placeholder="검색어를 입력하세요"
-          type="text"
-          value={inputText}
-          onChange={(e) => {
-            setInputText(e.target.value);
-          }}
-          onKeyDown={handleEnter}
-        />
-        <img src={menuSVG} alt="메뉴" className={searchStyle.menuIcon} />
+      <div className={searchStyle.fixedDiv}>
+        <div className={searchStyle.inputDiv}>
+          <img
+            src={searchSVG}
+            alt="검색"
+            className={searchStyle.searchIcon}
+            onClick={() => setIsSearch((prev) => !prev)}
+          />
+          <input
+            placeholder="검색어를 입력하세요"
+            type="text"
+            value={inputText}
+            onChange={(e) => {
+              setInputText(e.target.value);
+            }}
+            onKeyDown={handleEnter}
+          />
+          <img src={menuSVG} alt="메뉴" className={searchStyle.menuIcon} />
+        </div>
+        {isSearch && (
+          <div className={searchStyle.festivalAndBand}>
+            <div
+              className={searchStyle.festivalDiv}
+              onClick={() => {
+                setOnFestival(true);
+              }}
+            >
+              <span
+                className={`${searchStyle.festival} ${
+                  onFestival ? searchStyle.selected : searchStyle.default
+                }`}
+              >
+                공연
+              </span>
+              <span
+                className={`${searchStyle.count} ${
+                  onFestival ? searchStyle.selected : searchStyle.default
+                }     `}
+              >
+                159
+              </span>
+            </div>
+            <div
+              className={searchStyle.bandDiv}
+              onClick={() => {
+                setOnFestival(false);
+              }}
+            >
+              <span
+                className={`${searchStyle.band} ${
+                  !onFestival ? searchStyle.selected : searchStyle.default
+                }`}
+              >
+                밴드
+              </span>
+              <span
+                className={`${searchStyle.count} ${
+                  !onFestival ? searchStyle.selected : searchStyle.default
+                }`}
+              >
+                1
+              </span>
+            </div>
+          </div>
+        )}
       </div>
       {isSearch == false ? (
         <>
@@ -125,53 +173,9 @@ export default function Search() {
         </>
       ) : (
         <>
-          <div className={searchStyle.searchResultDiv}>
-            <div className={searchStyle.festivalAndBand}>
-              <div
-                className={searchStyle.festivalDiv}
-                onClick={() => {
-                  setOnFestival(true);
-                }}
-              >
-                <span
-                  className={`${searchStyle.festival} ${
-                    onFestival ? searchStyle.selected : searchStyle.default
-                  }`}
-                >
-                  공연
-                </span>
-                <span
-                  className={`${searchStyle.count} ${
-                    onFestival ? searchStyle.selected : searchStyle.default
-                  }     `}
-                >
-                  159
-                </span>
-              </div>
-              <div
-                className={searchStyle.bandDiv}
-                onClick={() => {
-                  setOnFestival(false);
-                }}
-              >
-                <span
-                  className={`${searchStyle.band} ${
-                    !onFestival ? searchStyle.selected : searchStyle.default
-                  }`}
-                >
-                  밴드
-                </span>
-                <span
-                  className={`${searchStyle.count} ${
-                    !onFestival ? searchStyle.selected : searchStyle.default
-                  }`}
-                >
-                  1
-                </span>
-              </div>
-            </div>
-            <ul className={searchStyle.searchResultDiv}>
-              {onFestival && (
+          <ul className={searchStyle.searchResultDiv}>
+            {onFestival && (
+              <>
                 <li className={searchStyle.searchResultItem}>
                   <span className={searchStyle.testImg}>test</span>
                   <div className={searchStyle.titleAndInfo}>
@@ -192,16 +196,19 @@ export default function Search() {
                     className={searchStyle.arrowIcon}
                   />
                 </li>
-              )}
-              {!onFestival && (
                 <li className={searchStyle.searchResultItem}>
-                  <span className={searchStyle.bandTestImg}></span>
-                  <div className={searchStyle.bandNameAndInfo}>
-                    <span className={searchStyle.bandName}>쏜애플</span>
-                    <span className={searchStyle.bandHeart}>
-                      <img src={heartSVG} alt="좋아요" />
-                      999
+                  <span className={searchStyle.testImg}>test</span>
+                  <div className={searchStyle.titleAndInfo}>
+                    <span className={searchStyle.title}>
+                      쏜애플 콘서트 ‘바다와 구름과 무대
                     </span>
+                    <div className={searchStyle.info}>
+                      <span className={searchStyle.heart}>
+                        <img src={heartSVG} alt="좋아요" />
+                        999
+                      </span>
+                      | <span>쏜애플</span>| <span>2025.12.20 - 12.21</span>
+                    </div>
                   </div>
                   <img
                     src={arrowSVG}
@@ -209,9 +216,46 @@ export default function Search() {
                     className={searchStyle.arrowIcon}
                   />
                 </li>
-              )}
-            </ul>
-          </div>
+                <li className={searchStyle.searchResultItem}>
+                  <span className={searchStyle.testImg}>test</span>
+                  <div className={searchStyle.titleAndInfo}>
+                    <span className={searchStyle.title}>
+                      쏜애플 콘서트 ‘바다와 구름과 무대
+                    </span>
+                    <div className={searchStyle.info}>
+                      <span className={searchStyle.heart}>
+                        <img src={heartSVG} alt="좋아요" />
+                        999
+                      </span>
+                      | <span>쏜애플</span>| <span>2025.12.20 - 12.21</span>
+                    </div>
+                  </div>
+                  <img
+                    src={arrowSVG}
+                    alt="이동"
+                    className={searchStyle.arrowIcon}
+                  />
+                </li>
+              </>
+            )}
+            {!onFestival && (
+              <li className={searchStyle.searchResultItem}>
+                <span className={searchStyle.bandTestImg}></span>
+                <div className={searchStyle.bandNameAndInfo}>
+                  <span className={searchStyle.bandName}>쏜애플</span>
+                  <span className={searchStyle.bandHeart}>
+                    <img src={heartSVG} alt="좋아요" />
+                    999
+                  </span>
+                </div>
+                <img
+                  src={arrowSVG}
+                  alt="이동"
+                  className={searchStyle.arrowIcon}
+                />
+              </li>
+            )}
+          </ul>
         </>
       )}
     </>
