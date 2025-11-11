@@ -192,6 +192,23 @@ export default function Search() {
                   />
                 </li>
               )}
+              {!onFestival && (
+                <li className={searchStyle.searchResultItem}>
+                  <span className={searchStyle.bandTestImg}></span>
+                  <div className={searchStyle.bandNameAndInfo}>
+                    <span className={searchStyle.bandName}>쏜애플</span>
+                    <span className={searchStyle.bandHeart}>
+                      <img src={heartSVG} alt="좋아요" />
+                      999
+                    </span>
+                  </div>
+                  <img
+                    src={arrowSVG}
+                    alt="이동"
+                    className={searchStyle.arrowIcon}
+                  />
+                </li>
+              )}
             </ul>
           </div>
         </>

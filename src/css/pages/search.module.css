@@ -131,7 +131,7 @@
 }
 /* 검색 후 공연, 밴드 선택 카테고리 */
 
-/* 검색 후 결과 리스트 */
+/* 검색 후 공연 결과 리스트 */
 .searchResultItem {
   display: flex;
   width: 100%;
@@ -139,11 +139,7 @@
   /* border: 1px solid black; */
   align-items: center;
 }
-.testImg {
-  height: 100%;
-  width: 55px;
-  background-color: #ebebeb;
-}
+
 .titleAndInfo {
   display: flex;
   flex-direction: column;
@@ -181,4 +177,50 @@
   width: 18px;
   height: 18px;
 }
-/* 검색 후 결과 리스트 */
+/* 검색 후 공연 결과 리스트 */
+
+/* 검색 후 밴드 결과 리스트 */
+.bandNameAndInfo {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  height: 80%;
+  flex: 1;
+  margin-left: 10px;
+}
+.bandName {
+  width: 250px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 14px;
+  color: #1a1a1a;
+  font-weight: 600;
+}
+.bandHeart {
+  display: flex;
+  align-items: center;
+  color: #8f8f8f;
+  font-size: 11px;
+}
+.bandHeart img {
+  color: #8f8f8f;
+  width: 11px;
+  width: 11px;
+  margin-right: 2px;
+}
+/* 검색 후 밴드 결과 리스트 */
+
+/* 테스트용 */
+.testImg {
+  height: 100%;
+  width: 55px;
+  background-color: #ebebeb;
+}
+.bandTestImg {
+  height: 55px;
+  width: 55px;
+  border-radius: 100%;
+  background-color: #ebebeb;
+}
+/* 테스트용 */
