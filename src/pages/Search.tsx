@@ -36,6 +36,26 @@ export default function Search() {
           </li>
         </ul>
       </div>
+      <div className={searchStyle.recommendSearchDiv}>
+        <span className={searchStyle.recommendSearchHeader}>추천 검색어</span>
+        <ul className={searchStyle.recommendSearchList}>
+          <li className={searchStyle.recommendSearchItem}>
+            팔칠댄스 ［I LOVE YOUR COMPLEX］ 부산 쇼케이스 - 부산
+          </li>
+          <li className={searchStyle.recommendSearchItem}>
+            2025 비공정 단독공연 〈Hellvetica : Sabotage〉 in Busan - 부산
+          </li>
+          <li className={searchStyle.recommendSearchItem}>
+            2025 LUCY 8TH CONCERT 〈LUCID LINE〉 서울
+          </li>
+          <li className={searchStyle.recommendSearchItem}>
+            원 오크 록 내한공연
+          </li>
+          <li className={searchStyle.recommendSearchItem}>
+            쏜애플 콘서트 ‘바다와 구름과 무대’
+          </li>
+        </ul>
+      </div>
     </>
   );
 }
