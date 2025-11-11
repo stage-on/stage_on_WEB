@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import stageonlogo from ".././assets/StageonLogo.svg"; 
-import "./css/Splash.css";
+import ".././css/Splash.css";
 
 type SplashProps = {
   next?: string;
