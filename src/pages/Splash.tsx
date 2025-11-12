@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import stageonlogo from ".././assets/StageonLogo.svg"; 
+import stageonlogo from ".././assets/StageonLogo.svg";
 import "../css/Splash.css";
 
 type SplashProps = {
@@ -10,7 +10,7 @@ type SplashProps = {
 
 export default function Splash({
   next = "/",
-  delayMs = 3000, /*나중에 3초로 조정 */
+  delayMs = 3000 /*나중에 3초로 조정 */,
 }: SplashProps) {
   const navigate = useNavigate();
 
@@ -25,7 +25,6 @@ export default function Splash({
       role="main"
       aria-label="Stage_On splash screen"
     >
-   
       <div className="headline">
         <span>무대가</span>
         <span>켜지는 순간의</span>
@@ -33,8 +32,7 @@ export default function Splash({
       </div>
 
       <div className="brand">
-        <img src={stageonlogo} alt="StageonLogo"/>
-     
+        <img src={stageonlogo} alt="StageonLogo" />
       </div>
     </div>
   );

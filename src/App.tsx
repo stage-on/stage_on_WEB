@@ -1,9 +1,7 @@
-import {Routes, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import GlobalLayout from "./layout/GlobalLayout";
-
 import Splash from "./pages/Splash";
 import Login from "./pages/auth/Login";
-
 import Search from "./pages/Search";
 
 
@@ -18,6 +16,7 @@ export default function App() {
           <Route path="search" element={<Search/>}/>
         </Route>
       </Routes>
+
 
 
   );
