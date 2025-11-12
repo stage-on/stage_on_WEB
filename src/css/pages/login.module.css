@@ -1,0 +1,53 @@
+.fixedDiv{
+    display: flex;
+    flex-direction: column;
+
+}
+
+.loginLogo{
+    width: 152px;
+    height: 149px;
+    margin: 0 auto;
+    margin-top: 140px;
+}
+
+.loginText{
+    font-weight: 600;
+    font-size: 22px;
+    margin-top: 89px;
+} 
+
+.loginButton{
+    display: flex;
+    flex-direction: column;
+    gap: 31px;
+    margin-top: 31px;
+}
+
+.GoogleLogin, 
+.KaKaoLogin {
+  display: flex;
+  align-items: center;
+  padding-top: 17px;
+  padding-bottom: 17px;
+  padding-right: 20px;
+  padding-left: 20px;
+  gap: 59px;
+  weight: 146px;
+  height: 19px;
+  font-weight: 500;
+  font-size: 16px;
+  border-radius: 4px;
+}
+
+.GoogleLogin{
+    border-color: #F2F2F2;
+    border: 1px solid #F2F2F2;
+
+}
+
+.KaKaoLogin{
+    background: #FEE500;
+    border-color: #FEE500;
+     border: 1px solid #FEE500;
+}
