@@ -1,0 +1,16 @@
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.input {
+  height: 28px;
+}
+.iconDiv {
+  display: flex;
+  align-items: center;
+}
+.iconDiv img {
+  height: 22px;
+  width: 22px;
+}
