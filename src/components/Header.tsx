@@ -5,7 +5,7 @@ import searchSVG from "../assets/component/header/search.svg";
 import menuSVG from "../assets/component/header/menu.svg";
 
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Menu from "./Menu";
 
 export default function Header() {
