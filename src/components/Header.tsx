@@ -40,15 +40,11 @@ export default function Header() {
         />
       </div>
       {onMenu && (
-        <div
-          className={headerStyle.overlay}
-          onClick={() => setOnMenu(false)} // <- 여기를 클릭하면 메뉴 닫힘
-        >
+        <div className={headerStyle.overlay}>
           <div
             className={`${headerStyle.menuDiv} ${
               animateMenu ? headerStyle.show : ""
             }`}
-            onClick={(e) => e.stopPropagation()} // <- 요게 핵심
           ></div>
         </div>
       )}
