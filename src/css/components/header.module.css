@@ -1,0 +1,22 @@
+/* header UI  */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 31px;
+}
+
+.iconDiv {
+  display: flex;
+  align-items: center;
+}
+.iconDiv img {
+  height: 22px;
+  width: 22px;
+}
+.searchIcon {
+  margin-right: 20px;
+}
+/* header UI */
+
+
