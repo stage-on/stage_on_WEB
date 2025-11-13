@@ -19,28 +19,4 @@
 }
 /* header UI */
 
-/* 메뉴 창 */
-.overlay {
-  position: fixed;
-  top: 0;
-  left: 50%;
-  height: 100%;
-  transform: translate(-50%);
-  width: 100%;
-  max-width: 600px;
-  background-color: rgba(0, 0, 0, 0.1);
-  pointer-events: auto;
-  z-index: 999;
-}
-.menuDiv {
-  position: absolute;
-  background-color: #ffffff;
-  width: calc(100% - 55px);
-  height: 100%;
-  transform: translateX(-100%);
-  transition: transform 0.2s ease-in-out;
-}
-.menuDiv.show {
-  transform: translateX(0);
-}
-/* 메뉴 창 */
+

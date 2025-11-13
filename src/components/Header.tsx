@@ -1,24 +1,18 @@
 import headerStyle from "../css/components/header.module.css";
+
 import logoSVG from "../assets/component/header/homeLogo.svg";
 import searchSVG from "../assets/component/header/search.svg";
 import menuSVG from "../assets/component/header/menu.svg";
+
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import Menu from "./Menu";
 
 export default function Header() {
   const navigate = useNavigate();
   const [onMenu, setOnMenu] = useState<boolean>(false);
-  const [animateMenu, setAnimateMenu] = useState(false);
+  const [animateMenu, setAnimateMenu] = useState<boolean>(false);
 
-  // menuDiv 생길 때 delay 주기
-  useEffect(() => {
-    if (onMenu) {
-      const timer = setTimeout(() => setAnimateMenu(true), 10);
-      return () => clearTimeout(timer);
-    } else {
-      setAnimateMenu(false);
-    }
-  }, [onMenu]);
   return (
     <header className={headerStyle.header}>
       <img src={logoSVG} alt="로고" />
@@ -40,13 +34,11 @@ export default function Header() {
         />
       </div>
       {onMenu && (
-        <div className={headerStyle.overlay}>
-          <div
-            className={`${headerStyle.menuDiv} ${
-              animateMenu ? headerStyle.show : ""
-            }`}
-          ></div>
-        </div>
+        <Menu
+          animateMenu={animateMenu}
+          setOnMenu={setOnMenu}
+          setAnimateMenu={setAnimateMenu}
+        />
       )}
     </header>
   );
