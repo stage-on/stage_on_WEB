@@ -9,9 +9,8 @@ export default function HomeLayout() {
     <div>
       <header className={headerStyle.header}>
         <img src={logoSVG} alt="로고" />
-        <input type="hidden" className={headerStyle.input} />
         <div className={headerStyle.iconDiv}>
-          <img src={searchSVG} alt="검색" />
+          <img src={searchSVG} alt="검색" className={headerStyle.searchIcon} />
           <img src={menuSVG} alt="메뉴" />
         </div>
       </header>
