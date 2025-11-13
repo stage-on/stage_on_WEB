@@ -20,7 +20,7 @@
   transition: transform 0.2s ease-in-out;
   display: flex;
   flex-direction: column;
-  padding: 10px 20px 40px 20px;
+  padding: 20px 10px 40px 20px;
   box-sizing: border-box;
 }
 .menuDiv.show {
@@ -32,11 +32,17 @@
 /* 메뉴 창 */
 
 /* 메뉴 창 아이템들 */
+.closeIconDiv {
+  height: 31px;
+  display: flex;
+  align-items: center;
+  justify-content: end;
+}
 .closeIcon {
   width: 26px;
   height: 26px;
-  position: absolute;
-  right: 15px;
+  /* position: absolute;
+  right: 15px; */
 }
 .profileDiv {
   display: flex;

@@ -47,15 +47,17 @@ export default function Menu({
           animateMenu ? menuStyle.show : menuStyle.hide
         }`}
       >
-        <img
-          src={menuExitSVG}
-          alt="close"
-          className={menuStyle.closeIcon}
-          onClick={() => {
-            setAnimateMenu(false);
-            setTimeout(() => setOnMenu(false), 200);
-          }}
-        />
+        <div className={menuStyle.closeIconDiv}>
+          <img
+            src={menuExitSVG}
+            alt="close"
+            className={menuStyle.closeIcon}
+            onClick={() => {
+              setAnimateMenu(false);
+              setTimeout(() => setOnMenu(false), 200);
+            }}
+          />
+        </div>
         <div className={menuStyle.profileDiv}>
           <div className={menuStyle.profileImg}></div>
           <span className={menuStyle.profileName}>김슈니</span>
