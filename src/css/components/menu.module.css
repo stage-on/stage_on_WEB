@@ -1,0 +1,90 @@
+/* 메뉴 창 */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  height: 100%;
+  transform: translate(-50%);
+  width: 100%;
+  max-width: 600px;
+  background-color: rgba(0, 0, 0, 0.1);
+  pointer-events: auto;
+  z-index: 999;
+}
+.menuDiv {
+  position: absolute;
+  background-color: #ffffff;
+  width: calc(100% - 55px);
+  height: 100%;
+  transform: translateX(-100%);
+  transition: transform 0.2s ease-in-out;
+  display: flex;
+  flex-direction: column;
+  padding: 20px 10px 40px 20px;
+  box-sizing: border-box;
+}
+.menuDiv.show {
+  transform: translateX(0);
+}
+.menuDiv.hide {
+  transform: translateX(-100%);
+}
+/* 메뉴 창 */
+
+/* 메뉴 창 아이템들 */
+.closeIconDiv {
+  height: 31px;
+  display: flex;
+  align-items: center;
+  justify-content: end;
+}
+.closeIcon {
+  width: 26px;
+  height: 26px;
+  /* position: absolute;
+  right: 15px; */
+}
+.profileDiv {
+  display: flex;
+  align-items: center;
+  margin-top: 80px;
+}
+.profileDiv span {
+  font-size: 20px;
+  font-weight: 700;
+  margin-left: 12px;
+}
+.profileImg {
+  width: 45px;
+  height: 45px;
+  border-radius: 100%;
+  background-color: #ebebeb;
+}
+.menuList {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-top: 80px;
+}
+.menuItem {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+.menuItem img {
+  width: 17px;
+  height: 17px;
+  margin-right: 12px;
+}
+.menuItem span {
+  font-size: 14px;
+  font-weight: 600;
+}
+.logout {
+  color: #929292;
+  font-size: 14px;
+  font-weight: 600;
+  position: absolute;
+  bottom: 40px;
+}
+/* 메뉴 창 아이템들 */
