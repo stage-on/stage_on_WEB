@@ -12,7 +12,7 @@ const Registerfinish = () => {
         <img src={stageonlogo} className={registerStyle.finishlogo} />
         <span>와 공연전의 설렘을 함께 하세요!</span>
     </div>
-    <Link className={registerStyle.registercomplete} to="/home">완료</Link>
+    <Link className={registerStyle.registercomplete} to="/main/home">완료</Link>
     </div>
   )
 }

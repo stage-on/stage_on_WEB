@@ -4,12 +4,12 @@ import googlelogo from  "../../assets/auth/Google.svg";
 import kakaologo from "../../assets/auth/KaKao.svg"
 
 const Login = () => {
-  const REST_API_KEY = '백엔드 연동전';
-  const REDIRECT_URI = '백엔드한테 연동전';
+  const REST_API_KEY = import.meta.env.VITE_KAKAO_REST_API_KEY;
+  const REDIRECT_URI = import.meta.env.VITE_KAKAO_REDIRECT_URI;
   const kakaolink = `https://kauth.kakao.com/oauth/authorize?client_id=${REST_API_KEY}&redirect_uri=${REDIRECT_URI}&response_type=code`;
 
-  const GOOGLE_CLIENT_ID = "YOUR_GOOGLE_CLIENT_ID";
-  const GOOGLE_REDIRECT_URI = "http://localhost:5173/login"; // 백엔드 연동 전 임시
+  const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+  const GOOGLE_REDIRECT_URI = import.meta.env.VITE_GOOGLE_REDIRECT_URI;
   const googlelink = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${GOOGLE_REDIRECT_URI}&response_type=code&scope=email%20profile`;
 
   const handleGoogleLogin = () => {
