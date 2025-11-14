@@ -4,6 +4,7 @@ import Splash from "./pages/Splash";
 import Login from "./pages/auth/Login";
 import Search from "./pages/Search";
 import HomeLayout from "./layout/HomeLayout";
+import MyBands from "./pages/MyBands";
 
 export default function App() {
   return (
@@ -12,7 +13,9 @@ export default function App() {
         <Route index element={<Splash next="/Login" delayMs={3000} />} />
         {/*나중에 3초로 조정*/}
         <Route path="login" element={<Login />} />
-        <Route path="main" element={<HomeLayout />}></Route>
+        <Route path="main" element={<HomeLayout />}>
+          <Route path="mybands" element={<MyBands />} />
+        </Route>
         <Route path="search" element={<Search />} />
       </Route>
     </Routes>
