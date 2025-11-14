@@ -32,6 +32,7 @@
   font-weight: 500;
   line-height: normal;
   letter-spacing: -0.42px;
+  margin-top:8px;
 
   /* ⭐ ellipsis 핵심 */
   white-space: nowrap;
