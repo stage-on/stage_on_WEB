@@ -6,6 +6,7 @@ import Search from "./pages/Search";
 import Register from "./pages/auth/Register";
 
 import HomeLayout from "./layout/HomeLayout";
+import Registerfinish from "./pages/auth/Registerfinish";
 
 export default function App() {
   return (
@@ -17,6 +18,7 @@ export default function App() {
         <Route path="main" element={<HomeLayout />}></Route>
         <Route path="search" element={<Search />} />
         <Route path="register" element={<Register/>}/>
+         <Route path="registerfinish" element={<Registerfinish/>}/>
       </Route>
     </Routes>
 
