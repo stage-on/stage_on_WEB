@@ -1,15 +1,18 @@
 import searchStyle from "../css/pages/search.module.css";
-import searchSVG from "../assets/search/search.svg";
-import menuSVG from "../assets/search/menu.svg";
-import xSVG from "../assets/search/x.svg";
-import heartSVG from "../assets/search/heart.svg";
-import arrowSVG from "../assets/search/arrow-right.svg";
+import searchSVG from "../assets/pages/search/search.svg";
+import menuSVG from "../assets/pages/search/menu.svg";
+import xSVG from "../assets/pages/search/x.svg";
+import heartSVG from "../assets/pages/search/heart.svg";
+import arrowSVG from "../assets/pages/search/arrow-right.svg";
 import { useEffect, useState } from "react";
+import Menu from "../components/Menu";
 
 export default function Search() {
   const [inputText, setInputText] = useState<string>("");
   const [isSearch, setIsSearch] = useState<boolean>(true);
   const [onFestival, setOnFestival] = useState<boolean>(true);
+  const [onMenu, setOnMenu] = useState<boolean>(false);
+  const [animateMenu, setAnimateMenu] = useState<boolean>(false);
   const recommendLista: any[] = [
     {
       id: 1,
@@ -59,6 +62,13 @@ export default function Search() {
   }, [inputText]);
   return (
     <>
+      {onMenu && (
+        <Menu
+          animateMenu={animateMenu}
+          setOnMenu={setOnMenu}
+          setAnimateMenu={setAnimateMenu}
+        />
+      )}
       <div className={searchStyle.fixedDiv}>
         <div className={searchStyle.inputDiv}>
           <img
@@ -76,7 +86,14 @@ export default function Search() {
             }}
             onKeyDown={handleEnter}
           />
-          <img src={menuSVG} alt="메뉴" className={searchStyle.menuIcon} />
+          <img
+            src={menuSVG}
+            alt="메뉴"
+            className={searchStyle.menuIcon}
+            onClick={() => {
+              setOnMenu(true);
+            }}
+          />
         </div>
         {isSearch && (
           <div className={searchStyle.festivalAndBand}>
@@ -95,7 +112,9 @@ export default function Search() {
               </span>
               <span
                 className={`${searchStyle.count} ${
-                  onFestival ? searchStyle.selected : searchStyle.default
+                  onFestival
+                    ? searchStyle.selected
+                    : `${searchStyle.default} ${searchStyle.defaultCnt}`
                 }     `}
               >
                 159
@@ -116,7 +135,9 @@ export default function Search() {
               </span>
               <span
                 className={`${searchStyle.count} ${
-                  !onFestival ? searchStyle.selected : searchStyle.default
+                  !onFestival
+                    ? searchStyle.selected
+                    : `${searchStyle.default} ${searchStyle.defaultCnt}`
                 }`}
               >
                 1

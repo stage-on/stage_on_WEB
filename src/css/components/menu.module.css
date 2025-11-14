@@ -22,6 +22,7 @@
   flex-direction: column;
   padding: 20px 10px 40px 20px;
   box-sizing: border-box;
+  z-index: 999;
 }
 .menuDiv.show {
   transform: translateX(0);
