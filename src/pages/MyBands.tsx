@@ -4,7 +4,7 @@ import fullSVG from "../assets/pages/mybands/fullCheckbox.svg";
 import { useEffect, useState } from "react";
 
 export default function MyBands() {
-  const bandList = [1, 2, 3, 4];
+  const bandList = [1, 2, 3, 4, 5];
 
   const [onDelete, setOnDelete] = useState<boolean>(false);
   const [onCheck, setOnCheck] = useState<boolean>(false);
