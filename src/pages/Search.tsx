@@ -68,7 +68,7 @@ export default function Search() {
           setOnMenu={setOnMenu}
           setAnimateMenu={setAnimateMenu}
         />
-      )}  
+      )}
       <div className={searchStyle.fixedDiv}>
         <div className={searchStyle.inputDiv}>
           <img
@@ -112,7 +112,9 @@ export default function Search() {
               </span>
               <span
                 className={`${searchStyle.count} ${
-                  onFestival ? searchStyle.selected : searchStyle.default
+                  onFestival
+                    ? searchStyle.selected
+                    : `${searchStyle.default} ${searchStyle.defaultCnt}`
                 }     `}
               >
                 159
@@ -133,7 +135,9 @@ export default function Search() {
               </span>
               <span
                 className={`${searchStyle.count} ${
-                  !onFestival ? searchStyle.selected : searchStyle.default
+                  !onFestival
+                    ? searchStyle.selected
+                    : `${searchStyle.default} ${searchStyle.defaultCnt}`
                 }`}
               >
                 1
