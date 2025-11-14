@@ -1,0 +1,38 @@
+/* timetablemain.module.css 파일 (최종 수정본) */
+
+/* ---------------------------------------------------- */
+/* 1. 페이지 레이아웃 (대단위 컴포넌트 간 간격 제어) */
+/* ---------------------------------------------------- */
+
+/* 대단위 컴포넌트 간의 수직 간격 (52px) 설정을 위한 Wrapper */
+.mainContentWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 52px; 
+}
+
+/* MyTimetable Section */
+.mytimetableSection {
+  /* 이 섹션에만 필요한 고유한 패딩, 배경색 등을 여기에 정의합니다. */
+}
+
+
+/* ---------------------------------------------------- */
+/* 2. 타임테이블 리스트 스타일 */
+/* ---------------------------------------------------- */
+
+/* 타임테이블 목록 (MyTimetable 컴포넌트들을 감싸는 ul) */
+.timetableList {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px; /* 목록 아이템 간의 간격 */
+  align-self: stretch;
+  list-style: none; /* ul의 기본 점 제거 */
+  padding: 0; /* ul의 기본 패딩 제거 */
+  margin: 0; /* ul의 기본 마진 제거 */
+}
+
+/* ⚠️ 삭제된 클래스: */
+/* - .timetableHeaderGroup, .subtitle, .mainTitle, .myText, .timetableText */
+/* ⚠️ 이 스타일들은 범용적인 재사용을 위해 sectionheader.module.css 파일로 이동했습니다. */

@@ -1,0 +1,72 @@
+.timetableListItem {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 10px;
+  cursor: pointer;
+}
+
+/* 썸네일 스타일 */
+.listThumbnail {
+  width: 45px;
+  height: 60px;
+  aspect-ratio: 3/4;
+}
+
+/* 정보 컨테이너 (유동적인 중앙 박스) */
+.infoContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 10px;
+  flex-grow: 1;
+  min-width: 0; /* ⭐ ellipsis 작동을 위해 필요 */
+}
+
+/* 제목 스타일 (ellipsis 적용 완료) */
+.listTitle {
+  color: var(--g-100, #1a1a1a);
+  font-family: Inter;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+  letter-spacing: -0.42px;
+
+  /* ⭐ ellipsis 핵심 */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 상세 정보 그룹 */
+.listDetails {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0; /* ⭐ flex 내부에서 ellipsis를 위해 필요 */
+}
+
+.heartIcon {
+  width: 11px;
+  height: 11px;
+  aspect-ratio: 1/1;
+}
+
+.heartCount,
+.location,
+.date {
+  color: var(--g-80, #5c5c5c);
+  font-family: Inter;
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  letter-spacing: -0.3px;
+}
+
+.arrowIcon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
