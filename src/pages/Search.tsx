@@ -1,9 +1,9 @@
 import searchStyle from "../css/pages/search.module.css";
-import searchSVG from "../assets/search/search.svg";
-import menuSVG from "../assets/search/menu.svg";
-import xSVG from "../assets/search/x.svg";
-import heartSVG from "../assets/search/heart.svg";
-import arrowSVG from "../assets/search/arrow-right.svg";
+import searchSVG from "../assets/pages/search/search.svg";
+import menuSVG from "../assets/pages/search/menu.svg";
+import xSVG from "../assets/pages/search/x.svg";
+import heartSVG from "../assets/pages/search/heart.svg";
+import arrowSVG from "../assets/pages/search/arrow-right.svg";
 import { useEffect, useState } from "react";
 
 export default function Search() {
