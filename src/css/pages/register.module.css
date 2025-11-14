@@ -1,3 +1,4 @@
+/* 회원가입 헤더 */
 .registerHeader{
     display: flex;
     flex-direction: row;
@@ -12,5 +13,96 @@
     transform: translateX(-50%);
     font-weight: 500;
     font-size: 16px;
+}
+
+/* 밴드 선택 text */
+.selectText{
+    display: flex;
+    flex-direction: column;
+    padding-top: 40px;
+    gap: 4px;
+}
+
+.selectText1{
+    font-weight: 500;
+    font-size: 20px;
+}
+
+.selectText2{
+    font-weight: 400;
+    font-size: 12px;
+    color: #8F8F8F;
+}
+
+/* 밴드 List */
+
+.localBand{
+    display: flex;
+    flex-direction: column;
+}
+
+.globalText,
+.localText{
+    display: flex;
+    flex-direction: row;
+    padding-top: 65px;
+    font-weight: 500;
+    font-size: 14px;
+    gap: 5px;
+    align-items: center;
+}
+/* 밴드 버튼 */
+.bandChip{
+    height: 36px;
+    border: 1px solid #EBEBEB;
+    background: #FFFFFF;
+    border-radius: 8px;
+     padding: 7px 22px;
+}
+
+.globalbandList,
+.localbandList{
+    padding-top: 24px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+/* 다음 버튼 활성화 */
+.nextButtonEnabled{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    border: 1px solid #FFFFFF;
+    background: linear-gradient(90deg, rgba(230, 155, 245, 0.5) 0%, rgba(146, 3, 173, 0.5) 53.37%, rgba(254, 169, 66, 0.5) 100%), #FFFFFF;
+    font-size: 16px;
+    font-weight: 600;
+    color: #FFFFFF;
+    padding: 10px 0px;
+    border-radius: 4px;
+    margin-top: 62px;
+}
+
+/* 다음 버튼 비활성화 */
+.nextButtonDisabled{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    border: 1px solid #FFFFFF;
+    background: #D1D1D1;
+    font-weight: 600;
+    color: #FFFFFF;
+    padding: 10px 0px;
+    border-radius: 4px;
+    margin-top: 62px;
+}
+
+.bandChipSelected2,
+.bandChipSelected1{
+    background: rgba(198, 108, 217, 0.1);
+    border: 1px solid #C66CD9;
+    color: #C66CD9;
 }
 
