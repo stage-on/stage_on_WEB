@@ -36,3 +36,23 @@
 /* ⚠️ 삭제된 클래스: */
 /* - .timetableHeaderGroup, .subtitle, .mainTitle, .myText, .timetableText */
 /* ⚠️ 이 스타일들은 범용적인 재사용을 위해 sectionheader.module.css 파일로 이동했습니다. */
+
+.recommendListWrapper {
+  display: flex;
+  /* 횡스크롤을 활성화 */
+  overflow-x: scroll; 
+  /* 뷰포트를 벗어나는 콘텐츠는 숨김 처리 (대부분의 모바일 브라우저에서 스크롤바가 숨겨짐) */
+  overflow-y: hidden; 
+  
+  /* 카드 사이의 간격 */
+  gap: 16px; 
+  
+  /* 리스트 시작 부분의 좌측 패딩 (Header와 맞추기 위함) */
+  padding-bottom: 20px; /* 스크롤바 공간 확보 또는 하단 패딩 */
+  
+  /* ⚠️ iOS에서 스크롤바 숨기기 */
+  -webkit-overflow-scrolling: touch;
+  /* ⚠️ Firefox에서 스크롤바 숨기기 */
+  scrollbar-width: none;
+}
+
