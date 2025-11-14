@@ -85,7 +85,15 @@
 }
 
 .registercomplete{
-    margin-top: 264px;
+  text-align: center;
+  margin-top: 264px;
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translate(-50%, 0);
+  width: 343px;
+
+ 
 }
 
 .nextButtonEnabled{
