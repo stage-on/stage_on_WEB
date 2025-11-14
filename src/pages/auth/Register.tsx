@@ -3,7 +3,7 @@ import vector from "../../assets/auth/Vector.svg"
 import icon_microphone from "../../assets/auth/icon_microphone.svg"
 import woman_singer_light_skin_tone from "../../assets/auth/Woman Singer Light Skin Tone.svg"
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 // 백엔드 연동 전 국내 인디 밴드 더미데이터
 const localBand = [
@@ -44,6 +44,7 @@ const globalBand = [
 
 const Register = () => {
 
+  const navigate = useNavigate();
 
   const [selectedBandIds, setSelectedBandIds] = useState<number[]>([]);
 
@@ -69,7 +70,11 @@ const Register = () => {
     <>
     {/* 회원가입 Header */}
     <div className={registerStyle.registerHeader}>
-        <img src={vector} className={registerStyle.registerVector}/>
+        <img
+        src={vector}
+        className={registerStyle.registerVector}
+        onClick={() => navigate(-1)}
+      />
         <span className={registerStyle.registerText}>회원가입</span>
     </div>
 
