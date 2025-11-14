@@ -1,20 +1,15 @@
-/* src/css/common/sectionheader.module.css */
-
-/* 섹션 헤더 그룹 (SectionHeader 컴포넌트의 최상위 컨테이너) */
 .sectionHeaderGroup {
   display: flex;
   flex-direction: column;
-  margin-bottom: 16px; /* 헤더 그룹과 다음 콘텐츠(리스트 등) 사이의 간격 */
+  margin-bottom: 16px;
 }
 
-/* p와 h2의 기본 마진을 0으로 리셋하여 브라우저 기본 스타일 제거 */
 .sectionHeaderGroup p,
 .sectionHeaderGroup h2 {
   margin: 0;
   padding: 0;
 }
 
-/* 부제 스타일 (.subtitle) */
 .subtitle {
   align-self: stretch;
   color: var(--g-80, #5c5c5c);
@@ -26,14 +21,12 @@
   letter-spacing: -0.36px;
 }
 
-/* 메인 제목 (.mainTitle) */
 .mainTitle {
   display: flex;
   align-items: flex-start;
   align-self: stretch;
 }
 
-/* 메인 제목의 각 줄 (.mainTitleLine) - 기본(얇은) 스타일 */
 .mainTitleLine {
   color: var(--g-100, #1a1a1a);
   font-family: Inter;
@@ -44,7 +37,6 @@
   letter-spacing: -0.54px;
 }
 
-/* 굵게 강조할 텍스트에 적용되는 스타일 (.boldText) */
 .boldText {
   color: var(--g-100, #1a1a1a);
   font-family: Inter;

@@ -6,24 +6,21 @@
   cursor: pointer;
 }
 
-/* 썸네일 스타일 */
 .listThumbnail {
   width: 45px;
   height: 60px;
   aspect-ratio: 3/4;
 }
 
-/* 정보 컨테이너 (유동적인 중앙 박스) */
 .infoContainer {
   display: flex;
   flex-direction: column;
   justify-content: center;
   gap: 10px;
   flex-grow: 1;
-  min-width: 0; /* ⭐ ellipsis 작동을 위해 필요 */
+  min-width: 0;
 }
 
-/* 제목 스타일 (ellipsis 적용 완료) */
 .listTitle {
   color: var(--g-100, #1a1a1a);
   font-family: Inter;
@@ -32,20 +29,17 @@
   font-weight: 500;
   line-height: normal;
   letter-spacing: -0.42px;
-  margin-top:8px;
-
-  /* ⭐ ellipsis 핵심 */
+  margin-top: 8px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-/* 상세 정보 그룹 */
 .listDetails {
   display: flex;
   align-items: center;
   gap: 5px;
-  min-width: 0; /* ⭐ flex 내부에서 ellipsis를 위해 필요 */
+  min-width: 0;
 }
 
 .heartIcon {
@@ -70,4 +64,10 @@
   width: 20px;
   height: 20px;
   flex-shrink: 0;
+}
+
+.divider {
+  background: #5C5C5C;
+  width: 0.5px;
+  height: 8px;
 }
