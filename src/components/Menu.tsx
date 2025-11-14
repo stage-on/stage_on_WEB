@@ -27,6 +27,7 @@ export default function Menu({
 
   const movePage = (e: React.MouseEvent<HTMLLIElement>) => {
     const span = e.currentTarget.dataset.value;
+    setOnMenu(false);
     if (span === "HOME") {
       navigate("/main/home");
     } else if (span === "SEARCH") {
