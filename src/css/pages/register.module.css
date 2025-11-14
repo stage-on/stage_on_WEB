@@ -91,9 +91,7 @@
   bottom: 40px;
   left: 50%;
   transform: translate(-50%, 0);
-  width: 343px;
-
- 
+  width: 343px; 
 }
 
 .nextButtonEnabled{
