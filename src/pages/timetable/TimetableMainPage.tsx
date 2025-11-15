@@ -7,9 +7,6 @@ import FestivalListItem from "../../components/timetable/FestivalListItem";
 import SectionHeader from "../../components/SectionHeader";
 import RecommendCard from "../../components/timetable/RecommendCard";
 
- 
-
-// ⭐️ 타입 정의 ⭐️
 interface FestivalItem {
   id: number;
   title: string;
@@ -26,7 +23,6 @@ interface RecommendItem {
   thumbnailUrl: string;
 }
 
-// 정렬 옵션 정의
 const sortOptions = [
   { label: "최신 등록순", key: "latest" },
   { label: "인기순", key: "likes" },
@@ -34,34 +30,30 @@ const sortOptions = [
 ];
 
 const TimetableMainPage = () => {
-  // ⭐️ 상태 선언 및 타입 지정 ⭐️
   const [timetableList, setTimetableList] = useState<FestivalItem[]>([]);
   const [recommendedFestivals, setRecommendedFestivals] = useState<RecommendItem[]>([]);
   const [morefestival, setMorefestival] = useState<FestivalItem[]>([]);
 
   const [currentSort, setCurrentSort] = useState(sortOptions[0].key); 
 
-  // ⭐️ 매개변수 타입 명시 ⭐️
   const handleCustomizeClick = (festivalId: number) => { 
     console.log(`Festival ID ${festivalId}의 커스텀 페이지로 이동 요청.`);
     alert(`[라우팅]: 페스티벌 ID ${festivalId}의 커스텀 페이지로 이동합니다.`);
   };
 
-  // ⭐️ useEffect 로직 (데이터 초기화 및 정렬) ⭐️
   useEffect(() => {
     async function fetchSortedFestivals() {
       const sortParam = currentSort;
       console.log(`[API 준비됨 가정] 현재 정렬 기준: ${sortParam}`);
       
-      // Mock Data 로드
       if (morefestival.length === 0) {
         const mockData3: FestivalItem[] = [
-          { id: 7, title: "페스티벌 이름 A", likes: 999, location: "페스티벌 위치", date: "2025.12.20 - 12.21", thumbnailUrl: "/path/to/img1.png" },
-          { id: 8, title: "페스티벌 이름 C", likes: 120, location: "페스티벌 위치", date: "2025.12.20 - 12.21", thumbnailUrl: "/path/to/img1.png" },
-          { id: 9, title: "페스티벌 이름 B", likes: 2500, location: "페스티벌 위치", date: "2025.12.20 - 12.21", thumbnailUrl: "/path/to/img1.png" },
-          { id: 10, title: "페스티벌 이름 F", likes: 10, location: "페스티벌 위치", date: "2025.12.20 - 12.21", thumbnailUrl: "/path/to/img1.png" },
-          { id: 11, title: "페스티벌 이름 D", likes: 50, location: "페스티벌 위치", date: "2025.12.20 - 12.21", thumbnailUrl: "/path/to/img1.png" },
-          { id: 12, title: "페스티벌 이름 E", likes: 5, location: "페스티벌 위치", date: "2025.12.20 - 12.21", thumbnailUrl: "/path/to/img1.png" },
+          { id: 7, title: "페스티벌 이름", likes: 999, location: "페스티벌 위치", date: "2025.12.20 - 12.21", thumbnailUrl: "/path/to/img1.png" },
+          { id: 8, title: "페스티벌 이름", likes: 999 , location: "페스티벌 위치", date: "2025.12.20 - 12.21", thumbnailUrl: "/path/to/img1.png" },
+          { id: 9, title: "페스티벌 이름", likes: 999, location: "페스티벌 위치", date: "2025.12.20 - 12.21", thumbnailUrl: "/path/to/img1.png" },
+          { id: 10, title: "페스티벌 이름", likes: 999, location: "페스티벌 위치", date: "2025.12.20 - 12.21", thumbnailUrl: "/path/to/img1.png" },
+          { id: 11, title: "페스티벌 이름", likes: 999, location: "페스티벌 위치", date: "2025.12.20 - 12.21", thumbnailUrl: "/path/to/img1.png" },
+          { id: 12, title: "페스티벌 이름", likes: 999, location: "페스티벌 위치", date: "2025.12.20 - 12.21", thumbnailUrl: "/path/to/img1.png" },
         ];
         setMorefestival(mockData3);
       }
@@ -86,7 +78,6 @@ const TimetableMainPage = () => {
     setRecommendedFestivals(mockData2);
   }, []);
 
-  // ⭐️ JSX에서 사용될 변수 선언 ⭐️
   const listData = timetableList;
   const recommendData = recommendedFestivals;
   const displayFestivalData = morefestival; 
@@ -107,7 +98,6 @@ const TimetableMainPage = () => {
               <FestivalListItem
                 key={item.id}
                 itemData={item}
-                // arrowSVG={arrowSVG} ⭐️ props 전달 제거 ⭐️
               />
             ))}
           </ul>
@@ -159,7 +149,6 @@ const TimetableMainPage = () => {
               <FestivalListItem
                 key={item.id}
                 itemData={item}
-                // arrowSVG={arrowSVG} ⭐️ props 전달 제거 ⭐️
               />
             ))}
           </ul>
