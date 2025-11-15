@@ -1,0 +1,42 @@
+@font-face {
+  font-family: "JejuGothic";
+  src: url("../assets/fonts/JejuGothic.ttf") format("truetype");
+}
+
+@keyframes fadeOut {
+  0%,
+  75% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.splash-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  animation: fadeOut 3s forwards;
+}
+
+.headline {
+  display: flex;
+  flex-direction: column;
+  font-weight: 400;
+  font-family: "JejuGothic";
+  font-size: 40px;
+  gap: 3px;
+  margin-top: 140px;
+  margin-left: 16px;
+}
+
+.brand {
+  text-align: center;
+  margin-bottom: 12px;
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translate(-50%, 0);
+}
