@@ -24,8 +24,6 @@
   scrollbar-width: none;
 }
 
-.moretimetableSection {
-}
 
 .recommendListWrapper::-webkit-scrollbar {
   display: none;

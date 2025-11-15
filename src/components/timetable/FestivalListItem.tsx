@@ -1,11 +1,30 @@
-import React from 'react';
+// src/components/timetable/FestivalListItem.tsx (파일명이 .tsx인지 확인)
+
 import { useNavigate } from 'react-router-dom'; 
 import festivalListStyles from "../../css/components/timetable/festivallistitem.module.css"; 
 import sampleposter from "../../assets/timetable/poster.svg"; 
-import arrowIconSVG from "../../assets/timetable/arrow-right.svg"; 
+// ⭐️ 화살표 아이콘을 직접 import합니다. ⭐️
+import arrowIconSVG from "../../assets/timetable/arrow-right.svg"; // TimetableMainPage에서 사용했던 경로 사용
 import heart from "../../assets/timetable/heart.svg";
 
-export default function FestivalListItem({ itemData }) {
+// ⭐️ Props 인터페이스에서 arrowSVG를 제거합니다. ⭐️
+interface FestivalItemData {
+    id: number;
+    title: string;
+    likes: number;
+    location: string;
+    date: string;
+    thumbnailUrl: string;
+}
+
+interface FestivalListItemProps {
+    itemData: FestivalItemData;
+    // arrowSVG: string; ⭐️ 이 줄을 제거합니다. ⭐️
+}
+
+
+// ⭐️ Props에서 arrowSVG를 제거하고 itemData만 받습니다. ⭐️
+export default function FestivalListItem({ itemData }: FestivalListItemProps) {
     
     const navigate = useNavigate();
 
@@ -15,7 +34,6 @@ export default function FestivalListItem({ itemData }) {
 
     return (
         <li 
-            key={itemData.id} 
             className={festivalListStyles.timetableListItem} 
         >
             <img 
@@ -39,6 +57,7 @@ export default function FestivalListItem({ itemData }) {
             </div>
             
             <img 
+                // ⭐️ 직접 import한 arrowIconSVG를 사용하여 아이콘 문제 해결 ⭐️
                 src={arrowIconSVG} 
                 alt="상세 페이지 이동" 
                 className={festivalListStyles.arrowIcon}
