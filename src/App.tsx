@@ -8,7 +8,8 @@ import HomeLayout from "./layout/HomeLayout";
 import Registerfinish from "./pages/auth/Registerfinish";
 import MyBands from "./pages/MyBands";
 import Home from "./pages/Home";
-
+import TimetableMainPage from "./pages/timetable/TimetableMainPage";
+import TimetableDetailPage from "./pages/timetable/TimetableDetailPage";
 
 
 export default function App() {
@@ -24,7 +25,10 @@ export default function App() {
         <Route path="search" element={<Search />} />
         <Route path="register" element={<Register/>}/>
          <Route path="registerfinish" element={<Registerfinish/>}/>
-         
+         <Route path="timetable">
+          <Route index element={<TimetableMainPage />} />     
+          <Route path=":id" element={<TimetableDetailPage />} /> 
+        </Route>
       </Route>
     </Routes>
 
