@@ -31,11 +31,13 @@ const BandCardName = ({ band }: BandCardNameProps) => {
         </div>
       </div>
 
-      <div className={bandcardStyle.bandcardRow}>
-        {band.concerts.map((concert) => (
-          <BandCard key={concert.id} concert={concert} />
-        ))}
-      </div>
+     <div className={bandcardStyle.bandcardRowWrapper}>
+    <div className={bandcardStyle.bandcardRow}>
+      {band.concerts.map((concert) => (
+        <BandCard key={concert.id} concert={concert} />
+      ))}
+    </div>
+</div>
     </>
   );
 };
