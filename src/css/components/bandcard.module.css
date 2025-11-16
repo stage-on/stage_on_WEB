@@ -1,0 +1,102 @@
+.bandcardText{
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.bandcardPlanText{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.bandcardsubText{
+    font-weight: 400;
+    font-size: 12px;
+    color: #5C5C5C;
+}
+
+.bandNameText1{
+    font-weight: 500;
+    font-size: 18px;
+}
+
+.bandcardsubText2{
+    font-weight: 400;
+    font-size: 18px;
+}
+
+
+/*밴드 카드*/
+.bandcardContainer {
+  width: 132px;
+  display: flex;
+  flex-direction: column;
+  margin-top: 16px;
+  margin-bottom: 40px;
+}
+
+/* 밴드 카드에서의 텍스트 */
+.cardText {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;       
+  margin-top: 8px; 
+}
+
+.concertName {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--g-100, #1A1A1A);
+  height: calc(1.4em * 2); 
+}
+
+.concertDate {
+  font-size: 10px;
+  color: var(--g-60, #8F8F8F);
+  font-weight: 400;
+}
+
+.bandcardRow{
+    overflow-x: auto;
+    width: 100%; 
+    display: flex;
+    flex-direction: row; 
+    gap: 23px;
+
+}
+
+.imageWrapper {
+  position: relative;
+  width: 132px;
+  height: 176px;
+}
+
+
+.concert_image {
+  width: 100%;
+  height: 100%;
+  background-color: #e5e5e5;
+  display: block;
+}
+
+
+.newBadgeWrapper {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+}
+
+.NewCard{
+    display: flex;
+    padding: 0 4px;
+    justify-content: center;
+    gap: 10px;
+    background: linear-gradient(90deg, #D300FF 0%, #FBBC05 100%);
+    color: var(--g-0, #FFF);
+    font-size: 8px;
+    font-weight: 600;
+    height: 13px;
+    margin-bottom: 6px;
+    margin-left: 6px;
+}
