@@ -53,6 +53,7 @@
 }
 
 .customButton {
+  cursor:pointer;
   display: flex;
   width: 132px;
   padding: 8px 0;

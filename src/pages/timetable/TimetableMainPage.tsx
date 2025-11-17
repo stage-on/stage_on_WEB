@@ -44,12 +44,10 @@ const TimetableMainPage = () => {
   useEffect(() => {
     async function fetchSortedFestivals() {
       const sortParam = currentSort;
-      console.log(`[API 준비됨 가정] 현재 정렬 기준: ${sortParam}`);
-      
       if (morefestival.length === 0) {
         const mockData3: FestivalItem[] = [
           { id: 7, title: "페스티벌 이름", likes: 999, location: "페스티벌 위치", date: "2025.12.20 - 12.21", thumbnailUrl: "/path/to/img1.png" },
-          { id: 8, title: "페스티벌 이름", likes: 999 , location: "페스티벌 위치", date: "2025.12.20 - 12.21", thumbnailUrl: "/path/to/img1.png" },
+          { id: 8, title: "페스티벌 이름", likes: 999, location: "페스티벌 위치", date: "2025.12.20 - 12.21", thumbnailUrl: "/path/to/img1.png" },
           { id: 9, title: "페스티벌 이름", likes: 999, location: "페스티벌 위치", date: "2025.12.20 - 12.21", thumbnailUrl: "/path/to/img1.png" },
           { id: 10, title: "페스티벌 이름", likes: 999, location: "페스티벌 위치", date: "2025.12.20 - 12.21", thumbnailUrl: "/path/to/img1.png" },
           { id: 11, title: "페스티벌 이름", likes: 999, location: "페스티벌 위치", date: "2025.12.20 - 12.21", thumbnailUrl: "/path/to/img1.png" },
@@ -127,7 +125,6 @@ const TimetableMainPage = () => {
             mainTitleLines={["타임테이블", "을\u00A0확인해\u00A0보세요!"]}
             boldParts={[0]}
           />
-          
           
           <div className={timetablestyles.sortOptions}>
             {sortOptions.map((option) => (
