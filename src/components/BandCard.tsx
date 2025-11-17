@@ -16,7 +16,7 @@ type BandCardProps = {
 const BandCard = ({ concert }: BandCardProps) => {
   return (
     <div className={bandcardStyle.bandcardContainer}>
-      {/* 이미지 + NEW Card */}
+    
       <div className={bandcardStyle.imageWrapper}>
         <img
           src={concert.image}
