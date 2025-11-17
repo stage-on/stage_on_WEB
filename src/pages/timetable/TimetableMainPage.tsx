@@ -1,7 +1,6 @@
 // src/pages/timetable/TimetableMainPage.tsx
 
 import { useState, useEffect } from "react";
-import HomeLayout from "../../layout/HomeLayout.tsx";
 import timetablestyles from "../../css/pages/timetable/timetablemain.module.css";
 import FestivalListItem from "../../components/timetable/FestivalListItem";
 import SectionHeader from "../../components/SectionHeader";
@@ -43,7 +42,6 @@ const TimetableMainPage = () => {
 
   useEffect(() => {
     async function fetchSortedFestivals() {
-      const sortParam = currentSort;
       if (morefestival.length === 0) {
         const mockData3: FestivalItem[] = [
           { id: 7, title: "페스티벌 이름", likes: 999, location: "페스티벌 위치", date: "2025.12.20 - 12.21", thumbnailUrl: "/path/to/img1.png" },
