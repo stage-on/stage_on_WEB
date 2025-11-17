@@ -1,0 +1,74 @@
+.timetableListItem {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 10px;
+}
+
+.listThumbnail {
+  width: 45px;
+  height: 60px;
+  aspect-ratio: 3/4;
+}
+
+.infoContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 10px;
+  flex-grow: 1;
+  min-width: 0;
+}
+
+.listTitle {
+  color: var(--g-100, #1a1a1a);
+  font-family: Inter;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+  letter-spacing: -0.42px;
+  margin-top: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.listDetails {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+}
+
+.heartIcon {
+  width: 11px;
+  height: 11px;
+  aspect-ratio: 1/1;
+}
+
+.heartCount,
+.location,
+.date {
+  color: var(--g-80, #5c5c5c);
+  font-family: Inter;
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  letter-spacing: -0.3px;
+}
+
+.arrowIcon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.divider {
+  background: #5C5C5C;
+  width: 0.5px;
+  height: 8px;
+}
