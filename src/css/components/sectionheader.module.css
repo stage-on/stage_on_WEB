@@ -1,0 +1,48 @@
+.sectionHeaderGroup {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 16px;
+}
+
+.sectionHeaderGroup p,
+.sectionHeaderGroup h2 {
+  margin: 0;
+  padding: 0;
+}
+
+.subtitle {
+  align-self: stretch;
+  color: var(--g-80, #5c5c5c);
+  font-family: Inter;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  letter-spacing: -0.36px;
+}
+
+.mainTitle {
+  display: flex;
+  align-items: flex-start;
+  align-self: stretch;
+}
+
+.mainTitleLine {
+  color: var(--g-100, #1a1a1a);
+  font-family: Inter;
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  letter-spacing: -0.54px;
+}
+
+.boldText {
+  color: var(--g-100, #1a1a1a);
+  font-family: Inter;
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+  letter-spacing: -0.54px;
+}

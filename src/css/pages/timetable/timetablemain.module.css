@@ -1,0 +1,78 @@
+.mainContentWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 52px;
+}
+
+.timetableList {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  align-self: stretch;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.recommendListWrapper {
+  display: flex;
+  overflow-x: scroll;
+  overflow-y: hidden;
+  gap: 16px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+
+.recommendListWrapper::-webkit-scrollbar {
+  display: none;
+}
+
+.sortOptions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  align-self: stretch;
+  margin-bottom: 16px;
+}
+
+.sortButton {
+  color: var(--g-60, #8F8F8F);
+  font-family: Inter;
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  letter-spacing: -0.3px;
+  position: relative;
+  padding-left: 6px;
+}
+
+.sortButton::before {
+  content: '•';
+  position: absolute;
+  left: -6px;
+  color: #888;
+  font-size: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.sortButton.active {
+  color: var(--p-40, #8D4E99);
+  font-family: Inter;
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  letter-spacing: -0.3px;
+}
+
+.sortButton.active::before {
+  color: var(--p-40, #8D4E99);
+}
+
+.sortButton:hover {
+  opacity: 0.8;
+}
