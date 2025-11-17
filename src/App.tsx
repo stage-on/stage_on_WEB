@@ -21,14 +21,14 @@ export default function App() {
         <Route path="main" element={<HomeLayout />}>
           <Route path="mybands" element={<MyBands />} />
            <Route path="home" element={<Home />} />
+           <Route path="timetable">
+          <Route index element={<TimetableMainPage />} />     
+          <Route path=":id" element={<TimetableDetailPage />} /> 
+        </Route>
         </Route>
         <Route path="search" element={<Search />} />
         <Route path="register" element={<Register/>}/>
          <Route path="registerfinish" element={<Registerfinish/>}/>
-         <Route path="timetable">
-          <Route index element={<TimetableMainPage />} />     
-          <Route path=":id" element={<TimetableDetailPage />} /> 
-        </Route>
       </Route>
     </Routes>
 

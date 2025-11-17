@@ -82,7 +82,6 @@ const TimetableMainPage = () => {
 
   return (
     <>
-      <HomeLayout />
       <div className={timetablestyles.mainContentWrapper}>
         <section className={timetablestyles.mytimetableSection}>
           <SectionHeader
