@@ -2,19 +2,6 @@ import Alarm from "../components/Alarm"
 import BandCardName from "../components/BandCardName"
 import concertimage from "../assets/component/home/concert_image.svg";
 
-type Concert = {
-  id: number;
-  name: string;
-  date: string;
-  image: string;
-};
-
-type Band = {
-  id: number;
-  name: string;
-  concerts: Concert[];
-};
-
 const favoriteBands = [ // 연동전 더미데이터
   {
     id: 1,
