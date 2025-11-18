@@ -46,6 +46,7 @@
   width: 11px;
   height: 11px;
   aspect-ratio: 1/1;
+  cursor:pointer;
 }
 
 .heartCount,
