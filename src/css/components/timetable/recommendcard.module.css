@@ -7,20 +7,13 @@
 
 .cardThumbnail {
   display: flex;
-  width: 132px;
-  height: 176px;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   aspect-ratio: 3/4;
 }
 
-.cardThumbnail img {
-  width: 132px;
-  height: 176px;
-  aspect-ratio: 3/4;
-  position: absolute;
-}
+
 
 .cardInfo {
   margin-bottom: 8px;
