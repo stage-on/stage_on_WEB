@@ -35,15 +35,18 @@ const Alarm = () => {
 
   if (!current) return null;
 
-  return (
-    <div className={alarmStyle.alarmContainer}>
-      <img className={alarmStyle.pushpin} src={pushpin} />
+return (
+  <div className={alarmStyle.alarmContainer}>
+    <img className={alarmStyle.pushpin} src={pushpin} />
+    <span className={alarmStyle.textWrap}>
       <span className={alarmStyle.concertName}>{current.concertName}</span>
-      <span className={alarmStyle.subText}>의 예매일까지</span>
+      <span className={alarmStyle.subText}>의 예매일까지 </span>
       <span className={alarmStyle.concertData}>{current.daysLeft}</span>
       <span className={alarmStyle.subText}>일 남았어요!</span>
-    </div>
-  );
+    </span>
+  </div>
+);
+
 };
 
 export default Alarm;

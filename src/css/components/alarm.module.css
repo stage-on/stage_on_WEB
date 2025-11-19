@@ -31,3 +31,10 @@
     color: #8D4E99;
     padding: 0 2px;
 }
+
+.textWrap {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
+}
