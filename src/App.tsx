@@ -10,12 +10,14 @@ import MyBands from "./pages/MyBands";
 import Home from "./pages/Home";
 import TimetableMainPage from "./pages/timetable/TimetableMainPage";
 import TimetableDetailPage from "./pages/timetable/TimetableDetailPage";
+import Test from "./pages/Test";
 
 
 export default function App() {
   return (
     <Routes>
       <Route element={<GlobalLayout />}>
+      <Route path="test" element={<Test/>}/>
         <Route index element={<Splash next="/Login" delayMs={3000} />} />
         <Route path="login" element={<Login />} />
         <Route path="main" element={<HomeLayout />}>
