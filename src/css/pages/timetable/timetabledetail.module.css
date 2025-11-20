@@ -1,0 +1,72 @@
+/* src/css/pages/timetable/timetabledetail.module.css */
+
+.pageContainer {
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+}
+
+/* ⭐️ .button (또는 .backButton) 초기화 속성 ⭐️ */
+.backButton {
+  /* 1. 모든 기본 버튼 스타일 제거 (모든 사용자 에이전트 스타일 초기화) */
+  all: unset; 
+  
+  /* 2. pointer 이벤트 및 접근성 유지를 위해 필수 속성 재설정 */
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  
+  /* 3. 혹시 모를 내부 이미지의 크기 간섭을 막기 위해 크기 관련 속성 제거 */
+  /* width, height, flex-shrink 등 기존에 정의된 모든 레이아웃 속성을 제거합니다. */
+
+  /* 4. 포커스 시 외곽선 제거 (필요에 따라) */
+  outline: none; 
+}
+
+/* ⭐️ 버튼 내부의 이미지 크기는 img 태그에 직접 지정해야 합니다. ⭐️ */
+.backButton img {
+    /* 예시: 이미지가 24px 크기를 가지도록 설정 */
+    width: 24px; 
+    height: 28px;
+    flex-shrink: 0;
+}
+
+
+.pageTitle {
+  /* ⭐️ 1. 남은 공간을 모두 차지하도록 확장 ⭐️ */
+  flex-grow: 1;
+  /* ⭐️ 2. 텍스트를 중앙 정렬하여 backButton과 emptyBox 사이에 위치 ⭐️ */
+  text-align: center;
+  
+  /* ⭐️ 3. 줄임표 (...) 처리를 위한 필수 3종 세트 ⭐️ */
+  /* 넘치는 텍스트를 숨김 */
+  overflow: hidden; 
+  /* 텍스트를 한 줄로 강제 */
+  white-space: nowrap; 
+  /* 넘치는 텍스트를 ...로 표시 */
+  text-overflow: ellipsis; 
+
+  /* 기존 폰트 속성 유지 */
+  color: var(--g-100, #1a1a1a);
+  font-family: Inter;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+  letter-spacing: -0.48px;
+  
+  /* 버튼과의 간섭 방지를 위해 좌우 마진 추가 (선택 사항) */
+  margin: 0 10px; 
+}
+.emptyBox{
+       width: 24px; 
+    height: 24px;
+    display: block;
+}
