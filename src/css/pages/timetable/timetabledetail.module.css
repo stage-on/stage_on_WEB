@@ -5,55 +5,45 @@
   flex-direction: column;
 }
 
+/* ========================================================= */
+/* 1. Header 및 제목 스타일 */
+/* ========================================================= */
+
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 16px;
+  /* (사용자 요청 속성 유지) 좌우 패딩이 0이므로, 버튼과 emptyBox에 마진/패딩을 추가하여 여백 확보 */
+  padding: 12px 0px; 
 }
 
-/* ⭐️ .button (또는 .backButton) 초기화 속성 ⭐️ */
+/* 뒤로 가기 버튼 초기화 */
 .backButton {
-  /* 1. 모든 기본 버튼 스타일 제거 (모든 사용자 에이전트 스타일 초기화) */
   all: unset; 
-  
-  /* 2. pointer 이벤트 및 접근성 유지를 위해 필수 속성 재설정 */
   border: none;
   background: none;
   padding: 0;
   cursor: pointer;
-  
-  /* 3. 혹시 모를 내부 이미지의 크기 간섭을 막기 위해 크기 관련 속성 제거 */
-  /* width, height, flex-shrink 등 기존에 정의된 모든 레이아웃 속성을 제거합니다. */
-
-  /* 4. 포커스 시 외곽선 제거 (필요에 따라) */
   outline: none; 
+  /* ⭐️ 추가: Header padding이 0px이므로 좌측 여백 확보 ⭐️ */
+ 
 }
 
-/* ⭐️ 버튼 내부의 이미지 크기는 img 태그에 직접 지정해야 합니다. ⭐️ */
+/* 버튼 내부 이미지 크기 설정 */
 .backButton img {
-    /* 예시: 이미지가 24px 크기를 가지도록 설정 */
     width: 24px; 
     height: 28px;
     flex-shrink: 0;
 }
 
-
+/* 페이지 제목: 중앙 정렬 및 줄임표 처리 */
 .pageTitle {
-  /* ⭐️ 1. 남은 공간을 모두 차지하도록 확장 ⭐️ */
   flex-grow: 1;
-  /* ⭐️ 2. 텍스트를 중앙 정렬하여 backButton과 emptyBox 사이에 위치 ⭐️ */
   text-align: center;
-  
-  /* ⭐️ 3. 줄임표 (...) 처리를 위한 필수 3종 세트 ⭐️ */
-  /* 넘치는 텍스트를 숨김 */
   overflow: hidden; 
-  /* 텍스트를 한 줄로 강제 */
   white-space: nowrap; 
-  /* 넘치는 텍스트를 ...로 표시 */
   text-overflow: ellipsis; 
 
-  /* 기존 폰트 속성 유지 */
   color: var(--g-100, #1a1a1a);
   font-family: Inter;
   font-size: 16px;
@@ -62,26 +52,225 @@
   line-height: normal;
   letter-spacing: -0.48px;
   
-  /* 버튼과의 간섭 방지를 위해 좌우 마진 추가 (선택 사항) */
-  margin: 0 10px; 
 }
+
+/* 제목 오른쪽을 채우는 빈 상자 (레이아웃 균형용) */
 .emptyBox{
-       width: 24px; 
+    width: 24px; 
+    height: 24px;
+    display: block;
+    /* ⭐️ 추가: Header padding이 0px이므로 우측 여백 확보 ⭐️ */
+    
+}
+
+/* ========================================================= */
+/* 2. 타임테이블 컨트롤 바 (드롭다운 + 액션 버튼) */
+/* ========================================================= */
+
+/* ⭐️ 컨트롤 바 전체 컨테이너 (.timetableControlBar) ⭐️ */
+.timetableControlBar {
+    display: flex;
+    justify-content: space-between; /* 드롭다운과 액션 버튼을 양 끝에 배치 */
+    align-items: center;
+    flex-shrink: 0;
+    padding: 16px 0px;
+}
+
+/* ⭐️ 드롭다운 요소만 감싸는 래퍼 (.dropdownWrapper) - List의 absolute 기준점 ⭐️ */
+.dropdownWrapper {
+    position: relative; 
+    display: block; 
+}
+
+/* 토글 버튼 (현재 선택된 날짜 표시 영역) */
+.dayDropdownToggle {
+    all: unset; 
+    
+    box-sizing: border-box;
+    width: 83px; 
+    
+    display: flex;
+    padding: 6px 8px;
+    align-items: center;
+    justify-content: space-between; 
+    gap: 10px;
+    flex-shrink: 0;
+    border-radius: 4px;
+   
+border: 1px solid var(--p-20, #C66CD9);
+background: var(--g-0, #FFF);
+    
+    background: var(--g-0, #FFF);
+    cursor: pointer;
+    
+    transition: border-color 0.2s; 
+    color: var(--p-20, #C66CD9);
+
+/* medium/12 */
+font-family: Inter;
+font-size: 12px;
+font-style: normal;
+font-weight: 500;
+line-height: normal;
+letter-spacing: -0.36px;
+}
+
+/* 토글 버튼 열림 상태 스타일 */
+.dayDropdownToggle.open {
+    border: 1px solid var(--p-20, #C66CD9);
+}
+
+.dayDropdownToggle span {
+    flex-grow: 1; 
+}
+
+/* 선택된 날짜 (보라색 글꼴) */
+.fontSet {
+    color: var(--p-20, #C66CD9); 
+    font-family: Inter;
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: normal;
+    letter-spacing: -0.36px;
+    white-space: nowrap;
+    
+}
+
+/* Placeholder/열림 상태 텍스트 ('날짜 선택') */
+.placeholderText {
+    color: var(--g-40, #D1D1D1);
+
+/* regular/12 */
+font-family: Inter;
+font-size: 12px;
+font-style: normal;
+font-weight: 400;
+line-height: normal;
+letter-spacing: -0.36px;
+    white-space: nowrap;
+    
+}
+
+/* 화살표 아이콘 스타일 */
+.dayDropdownToggle img {
+    width: 16px; 
+    height: 16px;
+    flex-shrink: 0;
+    transition: transform 0.3s ease; 
+}
+
+.arrowClosed {
+    transform: rotate(0deg);
+}
+
+.arrowOpen {
+    transform: rotate(180deg);
+}
+
+
+/* 1. 드롭다운 목록 (ul 태그) */
+.dayDropdownList {
+    position: absolute; 
+    
+    /* ⭐️ 수정: .dropdownWrapper 기준이므로 left: 0px ⭐️ */
+    left: 0px; 
+    z-index: 10; 
+    width: 83px; 
+    
+    padding: 0; 
+    margin: 4px 0 0 0;
+    
+    border: 1px solid var(--p-20, #C66CD9); 
+    border-radius: 4px;
+    background-color: white;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* 2. 목록의 각 항목 (li 태그) */
+.dayDropdownItem {
+    width: 83px;
+    
+ 
+}
+
+/* 3. 목록 내부의 날짜 선택 버튼 (실제 클릭 영역) */
+.dayDropdownOption {
+    all: unset; 
+    display: block;
+    width: 83px;
+    padding: 8px 0px;
+    
+    
+    cursor: pointer;
+    
+    font-family: Inter;
+font-size: 12px;
+font-style: normal;
+font-weight: 500;
+line-height: normal;
+letter-spacing: -0.36px;
+    color: #333; 
+}
+
+/* 4. 마우스 오버(hover) 및 선택(active) 스타일 */
+.dayDropdownOption:hover {
+    background-color: #f7f7f7;
+}
+
+/* 현재 선택된 항목 스타일 */
+.dayDropdownOption.active {
+   background: var(--b-210, rgba(198, 108, 217, 0.10));
+    color: var(--p-20, #C66CD9);
+/* medium/12 */
+font-family: Inter;
+font-size: 12px;
+font-style: normal;
+font-weight: 500;
+line-height: normal;
+letter-spacing: -0.36px;
+padding-left:
+
+}
+
+/* ========================================================= */
+/* 3. 액션 버튼 (다운로드/되돌리기) 스타일 */
+/* ========================================================= */
+
+/* ⭐️ 액션 버튼 래퍼 (.actionButtonWrapper) ⭐️ */
+.actionButtonWrapper {
+    display: flex;
+    gap: 8px; /* 버튼 간격 */
+    flex-shrink: 0;
+}
+
+/* ⭐️ 개별 액션 버튼 (.actionButton) ⭐️ */
+.actionButton {
+    all: unset;
+    cursor: pointer;
+    padding: 4px; 
+    border-radius: 4px;
+    transition: background-color 0.2s;
+    
+    /* Flex item으로 작동하도록 설정 */
+    display: flex; 
+    align-items: center;
+    justify-content: center;
+}
+
+.actionButton:hover {
+    background-color: var(--g-10, #f0f0f0);
+}
+
+/* ⭐️ 액션 버튼 내부 이미지 크기 ⭐️ */
+.actionButton img {
+    width: 24px;
     height: 24px;
     display: block;
 }
 
-
-/* 날짜 선택 드롭다운, 이미지저장, 되돌리기 버튼 */
-
-.dayDropdown{
-    display: flex;
-width: 83px;
-padding: 6px 8px;
-align-items: center;
-gap: 10px;
+.selectedDateTextWrapper {
+   width: 67px;
 flex-shrink: 0;
-border-radius: 4px;
-border: 1px solid var(--p-20, #C66CD9);
-background: var(--g-0, #FFF);
+margin-left:8px;
 }
