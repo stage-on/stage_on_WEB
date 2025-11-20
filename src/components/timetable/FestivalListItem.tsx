@@ -6,7 +6,7 @@ import festivalListStyles from "../../css/components/timetable/festivallistitem.
 import sampleposter from "../../assets/timetable/poster.svg"; 
 import arrowIconSVG from "../../assets/timetable/arrow-right.svg"; 
 
-// ⭐️ 2. 두 가지 하트 이미지 import ⭐️
+
 import heartFilled from "../../assets/timetable/heart.svg";    // 채워진 하트 (기존 heart.svg 사용)
 import heartEmpty from "../../assets/timetable/heart-empty.svg"; // 빈 하트 이미지 경로 가정 (파일 준비 필요)
 
@@ -31,7 +31,7 @@ export default function FestivalListItem({ itemData }: FestivalListItemProps) {
     const [isLiked, setIsLiked] = useState(false); 
 
     const handleNavigation = () => {
-        navigate(`/timetable/detail/${itemData.id}`); 
+        navigate(`main/timetable/${itemData.id}`); 
     };
 
     // ⭐️ 4. 하트 클릭 핸들러 추가 ⭐️
