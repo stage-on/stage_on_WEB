@@ -70,3 +70,18 @@
     height: 24px;
     display: block;
 }
+
+
+/* 날짜 선택 드롭다운, 이미지저장, 되돌리기 버튼 */
+
+.dayDropdown{
+    display: flex;
+width: 83px;
+padding: 6px 8px;
+align-items: center;
+gap: 10px;
+flex-shrink: 0;
+border-radius: 4px;
+border: 1px solid var(--p-20, #C66CD9);
+background: var(--g-0, #FFF);
+}

@@ -4,7 +4,6 @@ import { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import leftarrow from "../../assets/timetable/arrow-left.svg"
 
-// ⭐️ CSS 모듈명 변경: detailStyles -> timetableStyles ⭐️
 import timetableStyles from "../../css/pages/timetable/timetabledetail.module.css"; 
 
 
@@ -12,41 +11,63 @@ import timetableStyles from "../../css/pages/timetable/timetabledetail.module.cs
 interface FestivalDetailData {
   festivalId: number;
   festivalTitle: string;
-  days: { date: string; stages: { stageName: string; }[] }[];
+  // date 속성은 'YYYY-MM-DD' 형식의 문자열로 가정합니다.
+  days: { date: string; stages: { stageName: string; }[] }[]; 
 }
 
-// 2. 임시 Mock 데이터를 Map 형태로 확장합니다. 
+// ⭐️ 날짜 형식 변환 유틸리티 함수 추가 ⭐️
+const formatDayAndDayOfWeek = (dateString: string): string => {
+    // 요일 배열 (한국어)
+    const weekdays = ['일', '월', '화', '수', '목', '금', '토'];
+
+    const date = new Date(dateString);
+
+    // Date 객체 생성 시 유효하지 않은 날짜 포맷일 수 있으므로 유효성 검사 추가
+    if (isNaN(date.getTime())) {
+        console.error("Invalid date format:", dateString);
+        return dateString; 
+    }
+
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    const dayOfWeek = weekdays[date.getDay()];
+
+    return `${month}.${day}(${dayOfWeek})`;
+};
+
+// ⭐️ 2. 임시 Mock 데이터를 YYYY-MM-DD 형식으로 수정 (함수 적용을 위해) ⭐️
 const MockFestivalDetails: Record<number, FestivalDetailData> = {
     1: {
         festivalId: 1, 
         festivalTitle: "그랜드 민트 페스티벌 2025",
         days: [
-            { date: "2025.12.20", stages: [{ stageName: "Mint Breeze Stage" }] }, 
-            { date: "2025.12.21", stages: [{ stageName: "Loving Forest Garden" }] }
+            // 형식 수정: YYYY-MM-DD
+            { date: "2025-12-20", stages: [{ stageName: "Mint Breeze Stage" }] }, 
+            { date: "2025-12-21", stages: [{ stageName: "Loving Forest Garden" }] }
         ],
     },
     2: {
         festivalId: 2,
         festivalTitle: "COUNTDOWN FANTASY 2025-2026",
         days: [
-            { date: "2025.12.30", stages: [{ stageName: "Fantasy Stage" }] }, 
-            { date: "2025.12.31", stages: [{ stageName: "New Year Stage" }] }
+            { date: "2025-12-30", stages: [{ stageName: "Fantasy Stage" }] }, 
+            { date: "2025-12-31", stages: [{ stageName: "New Year Stage" }] }
         ],
     },
     3: { 
         festivalId: 3, 
         festivalTitle: "COUNTDOWN FANTASY 2025-2026 (추천)", 
-        days: [{ date: "2025.12.20", stages: [{ stageName: "Stage A" }] }] 
+        days: [{ date: "2025-12-20", stages: [{ stageName: "Stage A" }] }] 
     },
     4: { 
         festivalId: 4, 
         festivalTitle: "DMZ 피스트레인 (추천)", 
-        days: [{ date: "2025.10.18", stages: [{ stageName: "Stage B" }] }] 
+        days: [{ date: "2025-10-18", stages: [{ stageName: "Stage B" }] }] 
     },
     7: { 
         festivalId: 7, 
         festivalTitle: "더 많은 페스티벌 1", 
-        days: [{ date: "2025.12.20", stages: [{ stageName: "Main Stage" }] }] 
+        days: [{ date: "2025-12-20", stages: [{ stageName: "Main Stage" }] }] 
     },
 };
 
@@ -64,7 +85,6 @@ export default function TimetableDetailPage() {
     
     const [currentDayIndex, setCurrentDayIndex] = useState(0);
 
-    // 4. 현재 모드 계산 (URL 분석)
     const currentMode: TimetableMode = useMemo(() => {
         if (location.pathname.includes('/my/')) return 'my';
         if (location.pathname.includes('/customize/')) return 'customize';
@@ -75,7 +95,6 @@ export default function TimetableDetailPage() {
         navigate(-1); 
     };
 
-    // 데이터 로딩 (API 호출 시뮬레이션)
     useEffect(() => {
         if (!festivalId) { 
             setIsLoading(false);
@@ -119,12 +138,10 @@ export default function TimetableDetailPage() {
     
     // --- 로딩/에러 처리 UI ---
     if (isLoading) {
-        // ⭐️ 클래스명 변경 적용 ⭐️
         return <div className={timetableStyles.pageContainer}>타임테이블 로딩 중...</div>;
     }
 
     if (!detailData) {
-        // ⭐️ 클래스명 변경 적용 ⭐️
         return <div className={timetableStyles.pageContainer}>요청하신 페스티벌 정보를 찾을 수 없습니다. (ID: {festivalId})</div>;
     }
 
@@ -133,12 +150,10 @@ export default function TimetableDetailPage() {
 
     // --- 메인 UI 렌더링 ---
     return (
-        // ⭐️ 클래스명 변경 적용 ⭐️
         <div className={timetableStyles.pageContainer}>
             
             <header className={timetableStyles.header}>
                 <button 
-                    // ⭐️ 클래스명 변경 적용 ⭐️
                     className={timetableStyles.backButton}
                     onClick={handleGoBack}
                 >
@@ -149,33 +164,42 @@ export default function TimetableDetailPage() {
                     {detailData.festivalTitle} 
                 </h1>
                 <div className={timetableStyles.emptyBox}></div>
-            
             </header>
 
             <main className={timetableStyles.mainContent}>
                 
-                {/* ⭐️ 1. 날짜 탭 UI ⭐️ */}
+               {/* ⭐️ 1. 날짜 드롭다운 UI ⭐️ */}
                 {detailData.days.length > 0 && (
-                    <div className={timetableStyles.dayTabs}>
-                        {detailData.days.map((day, index) => (
-                            <button
-                                key={index}
-                                // ⭐️ 클래스명 변경 적용 ⭐️
-                                className={`${timetableStyles.dayTab} ${
-                                    index === currentDayIndex ? timetableStyles.active : ''
-                                }`}
-                                onClick={() => setCurrentDayIndex(index)}
-                            >
-                                {day.date}
-                            </button>
-                        ))}
+                    <div className={timetableStyles.dayDropdownContainer}>
+                        
+                        {/* ⚠️ 레이블(label)은 접근성을 위해 유지하는 것을 권장합니다. */}
+                        {/* <label htmlFor="day-selector" className={timetableStyles.dayDropdownLabel}>날짜 선택</label> */}
+
+                        <select
+                            id="day-selector"
+                            className={timetableStyles.dayDropdown}
+                            value={currentDayIndex}
+                            onChange={(e) => setCurrentDayIndex(parseInt(e.target.value))}
+                        >
+                            {detailData.days.map((day, index) => (
+                                <option
+                                    key={index}
+                                    value={index} 
+                                >
+                                    {/* ⭐️ 날짜 형식 변환 함수 적용 ⭐️ */}
+                                    {formatDayAndDayOfWeek(day.date)}
+                                </option>
+                            ))}
+                        </select>
+
                     </div>
                 )}
                 
                 {/* ⭐️ 2. 선택된 날짜의 스테이지/일정 영역 ⭐️ */}
                 <div className={timetableStyles.scheduleArea}>
                     
-                    <h3>{selectedDayData.date} 일정</h3>
+                    {/* ⭐️ 제목에도 변환된 날짜 적용 ⭐️ */}
+                    <h3>{formatDayAndDayOfWeek(selectedDayData.date)} 일정</h3>
                     
                     {/* TODO: 여기에 스테이지 필터와 실제 타임테이블 목록이 들어갑니다. */}
                     <div style={{ marginTop: '10px', padding: '10px', border: '1px solid #ccc' }}>
