@@ -1,2 +1,0 @@
-pr test2
-dev deploy test2
