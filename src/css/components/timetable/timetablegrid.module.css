@@ -1,0 +1,91 @@
+/* src/css/components/timetable/timetablegrid.module.css (Stage 3개 고정 버전) */
+
+.timetableContainer {
+    display: flex;
+    overflow-y: auto; 
+    max-height: 50vh; 
+    margin-top: 16px;
+    padding-bottom: 20px;
+    width: 100%;
+    position: relative; 
+}
+
+/* ================== 시간 축 (TimeAxis) ================== */
+.timeAxis {
+    width: 40px; 
+    position: relative;
+    flex-shrink: 0;
+    z-index: 2; 
+    padding-top: 15px; 
+}
+
+.timeLabel {
+    position: absolute;
+    transform: translateY(-50%);
+    font-size: 10px;
+    color: var(--g-80, #555);
+    right: 5px; 
+    font-weight: 500;
+}
+
+/* 횡스크롤 이전 버전에서는 TimeAxis에서 렌더링된 요소가 StageGridWrapper 영역까지 침범하도록 설정 */
+.timeDivider {
+    position: absolute;
+    width: 100vw; /* StageGridWrapper를 가로질러 확장 */
+    height: 1px;
+    border-top: 1px dashed var(--g-40, #D1D1D1);
+    transform: translateY(-50%);
+    left: 40px; /* TimeAxis 너비만큼 이동 */
+    z-index: 1;
+}
+
+
+/* ================== 스테이지 그리드 ================== */
+.stageGridWrapper {
+    flex-grow: 1; 
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden; /* 횡스크롤 제거 */
+}
+
+
+/* Stage Header (StageName) */
+.stageHeader {
+    display: flex;
+    width: 100%;
+    margin-bottom: 5px;
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    padding-top: 15px;
+}
+
+.stageHeaderBlock {
+    flex: 1; /* 3개 스테이지가 화면 너비에 맞춰 균등 분할 */
+    min-width: 100px; /* 최소 너비 지정 */
+    
+    height: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 12px;
+    font-weight: 500;
+    color: white;
+    background-color: var(--p-40, #8D4E99);
+    border-radius: 4px;
+    margin: 0 4px; 
+}
+
+/* 일정 블록 영역 */
+.scheduleArea {
+    display: flex;
+    width: 100%; 
+    position: relative; 
+}
+
+.scheduleColumn {
+    flex: 1; /* Stage Header와 동일하게 균등 분할 */
+    min-width: 100px; 
+    position: relative;
+    margin: 0 4px; 
+}

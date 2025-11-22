@@ -1,86 +1,69 @@
+// src/pages/timetable/TimetableDetailPage.tsx (최종 Hooks 수정 및 3개 Stage 고정)
+
 import { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
+// 경로에 맞게 이미지 import 경로는 수정해 주세요.
 import leftarrow from "../../assets/timetable/arrow-left.svg"
-import downarrow from "../../assets/timetable/arrow-down.svg" // downarrow 이미지 import 필요
+import downarrow from "../../assets/timetable/arrow-down.svg"
 import download from "../../assets/timetable/download.svg"
 import refresh from "../../assets/timetable/refresh.svg"
 
 import timetableStyles from "../../css/pages/timetable/timetabledetail.module.css"; 
+import TimetableGrid from "../../components/timetable/TimetableGrid";
 
 
-// 1. 임시 타입 정의
-interface FestivalDetailData {
-  festivalId: number;
-  festivalTitle: string;
-  days: { date: string; stages: { stageName: string; }[] }[]; 
+// =========================================================
+// 1. 타입 정의 및 Mock 데이터 (길이가 길어 생략하며, 이전 코드를 유지하세요)
+// =========================================================
+export interface ScheduleItem { 
+  date: string; stageId: string; stageName: string; stageOrder: number; 
+  artist: string; start: string; end: string; minutes: number; 
+  img: string | null; note: string | null; isCustomized?: boolean; 
 }
+interface DayScheduleData { date: string; schedules: ScheduleItem[]; }
+interface FestivalDetailData { festivalId: number; festivalTitle: string; days: DayScheduleData[]; }
 
 // ⭐️ 날짜 형식 변환 유틸리티 함수 ⭐️
 const formatDayAndDayOfWeek = (dateString: string): string => {
     const weekdays = ['일', '월', '화', '수', '목', '금', '토'];
-
     const date = new Date(dateString);
-
-    if (isNaN(date.getTime())) {
-        console.error("Invalid date format:", dateString);
-        return dateString; 
-    }
-
     const month = date.getMonth() + 1;
     const day = date.getDate();
     const dayOfWeek = weekdays[date.getDay()];
-
     return `${month}.${day}(${dayOfWeek})`;
 };
 
-// ⭐️ 2. 임시 Mock 데이터를 YYYY-MM-DD 형식으로 가정하여 수정 ⭐️
-const MockFestivalDetails: Record<number, FestivalDetailData> = {
-    1: {
-        festivalId: 1, 
-        festivalTitle: "그랜드 민트 페스티벌 2025",
-        days: [
-            { date: "2025-12-20", stages: [{ stageName: "Mint Breeze Stage" }] }, 
-            { date: "2025-12-21", stages: [{ stageName: "Loving Forest Garden" }] }
-        ],
-    },
-    2: {
-        festivalId: 2,
-        festivalTitle: "COUNTDOWN FANTASY 2025-2026",
-        days: [
-            { date: "2025-12-30", stages: [{ stageName: "Fantasy Stage" }] }, 
-            { date: "2025-12-31", stages: [{ stageName: "New Year Stage" }] }
-        ],
-    },
-    3: { 
-        festivalId: 3, 
-        festivalTitle: "COUNTDOWN FANTASY 2025-2026 (추천)", 
-        days: [{ date: "2025-12-20", stages: [{ stageName: "Stage A" }] }] 
-    },
-    4: { 
-        festivalId: 4, 
-        festivalTitle: "DMZ 피스트레인 (추천)", 
-        days: [{ date: "2025-10-18", stages: [{ stageName: "Stage B" }] }] 
-    },
+const MockFestivalDetails: Record<number, FestivalDetailData> = { 
     7: { 
         festivalId: 7, 
-        festivalTitle: "더 많은 페스티벌 1", 
-        days: [{ date: "2025-12-20", stages: [{ stageName: "Main Stage" }] }] 
+        festivalTitle: "더 많은 페스티벌 1 (3 스테이지)", 
+        days: [{ 
+            date: "2025-12-20", schedules: [
+                { date: "2025-12-20", stageId: "A-1", stageName: "LAND STAGE A", stageOrder: 1, artist: "단편선 순간들", start: "15:00:00", end: "15:40:00", minutes: 40, img: null, note: null, isCustomized: true },
+                { date: "2025-12-20", stageId: "A-1", stageName: "LAND STAGE A", stageOrder: 1, artist: "구남과여라이딩스텔라", start: "17:00:00", end: "17:40:00", minutes: 40, img: null, note: null, isCustomized: true },
+                { date: "2025-12-20", stageId: "B-2", stageName: "LAND STAGE B", stageOrder: 2, artist: "사위", start: "15:45:00", end: "16:25:00", minutes: 40, img: null, note: null, isCustomized: true },
+                { date: "2025-12-20", stageId: "B-2", stageName: "LAND STAGE B", stageOrder: 2, artist: "초록불꽃소년단", start: "17:45:00", end: "18:25:00", minutes: 40, img: null, note: null, isCustomized: true },
+                { date: "2025-12-20", stageId: "C-3", stageName: "LAND STAGE C", stageOrder: 3, artist: "THE CHAIRS", start: "16:30:00", end: "17:10:00", minutes: 40, img: null, note: null, isCustomized: true },
+                { date: "2025-12-20", stageId: "C-3", stageName: "LAND STAGE C", stageOrder: 3, artist: "SUMIN", start: "18:30:00", end: "19:10:00", minutes: 40, img: null, note: null },
+                { date: "2025-12-20", stageId: "D-4", stageName: "LAND STAGE D", stageOrder: 4, artist: "New Band", start: "19:30:00", end: "20:30:00", minutes: 60, img: null, note: null },
+            ] 
+        }],
     },
+    // ... (다른 Mock 데이터 유지) ...
 };
-
-// 3. 모드 타입 정의
 type TimetableMode = 'customize' | 'my' | 'view'; 
+
 
 export default function TimetableDetailPage() {
     
+    // ⭐️ 1. 모든 Hooks는 함수 컴포넌트의 최상단에 위치합니다. ⭐️
     const navigate = useNavigate();
     const location = useLocation();
     const { id: festivalId } = useParams<{ id: string }>(); 
 
     const [detailData, setDetailData] = useState<FestivalDetailData | null>(null);
     const [isLoading, setIsLoading] = useState(true);
-    
-    const [currentDayIndex, setCurrentDayIndex] = useState(-1); // 초기값 -1
+    const [currentDayIndex, setCurrentDayIndex] = useState(-1);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
 
@@ -90,29 +73,38 @@ export default function TimetableDetailPage() {
         return 'view'; 
     }, [location.pathname]);
 
-    const handleGoBack = () => {
-        navigate(-1); 
-    };
     
-    // ⭐️ 다운로드 버튼 핸들러 ⭐️
-    const handleDownload = () => {
-        console.log("Download button clicked!");
-        // 여기에 타임테이블 이미지 저장 로직 구현
-    };
+    // ⭐️ 2. 데이터 추출 및 필터링 useMemo도 Early Return 이전에 선언 ⭐️
+    const allSchedules = useMemo(() => {
+        // detailData나 days가 없을 경우 안전하게 빈 배열 반환
+        if (!detailData || currentDayIndex === -1 || !detailData.days[currentDayIndex]) {
+            return [];
+        }
+        return detailData.days[currentDayIndex].schedules;
+    }, [detailData, currentDayIndex]);
     
-    // ⭐️ 되돌리기/리프레시 버튼 핸들러 ⭐️
-    const handleRefresh = () => {
-        console.log("Refresh/Reset button clicked!");
-        // 여기에 커스텀 타임테이블 초기화 또는 되돌리기 로직 구현
-    };
-    
-    // ⭐️ 날짜 선택 핸들러 ⭐️
-    const handleDaySelect = (index: number) => {
-        setCurrentDayIndex(index);
-        setIsDropdownOpen(false); // 선택 후 드롭다운 닫기
-    };
+    // ⭐️ Stage 3개 고정 필터링 로직 ⭐️
+    const schedulesByStage = useMemo(() => {
+        const stage1Schedules = allSchedules.filter(s => s.stageOrder === 1);
+        const stage2Schedules = allSchedules.filter(s => s.stageOrder === 2);
+        const stage3Schedules = allSchedules.filter(s => s.stageOrder === 3);
 
-    // 데이터 로딩 (API 호출 시뮬레이션)
+        const stageNames = {
+            1: stage1Schedules[0]?.stageName || "Stage 1",
+            2: stage2Schedules[0]?.stageName || "Stage 2",
+            3: stage3Schedules[0]?.stageName || "Stage 3",
+        };
+        
+        return {
+            stage1: stage1Schedules,
+            stage2: stage2Schedules,
+            stage3: stage3Schedules,
+            stageNames: stageNames,
+        };
+    }, [allSchedules]);
+
+
+    // --- useEffect, 핸들러 (이전 코드 유지) ---
     useEffect(() => {
         if (!festivalId) { 
             setIsLoading(false);
@@ -126,15 +118,14 @@ export default function TimetableDetailPage() {
                 
                 let dataToLoad: FestivalDetailData | null = null;
                 const idNum = parseInt(festivalId!); 
-                const baseData = MockFestivalDetails[idNum];
-
+                const baseData = MockFestivalDetails[idNum] || MockFestivalDetails[7]; 
+                
                 if (baseData) {
                     dataToLoad = baseData;
-                    // 데이터 로드 완료 후, 첫 번째 날짜(인덱스 0)를 기본 선택하도록 설정
-                    setCurrentDayIndex(0); 
-                    setIsDropdownOpen(false); 
+                    if (baseData.days.length > 0) {
+                        setCurrentDayIndex(0); 
+                    }
                 }
-                
                 setDetailData(dataToLoad); 
 
             } catch (error) {
@@ -144,40 +135,36 @@ export default function TimetableDetailPage() {
                 setIsLoading(false);
             }
         }
-
         fetchTimetableDetail();
     }, [festivalId, currentMode]); 
 
-    
-    // --- 로딩/에러 처리 UI ---
+    const handleGoBack = () => { navigate(-1); };
+    const handleDownload = () => { console.log("Download button clicked!"); };
+    const handleRefresh = () => { console.log("Refresh/Reset button clicked!"); };
+    const handleDaySelect = (index: number) => {
+        setCurrentDayIndex(index);
+        setIsDropdownOpen(false);
+    };
+
+
+    // --- Early Return ---
     if (isLoading) {
         return <div className={timetableStyles.pageContainer}>타임테이블 로딩 중...</div>;
     }
 
-    if (!detailData) {
-        return <div className={timetableStyles.pageContainer}>요청하신 페스티벌 정보를 찾을 수 없습니다. (ID: {festivalId})</div>;
+    if (!detailData || currentDayIndex === -1 || !detailData.days[currentDayIndex]) {
+        return <div className={timetableStyles.pageContainer}>
+            {detailData ? "날짜를 선택해 주세요." : `요청하신 페스티벌 정보를 찾을 수 없습니다. (ID: ${festivalId})`}
+        </div>;
     }
-
-    // 현재 선택된 날짜 데이터 준비
+    
     const selectedDayData = detailData.days[currentDayIndex];
     
-    // 현재 선택된 날짜를 포맷팅. (currentDayIndex가 -1이 아닐 경우만 사용)
-    const selectedDateFormatted = currentDayIndex !== -1 
-        ? formatDayAndDayOfWeek(selectedDayData.date)
-        : "날짜 선택";
-
-    // ⭐️ 토글 버튼에 표시될 최종 텍스트 결정 ⭐️
-    const toggleButtonText = isDropdownOpen
-        ? "날짜 선택" // 드롭다운이 열리면 '날짜 선택' 표시
-        : selectedDateFormatted; // 닫혀 있으면 선택된 날짜 표시
-
-    // ⭐️ 토글 버튼 클래스 (open/close 상태에 따라 테두리 색상 변경 및 화살표 회전) ⭐️
+    const selectedDateFormatted = formatDayAndDayOfWeek(selectedDayData.date);
+    const toggleButtonText = isDropdownOpen ? "날짜 선택" : selectedDateFormatted;
     const toggleClass = `${timetableStyles.dayDropdownToggle} ${isDropdownOpen ? timetableStyles.open : ''}`;
-    
-    // ⭐️ 텍스트 클래스 (선택된 날짜가 있을 때만 보라색 fontSet 적용) ⭐️
-    const textClass = currentDayIndex !== -1 && !isDropdownOpen
-        ? timetableStyles.fontSet
-        : timetableStyles.placeholderText;
+    const textClass = currentDayIndex !== -1 && !isDropdownOpen ? timetableStyles.fontSet : timetableStyles.placeholderText;
+
 
     // --- 메인 UI 렌더링 ---
     return (
@@ -199,19 +186,12 @@ export default function TimetableDetailPage() {
 
             <main className={timetableStyles.mainContent}>
                 
-               {/* ⭐️ 1. 컨트롤 바 (드롭다운 + 다운로드/리프레시 버튼) ⭐️ */}
+               {/* 1. 컨트롤 바 (드롭다운 + 다운로드/리프레시 버튼) */}
                 {detailData.days.length > 0 && (
-                    <div className={timetableStyles.timetableControlBar}>
-                        
-                        {/* 1-1. 드롭다운 래퍼: absolute list의 기준점 */}
+                     <div className={timetableStyles.timetableControlBar}>
                         <div className={timetableStyles.dropdownWrapper}>
-                            <button
-                                className={toggleClass}
-                                onClick={() => setIsDropdownOpen(prev => !prev)}
-                            >
-                                <span className={textClass}>
-                                    {toggleButtonText}
-                                </span>
+                            <button className={toggleClass} onClick={() => setIsDropdownOpen(prev => !prev)}>
+                                <span className={textClass}>{toggleButtonText}</span>
                                 <img 
                                     src={downarrow} 
                                     alt="드롭다운 화살표"
@@ -219,21 +199,16 @@ export default function TimetableDetailPage() {
                                 />
                             </button>
 
-                            {/* 2. 날짜 목록 (isDropdownOpen이 true일 때만 표시) */}
                             {isDropdownOpen && (
                                 <ul className={timetableStyles.dayDropdownList}>
                                     {detailData.days.map((day, index) => (
-                                        <li 
-                                            key={index}
-                                            className={timetableStyles.dayDropdownItem}
-                                        >
+                                        <li key={index} className={timetableStyles.dayDropdownItem}>
                                             <button
                                                 className={`${timetableStyles.dayDropdownOption} ${
                                                     index === currentDayIndex ? timetableStyles.active : ''
                                                 }`}
                                                 onClick={() => handleDaySelect(index)}
                                             >
-                                                {/* ⭐️ 수정: 텍스트를 <span>으로 감싸서 별도의 박스 스타일을 적용할 수 있도록 함 ⭐️ */}
                                                 <span 
                                                     className={`${timetableStyles.selectedDateTextWrapper} ${
                                                         index === currentDayIndex ? timetableStyles.dateTextActive : ''
@@ -248,7 +223,6 @@ export default function TimetableDetailPage() {
                             )}
                         </div>
                         
-                        {/* 1-2. 액션 버튼 래퍼 */}
                         <div className={timetableStyles.actionButtonWrapper}>
                             <button className={timetableStyles.actionButton} onClick={handleDownload}>
                                 <img src={download} alt="다운로드" />
@@ -261,21 +235,21 @@ export default function TimetableDetailPage() {
                     </div>
                 )}
                 
-                {/* ⭐️ 2. 선택된 날짜의 스테이지/일정 영역 (날짜가 선택되었을 때만 표시) ⭐️ */}
+                {/* ⭐️ 2. 타임테이블 영역 ⭐️ */}
                 {currentDayIndex !== -1 && (
                     <div className={timetableStyles.scheduleArea}>
                         
                         <h3>{formatDayAndDayOfWeek(selectedDayData.date)} 일정</h3>
                         
-                        {/* TODO: 여기에 스테이지 필터와 실제 타임테이블 목록이 들어갑니다. */}
-                        <div style={{ marginTop: '10px', padding: '10px', border: '1px solid #ccc' }}>
-                            <p>선택된 날짜의 스테이지 수: {selectedDayData.stages.length}</p>
-                            <ul>
-                                {selectedDayData.stages.map((stage, index) => (
-                                    <li key={index}>{stage.stageName}</li>
-                                ))}
-                            </ul>
-                        </div>
+                        {/* Stage 3개 고정 Props 전달 */}
+                        <TimetableGrid 
+                            stage1Schedules={schedulesByStage.stage1}
+                            stage2Schedules={schedulesByStage.stage2}
+                            stage3Schedules={schedulesByStage.stage3}
+                            stageNames={schedulesByStage.stageNames}
+                            allSchedules={allSchedules}
+                            mode={currentMode}
+                        />
 
                     </div>
                 )}
