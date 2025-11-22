@@ -42,6 +42,43 @@ const MockFestivalDetails: Record<number, FestivalDetailData> = {
 };
 
 type TimetableMode = 'customize' | 'my' | 'view'; 
+// ⭐️ 2. 데이터 로딩 함수 (외부로 분리하여 Refresh 시 재호출 가능하도록 함) ⭐️
+async function fetchTimetableDetail(
+    festivalId: string | undefined, 
+    setCurrentDayIndex: (index: number) => void, 
+    setDetailData: (data: FestivalDetailData | null) => void, 
+    setIsLoading: (loading: boolean) => void
+) {
+    if (!festivalId) { 
+        setIsLoading(false); 
+        return; 
+    }
+
+    setIsLoading(true);
+    try {
+        await new Promise(resolve => setTimeout(resolve, 500));
+        const idNum = parseInt(festivalId);
+        const baseData = MockFestivalDetails[idNum] || MockFestivalDetails[7];
+        
+        if (baseData) {
+            // ⭐ 깊은 복사: 원본 Mock 데이터를 가져와 사용자 변경 사항을 덮어씁니다. ⭐
+            const dataToLoad = JSON.parse(JSON.stringify(baseData)) as FestivalDetailData;
+            setDetailData(dataToLoad);
+            
+            if (dataToLoad.days.length > 0) {
+                // 데이터 로딩 완료 후 첫째 날을 선택
+                setCurrentDayIndex(0);
+            }
+        } else {
+            setDetailData(null);
+        }
+    } catch (error) {
+        console.error("데이터 로드 중 오류 발생:", error);
+        setDetailData(null);
+    } finally { 
+        setIsLoading(false); 
+    }
+}
 
 export default function TimetableDetailPage() {
     const navigate = useNavigate();
@@ -98,7 +135,17 @@ export default function TimetableDetailPage() {
 
     const handleGoBack = () => navigate(-1);
     const handleDownload = () => console.log("Download clicked");
-    const handleRefresh = () => console.log("Refresh clicked");
+   // ⭐ Refresh 함수: 상태 초기화 및 데이터 재로드 ⭐
+    const handleRefresh = () => {
+        console.log("Refresh button clicked! Resetting state and reloading data.");
+        
+        // 1. 화면 상태 초기화 (옵션)
+        setCurrentDayIndex(-1); 
+        setIsDropdownOpen(false);
+        
+        // 2. 데이터 로딩 함수를 직접 호출하여 데이터 재로드 (가장 중요)
+        fetchTimetableDetail(festivalId, setCurrentDayIndex, setDetailData, setIsLoading);
+    };
     const handleDaySelect = (index: number) => { setCurrentDayIndex(index); setIsDropdownOpen(false); };
 
     if (isLoading) return <div className={timetableStyles.pageContainer}>타임테이블 로딩 중...</div>;
