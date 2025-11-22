@@ -53,19 +53,28 @@ const TimetableMainPage = () => {
   useEffect(() => {
     // Mock Data 초기화
     const mockData1: FestivalItem[] = [
-      { id: 1, title: "그랜드 민트 페스티벌 2025", likes: 12, location: "일산 킨텍스", date: "2025.12.20 - 2025.12.21", thumbnailUrl: "/path/to/img1.png" },
+       { id: 1, title: "그랜드 민트 페스티벌 2025", likes: 12, location: "일산 킨텍스", date: "2025.12.20 - 2025.12.21", thumbnailUrl: "/path/to/img1.png" },
       { id: 2, title: "COUNTDOWN FANTASY 2025-2026", likes: 10, location: "일산 킨텍스", date: "2025.12.30 - 2025.12.31", thumbnailUrl: "/path/to/img2.png" },
+    
     ];
     setTimetableList(mockData1);
 
     const mockData2: RecommendItem[] = [
-      { id: 3, title: "COUNTDOWN FANTASY 2025-2026", date: "2025.12.20 - 2025.12.21", thumbnailUrl: "/path/to/poster1.png" },
+       { id: 3, title: "COUNTDOWN FANTASY 2025-2026", date: "2025.12.20 - 2025.12.21", thumbnailUrl: "/path/to/poster1.png" },
       { id: 4, title: "DMZ 피스트레인 뮤직 페스티벌 2025", date: "2025.10.18 - 2025.10.19", thumbnailUrl: "/path/to/poster2.png" },
-    ];
+      { id: 5, title: "2025 부산 락 페스티벌", date: "2025.12.20 - 2025.12.21", thumbnailUrl: "/path/to/poster3.png" },
+      { id: 6, title: "서울 재즈 페스티벌 2025", date: "2025.05.28 - 2025.05.30", thumbnailUrl: "/path/to/poster4.png" },
+     ];
     setRecommendedFestivals(mockData2);
     
     const mockData3: FestivalItem[] = [
-        { id: 7, title: "더 많은 페스티벌 1", likes: 999, location: "페스티벌 위치", date: "2025.12.20 - 12.21", thumbnailUrl: "/path/to/img7.png" },
+        { id: 7, title: "페스티벌 이름", likes: 999, location: "페스티벌 위치", date: "2025.12.20 - 12.21", thumbnailUrl: "/path/to/img1.png" },
+          { id: 8, title: "페스티벌 이름", likes: 999, location: "페스티벌 위치", date: "2025.12.20 - 12.21", thumbnailUrl: "/path/to/img1.png" },
+          { id: 9, title: "페스티벌 이름", likes: 999, location: "페스티벌 위치", date: "2025.12.20 - 12.21", thumbnailUrl: "/path/to/img1.png" },
+          { id: 10, title: "페스티벌 이름", likes: 999, location: "페스티벌 위치", date: "2025.12.20 - 12.21", thumbnailUrl: "/path/to/img1.png" },
+          { id: 11, title: "페스티벌 이름", likes: 999, location: "페스티벌 위치", date: "2025.12.20 - 12.21", thumbnailUrl: "/path/to/img1.png" },
+          { id: 12, title: "페스티벌 이름", likes: 999, location: "페스티벌 위치", date: "2025.12.20 - 12.21", thumbnailUrl: "/path/to/img1.png" },
+        
     ];
     setMorefestival(mockData3);
   }, []);

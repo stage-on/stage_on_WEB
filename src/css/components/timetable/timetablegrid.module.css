@@ -9,6 +9,7 @@
     width: 100vw;
 	position: relative;
 	left: calc(-50vw +50%); 
+    
 }
 
 /* ================== 시간 축 (TimeAxis) ================== */
@@ -39,6 +40,7 @@
     display: flex;
     flex-direction: column;
     padding-left:20px;
+     scrollbar-width: none; /* Firefox */
 }
 
 
@@ -86,6 +88,7 @@
   overflow-x: auto;
   overflow-y: hidden;
   padding-bottom: 10px; /* optional */
+  scrollbar-width: none; /* Firefox */
 }
 
 .timetableScrollWrapper {
