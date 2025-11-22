@@ -3,16 +3,17 @@
 .timetableContainer {
     display: flex;
     overflow-y: auto; 
-   
-    margin-top: 16px;
     padding-bottom: 20px;
     width: 100%;
     position: relative; 
+    width: 100vw;
+	position: relative;
+	left: calc(-50vw +50%); 
 }
 
 /* ================== 시간 축 (TimeAxis) ================== */
 .timeAxis {
-    margin-top:50px;
+    margin-top:62px;
     width: 40px; 
     position: relative;
     flex-shrink: 0;
@@ -24,20 +25,12 @@
     transform: translateY(-50%);
     font-size: 10px;
     color: var(--g-80, #555);
-    right: 5px; 
+    
     font-weight: 500;
+    padding-right:8px;
 }
 
-/* 횡스크롤 이전 버전에서는 TimeAxis에서 렌더링된 요소가 StageGridWrapper 영역까지 침범하도록 설정 */
-.timeDivider {
-    position: absolute;
-    width: 100vw; /* StageGridWrapper를 가로질러 확장 */
-    height: 1px;
-    border-top: 1px dashed var(--g-40, #D1D1D1);
-    transform: translateY(-50%);
-    left: 40px; /* TimeAxis 너비만큼 이동 */
-    z-index: 1;
-}
+
 
 
 /* ================== 스테이지 그리드 ================== */
@@ -45,7 +38,7 @@
     flex-grow: 1; 
     display: flex;
     flex-direction: column;
-    overflow-x: hidden; /* 횡스크롤 제거 */
+    padding-left:20px;
 }
 
 
@@ -57,35 +50,79 @@
     position: sticky;
     top: 0;
     z-index: 5;
-    padding-top: 15px;
+    margin-bottom: 33px;
+   
 }
 
 .stageHeaderBlock {
-    flex: 1; /* 3개 스테이지가 화면 너비에 맞춰 균등 분할 */
     min-width: 100px; /* 최소 너비 지정 */
-    
-    height: 30px;
+    height: 24px;
     display: flex;
     justify-content: center;
     align-items: center;
     font-size: 12px;
     font-weight: 500;
-    color: white;
-    background-color: var(--p-40, #8D4E99);
-    border-radius: 4px;
-    margin: 0 4px; 
+    color: black;
+
 }
 
 /* 일정 블록 영역 */
 .scheduleArea {
     display: flex;
-    width: 100%; 
+    width: calc(100% + 40px);
     position: relative; 
+    
 }
 
 .scheduleColumn {
     flex: 1; /* Stage Header와 동일하게 균등 분할 */
     min-width: 100px; 
     position: relative;
-    margin: 0 4px; 
+    
+}
+.timetableScrollWrapper {
+  width: calc(100% + 40px);
+  margin-left: -20px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 10px; /* optional */
+}
+
+.timetableScrollWrapper {
+  width: calc(100% + 40px);
+  margin-left: -20px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 10px; /* optional */
+}
+
+.scheduleArea {
+  display: flex;
+  position: relative;
+  width: auto; /* 원래대로 */
+}
+/* Stage Header 색상 매핑 */
+.colorStage1 {
+    border-top: 1px solid var(--g-100, #1A1A1A);
+border-bottom: 1px solid var(--g-100, #1A1A1A);
+background: var(--b-1, rgba(251, 188, 5, 0.20));
+}
+
+.colorStage2 {
+border-top: 1px solid var(--g-100, #1A1A1A);
+border-bottom: 1px solid var(--g-100, #1A1A1A);
+background: var(--b-2, rgba(198, 108, 217, 0.20));
+   
+}
+
+.colorStage3 {
+    border-top: 1px solid var(--g-100, #1A1A1A);
+border-bottom: 1px solid var(--g-100, #1A1A1A);
+background: var(--b-3, rgba(52, 168, 83, 0.20));
+}
+
+.colorStage4 {
+   border-top: 1px solid var(--g-100, #1A1A1A);
+border-bottom: 1px solid var(--g-100, #1A1A1A);
+background: var(--b-4, rgba(66, 133, 244, 0.20));
 }
