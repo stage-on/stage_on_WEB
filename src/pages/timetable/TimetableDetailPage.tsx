@@ -239,7 +239,7 @@ export default function TimetableDetailPage() {
                 {currentDayIndex !== -1 && (
                     <div className={timetableStyles.scheduleArea}>
                         
-                        <h3>{formatDayAndDayOfWeek(selectedDayData.date)} 일정</h3>
+                        
                         
                         {/* Stage 3개 고정 Props 전달 */}
                         <TimetableGrid 
