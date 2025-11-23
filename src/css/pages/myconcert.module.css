@@ -1,0 +1,13 @@
+.MyConcertstitle{
+    display: flex;
+    padding: 16px;
+    justify-content: center;
+    align-items: center;
+}
+
+/* MyConcerts 제목과 카드 사이 gap 조정 */
+.MyConcerts{
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
