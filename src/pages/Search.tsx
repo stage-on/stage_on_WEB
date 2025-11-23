@@ -12,9 +12,16 @@ interface RecentSearch {
   id: number;
   keyword: string;
 }
+interface Recommend {
+  keyword: string;
+}
 
 export default function Search() {
+  // 최근 검색어 담는 배열
   const [recent, setRecent] = useState<RecentSearch[]>([]);
+  // 추천 검색어 담는 배열
+  const [recommendList, setRecommendList] = useState<Recommend[]>([]);
+
   const [inputText, setInputText] = useState<string>("");
   const [isSearch, setIsSearch] = useState<boolean>(true);
   const [onFestival, setOnFestival] = useState<boolean>(true);
@@ -24,33 +31,6 @@ export default function Search() {
   // 테스트 액세스 토큰
   const REST_API_KEY = import.meta.env.VITE_TEST_ACCESS_TOKEN;
   const BASE_URL = import.meta.env.VITE_BASE_URL;
-  const recommendLista: any[] = [
-    {
-      id: 1,
-      title: "팔칠댄스 ［I LOVE YOUR COMPLEX］ 부산 쇼케이스",
-      location: "부산",
-    },
-    {
-      id: 2,
-      title: "2025 비공정 단독공연 〈Hellvetica : Sabotage〉 in Busan",
-      location: "부산",
-    },
-    {
-      id: 3,
-      title: "2025 LUCY 8TH CONCERT 〈LUCID LINE〉",
-      location: "서울",
-    },
-    {
-      id: 4,
-      title: "원 오크 록 내한공연",
-      location: "서울",
-    },
-    {
-      id: 5,
-      title: "쏜애플 콘서트 ‘바다와 구름과 무대’",
-      location: "서울",
-    },
-  ];
 
   // 최근 검색어 불러오는 함수
   const fetchRecentSearch = async () => {
@@ -66,7 +46,20 @@ export default function Search() {
       }
     } catch (error) {}
   };
+  // 추천 검색어 불러오는 함수
+  const fetchRecommendSearch = async () => {
+    try {
+      const res = await axios.get(`${BASE_URL}/recommend`, {
+        headers: {
+          Authorization: `Bearer ${REST_API_KEY}`,
+        },
+      });
 
+      if (res.status === 200) {
+        setRecommendList(res.data);
+      }
+    } catch (error) {}
+  };
   // enter key 눌렀을 때 검색 함수 호출
   const handleEnter = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
@@ -86,6 +79,7 @@ export default function Search() {
   // 처음 마운트될 때
   useEffect(() => {
     fetchRecentSearch();
+    fetchRecommendSearch();
   }, []);
   return (
     <>
@@ -179,7 +173,7 @@ export default function Search() {
             <span className={searchStyle.recentSearchHeader}>최근 검색어</span>
             <ul className={searchStyle.recentSearchList}>
               {recent.map((item) => (
-                <li className={searchStyle.recentSearchItem}>
+                <li className={searchStyle.recentSearchItem} key={item.id}>
                   {item.keyword}
                   <img
                     src={xSVG}
@@ -198,15 +192,15 @@ export default function Search() {
               추천 검색어
             </span>
             <ul className={searchStyle.recommendSearchList}>
-              {recommendLista.map((item) => (
+              {recommendList.map((item, idx) => (
                 <li
-                  key={item.id}
+                  key={idx}
                   className={searchStyle.recommendSearchItem}
                   onClick={() => {
-                    setInputText(item.title);
+                    setInputText(item.keyword);
                   }}
                 >
-                  {item.title}
+                  {item.keyword}
                 </li>
               ))}
             </ul>
