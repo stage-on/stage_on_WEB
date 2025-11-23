@@ -84,3 +84,8 @@
     width: 24px;
     height: 28px;
 }
+
+.cardLink{
+  text-decoration: none;
+  color: inherit;
+}

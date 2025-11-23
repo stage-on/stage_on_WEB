@@ -4,6 +4,7 @@ import { HiChevronRight } from "react-icons/hi2";
 
 import heartFilled from "./../assets/timetable/heart.svg";
 import heartEmpty from "./../assets/timetable/heart-empty.svg";
+import { Link } from "react-router-dom";
 
 interface MyConcertsCardProps {
   id: number;
@@ -25,12 +26,16 @@ const MyConcertsCard = ({
   onToggle,
 }: MyConcertsCardProps) => {
 
-  const handleLikeToggle = () => {
-    onToggle(id); 
+  const handleLikeToggle = (e: React.MouseEvent<HTMLImageElement>) => {
+    e.preventDefault();   
+    e.stopPropagation();   
+    onToggle(id);
   };
 
   return (
     <>
+    <Link to={`/main/concert/${id}`}
+     className={myConcertsStyle.cardLink}>
       <div className={myConcertsStyle.concertCardContainer}>
         <img src={concertimage} className={myConcertsStyle.concertImg} />
 
@@ -50,7 +55,9 @@ const MyConcertsCard = ({
 
         <HiChevronRight className={myConcertsStyle.Vector} />
       </div>
+      </Link>
     </>
+    
   );
 };
 

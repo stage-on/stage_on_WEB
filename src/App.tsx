@@ -12,6 +12,7 @@ import TimetableMainPage from "./pages/timetable/TimetableMainPage";
 import TimetableDetailPage from "./pages/timetable/TimetableDetailPage";
 import Test from "./pages/Test";
 import MyConcert from "./pages/MyConcert";
+import ConcertProfile from "./pages/ConcertProfile";
 
 export default function App() {
   return (
@@ -24,6 +25,7 @@ export default function App() {
           <Route path="mybands" element={<MyBands />} />
           <Route path="home" element={<Home />} />
           <Route path="myconcerts" element={<MyConcert/>}/>
+          <Route path="concert/:id" element={<ConcertProfile />} />
           <Route path="timetable">
             <Route index element={<TimetableMainPage />} />
             <Route path=":id" element={<TimetableDetailPage />} />
