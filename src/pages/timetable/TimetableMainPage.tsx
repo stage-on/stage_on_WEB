@@ -6,6 +6,7 @@ import timetablestyles from "../../css/pages/timetable/timetablemain.module.css"
 import FestivalListItem from "../../components/timetable/FestivalListItem";
 import SectionHeader from "../../components/SectionHeader";
 import RecommendCard from "../../components/timetable/RecommendCard";
+import Alarm from "../../components/Alarm";
 
 // ⭐️ 수정: 인터페이스를 export 합니다. ⭐️
 export interface FestivalItem {
@@ -85,7 +86,9 @@ const TimetableMainPage = () => {
 
   return (
     <>
+       <Alarm></Alarm>
       <div className={timetablestyles.mainContentWrapper}>
+        
         <section className={timetablestyles.mytimetableSection}>
           <SectionHeader
             subtitle="공연 관람이 며칠 안 남았다면?"
