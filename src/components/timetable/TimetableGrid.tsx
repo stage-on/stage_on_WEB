@@ -50,7 +50,7 @@ const TimetableGrid: React.FC<TimetableGridProps> = ({ stageMap, stageNames, all
                         }
                         return (
                             <div key={key} className={`${gridStyles.stageHeaderBlock} ${colorClass}`} style={{width:`${STAGE_WIDTH}px`}}>
-                                {stageNames[index+'']}
+                               LAND STAGE
                             </div>
                         )
                     })}

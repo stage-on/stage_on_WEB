@@ -189,8 +189,7 @@ letter-spacing: -0.36px;
 /* 2. 목록의 각 항목 (li 태그) */
 .dayDropdownItem {
     width: 83px;
-    
- 
+
 }
 
 /* 3. 목록 내부의 날짜 선택 버튼 (실제 클릭 영역) */
@@ -211,6 +210,10 @@ line-height: normal;
 letter-spacing: -0.36px;
     color: #333; 
 }
+.textSpace 
+{
+    padding-left:8px;
+}
 
 /* 4. 마우스 오버(hover) 및 선택(active) 스타일 */
 .dayDropdownOption:hover {
@@ -228,7 +231,7 @@ font-style: normal;
 font-weight: 500;
 line-height: normal;
 letter-spacing: -0.36px;
-padding-left:
+
 
 }
 

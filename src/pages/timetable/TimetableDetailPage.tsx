@@ -537,7 +537,7 @@ export default function TimetableDetailPage() {
                 {detailData.days.length > 0 && (
                     <div className={timetableStyles.timetableControlBar}>
                         <div className={timetableStyles.dropdownWrapper}>
-                            <button className={toggleClass} onClick={() => setIsDropdownOpen(prev => !prev)}>
+                            <button className={toggleClass} onClick={() => {if (detailData.days.length <= 1) return;setIsDropdownOpen(prev => !prev)}}>
                                 <span className={textClass}>{toggleButtonText}</span>
                                 <img src={downarrow} alt="드롭다운 화살표" className={isDropdownOpen ? timetableStyles.arrowOpen : timetableStyles.arrowClosed}/>
                             </button>
@@ -546,7 +546,8 @@ export default function TimetableDetailPage() {
                                     {detailData.days.map((day, index) => (
                                         <li key={index} className={timetableStyles.dayDropdownItem}>
                                             <button className={`${timetableStyles.dayDropdownOption} ${index===currentDayIndex? timetableStyles.active:''}`} onClick={()=>handleDaySelect(index)}>
-                                                {formatDayAndDayOfWeek(day.date)}
+                                                <div className={timetableStyles.textSpace}>{formatDayAndDayOfWeek(day.date)}</div>
+                                                
                                             </button>
                                         </li>
                                     ))}
