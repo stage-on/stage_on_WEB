@@ -6,13 +6,24 @@ import heartSVG from "../assets/pages/search/heart.svg";
 import arrowSVG from "../assets/pages/search/arrow-right.svg";
 import { useEffect, useState } from "react";
 import Menu from "../components/Menu";
+import axios from "axios";
+
+interface RecentSearch {
+  id: number;
+  keyword: string;
+}
 
 export default function Search() {
+  const [recent, setRecent] = useState<RecentSearch[]>([]);
   const [inputText, setInputText] = useState<string>("");
   const [isSearch, setIsSearch] = useState<boolean>(true);
   const [onFestival, setOnFestival] = useState<boolean>(true);
   const [onMenu, setOnMenu] = useState<boolean>(false);
   const [animateMenu, setAnimateMenu] = useState<boolean>(false);
+
+  // 테스트 액세스 토큰
+  const REST_API_KEY = import.meta.env.VITE_TEST_ACCESS_TOKEN;
+  const BASE_URL = import.meta.env.VITE_BASE_URL;
   const recommendLista: any[] = [
     {
       id: 1,
@@ -41,6 +52,21 @@ export default function Search() {
     },
   ];
 
+  // 최근 검색어 불러오는 함수
+  const fetchRecentSearch = async () => {
+    try {
+      const res = await axios.get(`${BASE_URL}/search/history`, {
+        headers: {
+          Authorization: `Bearer ${REST_API_KEY}`,
+        },
+      });
+
+      if (res.status === 200) {
+        setRecent(res.data);
+      }
+    } catch (error) {}
+  };
+
   // enter key 눌렀을 때 검색 함수 호출
   const handleEnter = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
@@ -56,10 +82,11 @@ export default function Search() {
     //   setIsSearch(true);
     // }
   };
-  // 나중에 지울거
+
+  // 처음 마운트될 때
   useEffect(() => {
-    console.log(inputText);
-  }, [inputText]);
+    fetchRecentSearch();
+  }, []);
   return (
     <>
       {onMenu && (
@@ -151,26 +178,19 @@ export default function Search() {
           <div className={searchStyle.recentSearchDiv}>
             <span className={searchStyle.recentSearchHeader}>최근 검색어</span>
             <ul className={searchStyle.recentSearchList}>
-              <li className={searchStyle.recentSearchItem}>
-                쏜애플 콘서트
-                <img src={xSVG} alt="삭제" className={searchStyle.xIcon} />
-              </li>
-              <li className={searchStyle.recentSearchItem}>
-                쏜애플 콘서트
-                <img src={xSVG} alt="삭제" className={searchStyle.xIcon} />
-              </li>
-              <li className={searchStyle.recentSearchItem}>
-                쏜애플 콘서트
-                <img src={xSVG} alt="삭제" className={searchStyle.xIcon} />
-              </li>
-              <li className={searchStyle.recentSearchItem}>
-                쏜애플 콘서트
-                <img src={xSVG} alt="삭제" className={searchStyle.xIcon} />
-              </li>
-              <li className={searchStyle.recentSearchItem}>
-                쏜애플 콘서트
-                <img src={xSVG} alt="삭제" className={searchStyle.xIcon} />
-              </li>
+              {recent.map((item) => (
+                <li className={searchStyle.recentSearchItem}>
+                  {item.keyword}
+                  <img
+                    src={xSVG}
+                    alt="삭제"
+                    className={searchStyle.xIcon}
+                    onClick={() => {
+                      setRecent((prev) => prev.filter((r) => r.id !== item.id));
+                    }}
+                  />
+                </li>
+              ))}
             </ul>
           </div>
           <div className={searchStyle.recommendSearchDiv}>
