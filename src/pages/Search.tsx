@@ -41,11 +41,7 @@ interface ApiResponse {
   performances: ListResult<PerformanceItem>;
   artists: ListResult<ArtistItem>;
 }
-// 검색 API status가 200 아닐 때
-interface ErrorResponse {
-  status: number;
-  message: string;
-}
+
 export default function Search() {
   // 최근 검색어 담는 배열
   const [recent, setRecent] = useState<RecentSearch[]>([]);
@@ -106,7 +102,7 @@ export default function Search() {
   // 검색 함수
   const handleSearch = async (inputText: string) => {
     try {
-      const res = await axios.get<ApiResponse | ErrorResponse>(
+      const res = await axios.get<ApiResponse>(
         `${BASE_URL}/search?query=${inputText}`,
         {
           headers: {
@@ -119,12 +115,9 @@ export default function Search() {
         setPerformances(data.performances);
         setArtists(data.artists);
         setIsSearch(true);
-      } else {
-        const err = res.data as ErrorResponse;
-        console.log(err.message);
       }
-    } catch (error) {
-      console.log(error);
+    } catch (error: any) {
+      console.log(error.response?.data?.message);
     }
   };
 
