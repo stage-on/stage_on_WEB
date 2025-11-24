@@ -8,22 +8,58 @@ import { useEffect, useState } from "react";
 import Menu from "../components/Menu";
 import axios from "axios";
 
+// 최근 검색어 interface
 interface RecentSearch {
   id: number;
   keyword: string;
 }
+// 추천 검색어 interface
 interface Recommend {
   keyword: string;
 }
-
+// 공연 검색 결과 interface
+interface PerformanceItem {
+  performanceId: number;
+  title: string;
+  posterUrl: string;
+  startDate: string;
+  endDate: string;
+  artistNames: string[];
+}
+// 밴드 검색 결과 interface => 형식 나오면 수정 필요함!!
+interface ArtistItem {
+  artistId?: number;
+  name?: string;
+}
+// 공연, 밴드 객체 interface
+interface ListResult<T> {
+  count: number;
+  items: T[];
+}
+// API 호출 결과 interface
+interface ApiResponse {
+  performances: ListResult<PerformanceItem>;
+  artists: ListResult<ArtistItem>;
+}
+// 검색 API status가 200 아닐 때
+interface ErrorResponse {
+  status: number;
+  message: string;
+}
 export default function Search() {
   // 최근 검색어 담는 배열
   const [recent, setRecent] = useState<RecentSearch[]>([]);
   // 추천 검색어 담는 배열
   const [recommendList, setRecommendList] = useState<Recommend[]>([]);
+  // 공연 검색 결과 담는 배열
+  const [performances, setPerformances] =
+    useState<ListResult<PerformanceItem> | null>(null);
+  // 밴드 검색 결과 담는 배열
+  const [artists, setArtists] = useState<ListResult<ArtistItem> | null>(null);
 
   const [inputText, setInputText] = useState<string>("");
-  const [isSearch, setIsSearch] = useState<boolean>(true);
+
+  const [isSearch, setIsSearch] = useState<boolean>(false);
   const [onFestival, setOnFestival] = useState<boolean>(true);
   const [onMenu, setOnMenu] = useState<boolean>(false);
   const [animateMenu, setAnimateMenu] = useState<boolean>(false);
@@ -69,11 +105,35 @@ export default function Search() {
 
   // 검색 함수
   const handleSearch = async (inputText: string) => {
-    console.log(inputText);
-    // 검색 api 연동 하기
-    // if (res.status === 200) {
-    //   setIsSearch(true);
-    // }
+    try {
+      const res = await axios.get<ApiResponse | ErrorResponse>(
+        `${BASE_URL}/search?query=${inputText}`,
+        {
+          headers: {
+            Authorization: `Bearer ${REST_API_KEY}`,
+          },
+        }
+      );
+      if (res.status === 200) {
+        const data = res.data as ApiResponse;
+        setPerformances(data.performances);
+        setArtists(data.artists);
+        setIsSearch(true);
+      } else {
+        const err = res.data as ErrorResponse;
+        console.log(err.message);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  // 검색 결과 시작, 끝 날짜 포맷팅 함수
+  const formatDateRange = (start: string, end: string) => {
+    const [sy, sm, sd] = start.split("-");
+    const [ey, em, ed] = end.split("-");
+
+    return `${sy}.${sm}.${sd} - ${ey}.${em}.${ed}`;
   };
 
   // 처음 마운트될 때
@@ -81,6 +141,13 @@ export default function Search() {
     fetchRecentSearch();
     fetchRecommendSearch();
   }, []);
+
+  // 검색창에 아무것도 입력 안 하면 isSearch = false로 변경
+  useEffect(() => {
+    if (inputText === "") {
+      setIsSearch(false);
+    }
+  }, [inputText]);
   return (
     <>
       {onMenu && (
@@ -96,7 +163,7 @@ export default function Search() {
             src={searchSVG}
             alt="검색"
             className={searchStyle.searchIcon}
-            onClick={() => setIsSearch((prev) => !prev)}
+            // onClick={() => setIsSearch((prev) => !prev)}
           />
           <input
             placeholder="검색어를 입력하세요"
@@ -138,7 +205,7 @@ export default function Search() {
                     : `${searchStyle.default} ${searchStyle.defaultCnt}`
                 }     `}
               >
-                159
+                {performances?.count}
               </span>
             </div>
             <div
@@ -161,7 +228,7 @@ export default function Search() {
                     : `${searchStyle.default} ${searchStyle.defaultCnt}`
                 }`}
               >
-                1
+                {artists?.count}
               </span>
             </div>
           </div>
@@ -211,85 +278,64 @@ export default function Search() {
           <ul className={searchStyle.searchResultDiv}>
             {onFestival && (
               <>
-                <li className={searchStyle.searchResultItem}>
-                  <span className={searchStyle.testImg}>test</span>
-                  <div className={searchStyle.titleAndInfo}>
-                    <span className={searchStyle.title}>
-                      쏜애플 콘서트 ‘바다와 구름과 무대
-                    </span>
-                    <div className={searchStyle.info}>
-                      <span className={searchStyle.heart}>
-                        <img src={heartSVG} alt="좋아요" />
-                        999
-                      </span>
-                      | <span>쏜애플</span>| <span>2025.12.20 - 12.21</span>
+                {performances?.items.map((item) => (
+                  <li
+                    className={searchStyle.searchResultItem}
+                    key={item.performanceId}
+                  >
+                    <img src={item.posterUrl} className={searchStyle.testImg} />
+                    <div className={searchStyle.titleAndInfo}>
+                      <span className={searchStyle.title}>{item.title}</span>
+                      <div className={searchStyle.info}>
+                        <span className={searchStyle.heart}>
+                          <img src={heartSVG} alt="좋아요" />
+                          999
+                        </span>
+                        | <span>{item.artistNames[0]}</span>
+                        <span>
+                          {formatDateRange(item.startDate, item.endDate)}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                  <img
-                    src={arrowSVG}
-                    alt="이동"
-                    className={searchStyle.arrowIcon}
-                  />
-                </li>
-                <li className={searchStyle.searchResultItem}>
-                  <span className={searchStyle.testImg}>test</span>
-                  <div className={searchStyle.titleAndInfo}>
-                    <span className={searchStyle.title}>
-                      쏜애플 콘서트 ‘바다와 구름과 무대
-                    </span>
-                    <div className={searchStyle.info}>
-                      <span className={searchStyle.heart}>
-                        <img src={heartSVG} alt="좋아요" />
-                        999
-                      </span>
-                      | <span>쏜애플</span>| <span>2025.12.20 - 12.21</span>
-                    </div>
-                  </div>
-                  <img
-                    src={arrowSVG}
-                    alt="이동"
-                    className={searchStyle.arrowIcon}
-                  />
-                </li>
-                <li className={searchStyle.searchResultItem}>
-                  <span className={searchStyle.testImg}>test</span>
-                  <div className={searchStyle.titleAndInfo}>
-                    <span className={searchStyle.title}>
-                      쏜애플 콘서트 ‘바다와 구름과 무대
-                    </span>
-                    <div className={searchStyle.info}>
-                      <span className={searchStyle.heart}>
-                        <img src={heartSVG} alt="좋아요" />
-                        999
-                      </span>
-                      | <span>쏜애플</span>| <span>2025.12.20 - 12.21</span>
-                    </div>
-                  </div>
-                  <img
-                    src={arrowSVG}
-                    alt="이동"
-                    className={searchStyle.arrowIcon}
-                  />
-                </li>
+                    <img
+                      src={arrowSVG}
+                      alt="이동"
+                      className={searchStyle.arrowIcon}
+                    />
+                  </li>
+                ))}
               </>
             )}
-            {!onFestival && (
-              <li className={searchStyle.searchResultItem}>
-                <span className={searchStyle.bandTestImg}></span>
-                <div className={searchStyle.bandNameAndInfo}>
-                  <span className={searchStyle.bandName}>쏜애플</span>
-                  <span className={searchStyle.bandHeart}>
-                    <img src={heartSVG} alt="좋아요" />
-                    999
-                  </span>
-                </div>
-                <img
-                  src={arrowSVG}
-                  alt="이동"
-                  className={searchStyle.arrowIcon}
-                />
-              </li>
-            )}
+            {/* {!onFestival && (
+              <>
+                {artists?.items.map((item) => (
+                  <li
+                    className={searchStyle.searchResultItem}
+                    key={item.artistId}
+                  >
+                    <img src={item.posterUrl} className={searchStyle.testImg} />
+                    <div className={searchStyle.titleAndInfo}>
+                      <span className={searchStyle.title}>{item.title}</span>
+                      <div className={searchStyle.info}>
+                        <span className={searchStyle.heart}>
+                          <img src={heartSVG} alt="좋아요" />
+                          999
+                        </span>
+                        | <span>{item.artistNames[0]}</span>
+                        <span>
+                          {formatDateRange(item.startDate, item.endDate)}
+                        </span>
+                      </div>
+                    </div>
+                    <img
+                      src={arrowSVG}
+                      alt="이동"
+                      className={searchStyle.arrowIcon}
+                    />
+                  </li>
+                ))}
+              </>
+            )} */}
           </ul>
         </>
       )}
