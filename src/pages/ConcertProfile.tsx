@@ -25,9 +25,9 @@ const ConcertProfile = () => {
           COUNTDOWN FANTASY 2025-2026
         </span>
       </div>
-
+    
       <img src={posterImage} className={concertProfileStyle.posterImg} />
-
+    <div className={concertProfileStyle.SectionWrapper}>
       <div className={concertProfileStyle.infoSection}>
         <div className={concertProfileStyle.leftBlock}>
           <span className={concertProfileStyle.title}>
@@ -134,6 +134,7 @@ const ConcertProfile = () => {
     </div>
   </div>
 </div>
+    </div>
     </div>
   );
 };
