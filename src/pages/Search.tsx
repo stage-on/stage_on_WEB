@@ -78,6 +78,23 @@ export default function Search() {
       }
     } catch (error) {}
   };
+  // 최근 검색어 삭제 함수
+  const deleteRecent = async (id: number) => {
+    try {
+      const res = await axios.delete(`${BASE_URL}/search/history/${id}`, {
+        headers: {
+          Authorization: `Bearer ${REST_API_KEY}`,
+        },
+      });
+      if (res.status == 200) {
+        alert(res.data);
+      }
+    } catch (error: any) {
+      console.log(error.response?.data?.message);
+    } finally {
+      fetchRecentSearch();
+    }
+  };
   // 추천 검색어 불러오는 함수
   const fetchRecommendSearch = async () => {
     try {
@@ -139,6 +156,7 @@ export default function Search() {
   useEffect(() => {
     if (inputText === "") {
       setIsSearch(false);
+      fetchRecentSearch();
     }
   }, [inputText]);
   return (
@@ -240,7 +258,7 @@ export default function Search() {
                     alt="삭제"
                     className={searchStyle.xIcon}
                     onClick={() => {
-                      setRecent((prev) => prev.filter((r) => r.id !== item.id));
+                      deleteRecent(item.id);
                     }}
                   />
                 </li>
