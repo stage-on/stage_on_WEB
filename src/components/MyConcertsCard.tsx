@@ -11,7 +11,6 @@ interface MyConcertsCardProps {
   festivalName: string;
   location: string;
   date: string;
-  likes: number;
   liked: boolean;
   onToggle: (id: number) => void;
 }
@@ -21,11 +20,9 @@ const MyConcertsCard = ({
   festivalName,
   location,
   date,
-  likes,
   liked,
   onToggle,
 }: MyConcertsCardProps) => {
-
   const handleLikeToggle = (e: React.MouseEvent<HTMLImageElement>) => {
     e.preventDefault();   
     e.stopPropagation();   
@@ -46,8 +43,9 @@ const MyConcertsCard = ({
             <img
               src={liked ? heartFilled : heartEmpty}
               onClick={handleLikeToggle}
+              className={myConcertsStyle.heartImg}
             />
-            <span className={myConcertsStyle.likeText}>{likes}</span>
+    
             <span className={myConcertsStyle.location}>{location}</span>
             <span className={myConcertsStyle.date}>{date}</span>
           </div>

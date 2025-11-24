@@ -7,7 +7,6 @@ interface Concert {
   festivalName: string;
   location: string;
   date: string;
-  likes: number;
   liked: boolean;
 }
 
@@ -18,7 +17,6 @@ const MyConcert = () => {
       festivalName: "COUNTDOWN FANTASY 2025-2026",
       location: "일산 킨텍스",
       date: "2025.12.20 - 12.21",
-      likes: 999,
       liked: true,
     },
     {
@@ -26,7 +24,6 @@ const MyConcert = () => {
       festivalName: "COUNTDOWN FANTASY 2025-2026",
       location: "일산 킨텍스",
       date: "2025.12.20 - 12.21",
-      likes: 523,
       liked: true,
     },
     {
@@ -34,7 +31,6 @@ const MyConcert = () => {
       festivalName: "COUNTDOWN FANTASY 2025-2026",
       location: "일산 킨텍스",
       date: "2025.12.20 - 12.21",
-      likes: 120,
       liked: true,
     },
     {
@@ -42,7 +38,6 @@ const MyConcert = () => {
       festivalName: "COUNTDOWN FANTASY 2025-2026",
       location: "일산 킨텍스",
       date: "2025.12.20 - 12.21",
-      likes: 87,
       liked: true,
     },
     {
@@ -50,7 +45,6 @@ const MyConcert = () => {
       festivalName: "COUNTDOWN FANTASY 2025-2026",
       location: "일산 킨텍스",
       date: "2025.12.20 - 12.21",
-      likes: 45,
       liked: true,
     },
   ]);
@@ -78,7 +72,6 @@ const MyConcert = () => {
           festivalName={concert.festivalName}
           location={concert.location}
           date={concert.date}
-          likes={concert.likes}
           liked={concert.liked}
           onToggle={handleToggle}
         />

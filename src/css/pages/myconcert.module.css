@@ -48,14 +48,12 @@
     padding-bottom: 10px;
 }
 
-.likeText{
-    color: #693C73;
-    font-size: 10px;
-    font-weight: 400;
-    letter-spacing: -0.3px;
-    padding-left: 2px;
-    padding-right: 5px;
+.heartImg {
+  display: block;      
+  margin-right: 5px;    
 }
+
+
 
 .location{
     color: var(--g-60, #8F8F8F);

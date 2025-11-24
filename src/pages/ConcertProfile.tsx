@@ -50,7 +50,7 @@ const ConcertProfile = () => {
                 if (liked) setLiked(false);
               }}
             />
-            <span className={concertProfileStyle.likeCount}>100</span>
+          
           </div>
 
           {liked ? (
