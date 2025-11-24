@@ -1,0 +1,245 @@
+.SectionWrapper {
+  background: #000;
+  margin: -20px; 
+}
+
+.header {
+    padding: 12px 0;
+    display: flex;
+    align-items: center;
+    position: relative; 
+}
+
+.Vector {
+  width: 24px;
+  height: 28px;
+}
+
+
+.concertName {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: -0.48px;
+  text-align: center;
+  display: block;
+  width: max-content;
+  line-height: 1.2;
+}
+
+.posterImg {
+  width: calc(100% + 40px);
+  margin: 0 -20px;
+  display: block;
+  background: #000; 
+}
+
+
+
+
+.infoSection {
+  padding: 44px 20px 0 0;
+  background: #000;
+  display: flex;
+  align-items: flex-start; 
+  justify-content: space-between;
+}
+
+
+.leftBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding-left: 20px;
+}
+
+.title {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--g-0, #FFF);
+  letter-spacing: -0.66px;
+}
+
+.location {
+  color: #fff;
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: -0.42px;
+}
+
+.rightBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding-top: 21px;
+}
+
+.likeRow {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.heartIcon {
+  width: 20px;
+  height: 20px;
+}
+
+.likeCount {
+  color: #E69BF5; 
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.96px;
+}
+
+/* 관심 공연 버튼 */
+.interestButton {
+    width: 132px;
+    height: 30px;
+    color: var(--g-0, #FFF);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+    display: flex;
+    padding: 8px 0;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    align-self: stretch;
+    border-radius: 4px;
+    border: 1px solid var(--l-stage-on-linear-1); 
+    background: var(--l-stage-on-linear-1, linear-gradient(90deg, rgba(230, 155, 245, 0.50) 0%, rgba(146, 3, 173, 0.50) 53.37%, rgba(254, 169, 66, 0.50) 100%), #FFF);
+}
+
+
+/* 상세 정보 info */
+.detailSection {
+  display: grid;
+  grid-template-columns: auto max-content;
+  padding: 70px 20px 0 20px;
+  background: #000;
+}
+
+/* 상세 정보 info - 왼 */
+.detailLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;   
+}
+
+.detailTitle {
+  color: var(--g-0, #FFF);
+ font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.42px;
+}
+
+
+.detailItem {
+  display: flex;
+  flex-direction: row;      
+  align-items: center;   
+  gap: 6px;                
+}
+
+.label {
+  color: var(--g-0, #FFF);         
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: -0.36px;
+  width: 50px;
+}
+
+.value {
+   width: 130px;
+  color: var(--g-0, #FFF);
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: -0.36px;
+}
+
+/* 상세 정보 info - 오른쪽 */
+.detailRight {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.detailButton {
+  width: 132px;
+  color: var(--g-0, #FFF);
+  padding: 8px 20px;
+  border-radius: 4px;
+  background: var(--l-stage-on-linear-2, linear-gradient(90deg, rgba(32, 116, 255, 0.50) 0%, rgba(146, 3, 173, 0.50) 53.37%, rgba(52, 168, 83, 0.50) 100%), #FFF);
+  font-size: 10px;
+  font-weight: 600;
+  border: none;
+  letter-spacing: -0.3px;
+}
+
+
+/* 출연 밴드 라인업 */
+.bandLineupSection {
+  display: flex;
+  flex-direction: column;
+  background: var(--b-black, #000);
+  padding: 70px 20px;
+  gap: 10px;
+}
+
+.bandLineupTitle {
+  color: var(--g-0, #FFF);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* 밴드 목록: 가로 나열 */
+.bandList {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+}
+
+/* 각 밴드 */
+.bandItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  text-align: center;
+}
+
+/* 밴드 프로필 */
+.bandAvatar {
+  width: 45px;
+  height: 45px;
+}
+
+/* 밴드 이름 */
+.bandName {
+  color: var(--g-0, #FFF);
+  font-size: 12px;
+  line-height: normal;
+  letter-spacing: -0.36px;
+  font-weight: 400;
+}
+
+/* 관심 공연으로 추가하기 */
+.interestButtonInactive {
+  width: 132px;
+  height: 30px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  border-radius: 4px;
+  background-color: transparent; 
+  color: #E69BF5;               
+  border: 1px solid #E69BF5;       
+}
