@@ -28,8 +28,11 @@ interface PerformanceItem {
 }
 // 밴드 검색 결과 interface => 형식 나오면 수정 필요함!!
 interface ArtistItem {
-  artistId?: number;
-  name?: string;
+  id: number;
+  bandName: string;
+  relateUrl: string;
+  sessionMem: string;
+  introBand: string;
 }
 // 공연, 밴드 객체 interface
 interface ListResult<T> {
@@ -115,7 +118,6 @@ export default function Search() {
       handleSearch(inputText);
     }
   };
-
   // 검색 함수
   const handleSearch = async (inputText: string) => {
     try {
@@ -298,11 +300,8 @@ export default function Search() {
                     <div className={searchStyle.titleAndInfo}>
                       <span className={searchStyle.title}>{item.title}</span>
                       <div className={searchStyle.info}>
-                        <span className={searchStyle.heart}>
-                          <img src={heartSVG} alt="좋아요" />
-                          999
-                        </span>
-                        | <span>{item.artistNames[0]}</span>
+                        <span>{item.artistNames[0]}</span>
+                        <span className={searchStyle.innerText}>|</span>
                         <span>
                           {formatDateRange(item.startDate, item.endDate)}
                         </span>
@@ -317,26 +316,18 @@ export default function Search() {
                 ))}
               </>
             )}
-            {/* {!onFestival && (
+            {!onFestival && (
               <>
                 {artists?.items.map((item) => (
-                  <li
-                    className={searchStyle.searchResultItem}
-                    key={item.artistId}
-                  >
-                    <img src={item.posterUrl} className={searchStyle.testImg} />
-                    <div className={searchStyle.titleAndInfo}>
-                      <span className={searchStyle.title}>{item.title}</span>
-                      <div className={searchStyle.info}>
-                        <span className={searchStyle.heart}>
-                          <img src={heartSVG} alt="좋아요" />
-                          999
-                        </span>
-                        | <span>{item.artistNames[0]}</span>
-                        <span>
-                          {formatDateRange(item.startDate, item.endDate)}
-                        </span>
-                      </div>
+                  <li className={searchStyle.searchResultItem}>
+                    <img
+                      src={item.relateUrl}
+                      className={searchStyle.bandTestImg}
+                    />
+                    <div className={searchStyle.bandNameAndInfo}>
+                      <span className={searchStyle.bandName}>
+                        {item.bandName}
+                      </span>
                     </div>
                     <img
                       src={arrowSVG}
@@ -346,7 +337,7 @@ export default function Search() {
                   </li>
                 ))}
               </>
-            )} */}
+            )}
           </ul>
         </>
       )}

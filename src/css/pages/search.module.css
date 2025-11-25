@@ -174,7 +174,7 @@
   margin-left: 10px;
 }
 .title {
-  width: 250px;
+  width: 220px;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -182,11 +182,20 @@
   color: #1a1a1a;
   font-weight: 600;
 }
+@media (min-width: 600px) {
+  .title,
+  .bandName {
+    width: 400px;
+  }
+}
 .info {
   display: flex;
   font-size: 11px;
   color: #8f8f8f;
   gap: 4px;
+}
+.innerText {
+  margin: 0 3px;
 }
 .heart {
   display: flex;
@@ -214,7 +223,7 @@
   margin-left: 10px;
 }
 .bandName {
-  width: 250px;
+  width: 220px;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
