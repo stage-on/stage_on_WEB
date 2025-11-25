@@ -6,7 +6,6 @@ import heartSVG from "../assets/pages/search/heart.svg";
 import arrowSVG from "../assets/pages/search/arrow-right.svg";
 import { useEffect, useState } from "react";
 import Menu from "../components/Menu";
-import axios from "axios";
 import api from "../api/api";
 
 // 최근 검색어 interface
@@ -139,6 +138,7 @@ export default function Search() {
     if (inputText === "") {
       setIsSearch(false);
       fetchRecentSearch();
+      fetchRecommendSearch();
     }
   }, [inputText]);
   return (
@@ -282,7 +282,6 @@ export default function Search() {
                       <div className={searchStyle.info}>
                         <span className={searchStyle.heart}>
                           <img src={heartSVG} alt="좋아요" />
-                          999
                         </span>
                         | <span>{item.artistNames[0]}</span>
                         <span>
