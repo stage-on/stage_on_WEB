@@ -7,6 +7,7 @@ import arrowSVG from "../assets/pages/search/arrow-right.svg";
 import { useEffect, useState } from "react";
 import Menu from "../components/Menu";
 import axios from "axios";
+import api from "../api/api";
 
 // 최근 검색어 interface
 interface RecentSearch {
@@ -60,18 +61,12 @@ export default function Search() {
   const [onMenu, setOnMenu] = useState<boolean>(false);
   const [animateMenu, setAnimateMenu] = useState<boolean>(false);
 
-  // 테스트 액세스 토큰
-  const REST_API_KEY = import.meta.env.VITE_TEST_ACCESS_TOKEN;
   const BASE_URL = import.meta.env.VITE_BASE_URL;
 
   // 최근 검색어 불러오는 함수
   const fetchRecentSearch = async () => {
     try {
-      const res = await axios.get(`${BASE_URL}/search/history`, {
-        headers: {
-          Authorization: `Bearer ${REST_API_KEY}`,
-        },
-      });
+      const res = await api.get(`${BASE_URL}/search/history`, {});
 
       if (res.status === 200) {
         setRecent(res.data);
@@ -81,11 +76,7 @@ export default function Search() {
   // 최근 검색어 삭제 함수
   const deleteRecent = async (id: number) => {
     try {
-      const res = await axios.delete(`${BASE_URL}/search/history/${id}`, {
-        headers: {
-          Authorization: `Bearer ${REST_API_KEY}`,
-        },
-      });
+      const res = await api.delete(`${BASE_URL}/search/history/${id}`, {});
       if (res.status == 200) {
         alert(res.data);
       }
@@ -98,11 +89,7 @@ export default function Search() {
   // 추천 검색어 불러오는 함수
   const fetchRecommendSearch = async () => {
     try {
-      const res = await axios.get(`${BASE_URL}/recommend`, {
-        headers: {
-          Authorization: `Bearer ${REST_API_KEY}`,
-        },
-      });
+      const res = await api.get(`${BASE_URL}/recommend`, {});
 
       if (res.status === 200) {
         setRecommendList(res.data);
@@ -119,13 +106,8 @@ export default function Search() {
   // 검색 함수
   const handleSearch = async (inputText: string) => {
     try {
-      const res = await axios.get<ApiResponse>(
-        `${BASE_URL}/search?query=${inputText}`,
-        {
-          headers: {
-            Authorization: `Bearer ${REST_API_KEY}`,
-          },
-        }
+      const res = await api.get<ApiResponse>(
+        `${BASE_URL}/search?query=${inputText}`
       );
       if (res.status === 200) {
         const data = res.data as ApiResponse;
