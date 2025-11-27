@@ -201,15 +201,10 @@
   display: flex;
   align-items: center;
 }
-.heart img {
-  color: #8f8f8f;
-  width: 11px;
-  width: 11px;
-  margin-right: 2px;
-}
-.arrowIcon {
-  width: 18px;
-  height: 18px;
+
+.hearIcon {
+  width: 24px;
+  height: 24px;
 }
 /* 검색 후 공연 결과 리스트 */
 
@@ -231,18 +226,7 @@
   color: #1a1a1a;
   font-weight: 600;
 }
-.bandHeart {
-  display: flex;
-  align-items: center;
-  color: #8f8f8f;
-  font-size: 11px;
-}
-.bandHeart img {
-  color: #8f8f8f;
-  width: 11px;
-  width: 11px;
-  margin-right: 2px;
-}
+
 /* 검색 후 밴드 결과 리스트 */
 
 /* 테스트용 */

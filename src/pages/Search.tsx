@@ -3,6 +3,8 @@ import searchSVG from "../assets/pages/search/search.svg";
 import menuSVG from "../assets/pages/search/menu.svg";
 import xSVG from "../assets/pages/search/x.svg";
 import arrowSVG from "../assets/pages/search/arrow-right.svg";
+import emptyHeart from "../assets/pages/mybands/empty_heart.svg";
+import fullHeart from "../assets/pages/mybands/full_heart.svg";
 import { useEffect, useState } from "react";
 import Menu from "../components/Menu";
 import api from "../api/api";
@@ -126,6 +128,17 @@ export default function Search() {
     const [ey, em, ed] = end.split("-");
 
     return `${sy}.${sm}.${sd} - ${ey}.${em}.${ed}`;
+  };
+  // 하트 눌렀을 때 MY BANDS에 밴드 추가 함수
+  const handleLikeBands = async (id: number) => {
+    try {
+      const res = await api.post(`/likes/artists/${id}`);
+      if (res.status === 200) {
+        alert("MY BANDS에 밴드를 추가했습니다!");
+      }
+    } catch (error: any) {
+      console.log(error.message);
+    }
   };
 
   // 처음 마운트될 때
@@ -300,7 +313,7 @@ export default function Search() {
             {!onFestival && (
               <>
                 {artists?.items.map((item) => (
-                  <li className={searchStyle.searchResultItem}>
+                  <li className={searchStyle.searchResultItem} key={item.id}>
                     <img
                       src={item.relateUrl}
                       className={searchStyle.bandTestImg}
@@ -311,9 +324,12 @@ export default function Search() {
                       </span>
                     </div>
                     <img
-                      src={arrowSVG}
-                      alt="이동"
-                      className={searchStyle.arrowIcon}
+                      src={emptyHeart}
+                      alt="하트"
+                      className={searchStyle.hearIcon}
+                      onClick={() => {
+                        handleLikeBands(item.id);
+                      }}
                     />
                   </li>
                 ))}
