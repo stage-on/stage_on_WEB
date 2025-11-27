@@ -2,9 +2,15 @@ import myBandsStyle from "../css/pages/myBands.module.css";
 import emptySVG from "../assets/pages/mybands/emptyCheckBox.svg";
 import fullSVG from "../assets/pages/mybands/fullCheckbox.svg";
 import { useEffect, useState } from "react";
+import api from "../api/api";
 
+interface MyBands {
+  artistId: number;
+  artistName: string;
+  artistPictureUrl: string;
+}
 export default function MyBands() {
-  const bandList = [1, 2, 3, 4, 5];
+  const [bandList, setBandList] = useState<MyBands[]>([]);
 
   const [onDelete, setOnDelete] = useState<boolean>(false);
   const [onCheck, setOnCheck] = useState<boolean>(false);
@@ -17,6 +23,19 @@ export default function MyBands() {
       prev.map((checked, i) => (i === index ? !checked : checked))
     );
   };
+  const fetchMyBands = async () => {
+    try {
+      const res = await api.get("/likes/my/bands");
+      if (res.status === 200) {
+        setBandList(res.data);
+      }
+    } catch (error: any) {
+      console.log(error.message);
+    }
+  };
+  useEffect(() => {
+    fetchMyBands();
+  }, []);
 
   useEffect(() => {
     const trueCount = checkedList.filter((v) => v === true).length;
@@ -30,48 +49,65 @@ export default function MyBands() {
   return (
     <div className={myBandsStyle.container}>
       <div className={myBandsStyle.title}>MY BANDS</div>
-      <div
-        className={`${myBandsStyle.deleteBtn} ${
-          onDelete && onCheck
-            ? myBandsStyle.deleteBtn
-            : onDelete
-            ? myBandsStyle.onDeleteBtn
-            : ""
-        }`}
-      >
-        {onDelete ? (
-          <span
-            onClick={() =>
-              !onCheck ? setOnDelete((prev) => !prev) : console.log("삭제로직")
-            }
+      {bandList.length > 0 ? (
+        <>
+          <div
+            className={`${myBandsStyle.deleteBtn} ${
+              onDelete && onCheck
+                ? myBandsStyle.deleteBtn
+                : onDelete
+                ? myBandsStyle.onDeleteBtn
+                : ""
+            }`}
           >
-            삭제하기
-          </span>
-        ) : (
-          <span onClick={() => setOnDelete((prev) => !prev)}>선택 삭제</span>
-        )}
-      </div>
-
-      <div className={myBandsStyle.grid}>
-        {bandList.map((_, index) => (
-          <div key={index} className={myBandsStyle.bandItem}>
-            <div className={myBandsStyle.itemInner}>
-              <div className={myBandsStyle.checkBoxDiv}>
-                {(onDelete || onCheck) && (
-                  <img
-                    src={checkedList[index] ? fullSVG : emptySVG}
-                    alt="checkbox"
-                    className={myBandsStyle.checkBox}
-                    onClick={() => toggleCheck(index)}
-                  />
-                )}
-              </div>
-              <div className={myBandsStyle.bandProfile}></div>
-              <div className={myBandsStyle.bandName}>밴드 이름</div>
-            </div>
+            {onDelete ? (
+              <span
+                onClick={() =>
+                  !onCheck
+                    ? setOnDelete((prev) => !prev)
+                    : console.log("삭제로직")
+                }
+              >
+                삭제하기
+              </span>
+            ) : (
+              <span onClick={() => setOnDelete((prev) => !prev)}>
+                선택 삭제 
+              </span>
+            )}
           </div>
-        ))}
-      </div>
+
+          <div className={myBandsStyle.grid}>
+            {bandList.map((item) => (
+              <div key={item.artistId} className={myBandsStyle.bandItem}>
+                <div className={myBandsStyle.itemInner}>
+                  <div className={myBandsStyle.checkBoxDiv}>
+                    {(onDelete || onCheck) && (
+                      <img
+                        src={checkedList[item.artistId] ? fullSVG : emptySVG}
+                        alt="checkbox"
+                        className={myBandsStyle.checkBox}
+                        onClick={() => toggleCheck(item.artistId)}
+                      />
+                    )}
+                  </div>
+                  <img
+                    src={item.artistPictureUrl}
+                    className={myBandsStyle.bandProfile}
+                  />
+                  <div className={myBandsStyle.bandName}>{item.artistName}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      ) : (
+        <>
+          <div className={myBandsStyle.emptyContainer}>
+            MY BANDS가 없습니다.
+          </div>
+        </>
+      )}
     </div>
   );
 }

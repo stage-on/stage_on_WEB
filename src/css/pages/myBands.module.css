@@ -99,3 +99,16 @@
   font-weight: 600;
 }
 /* 밴드 아이템 */
+
+/* 값 없을 때 */
+.emptyContainer {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: gray;
+}
+/* 값 없을 때 */
