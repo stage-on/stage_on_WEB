@@ -4,7 +4,7 @@ import menuSVG from "../assets/pages/search/menu.svg";
 import xSVG from "../assets/pages/search/x.svg";
 import arrowSVG from "../assets/pages/search/arrow-right.svg";
 import emptyHeart from "../assets/pages/mybands/empty_heart.svg";
-import fullHeart from "../assets/pages/mybands/full_heart.svg";
+// import fullHeart from "../assets/pages/mybands/full_heart.svg";
 import { useEffect, useState } from "react";
 import Menu from "../components/Menu";
 import api from "../api/api";
