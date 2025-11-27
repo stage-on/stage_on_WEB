@@ -2,7 +2,6 @@ import searchStyle from "../css/pages/search.module.css";
 import searchSVG from "../assets/pages/search/search.svg";
 import menuSVG from "../assets/pages/search/menu.svg";
 import xSVG from "../assets/pages/search/x.svg";
-import heartSVG from "../assets/pages/search/heart.svg";
 import arrowSVG from "../assets/pages/search/arrow-right.svg";
 import { useEffect, useState } from "react";
 import Menu from "../components/Menu";
@@ -26,7 +25,7 @@ interface PerformanceItem {
   endDate: string;
   artistNames: string[];
 }
-// 밴드 검색 결과 interface => 형식 나오면 수정 필요함!!
+// 밴드 검색 결과 interface
 interface ArtistItem {
   id: number;
   bandName: string;
@@ -63,12 +62,10 @@ export default function Search() {
   const [onMenu, setOnMenu] = useState<boolean>(false);
   const [animateMenu, setAnimateMenu] = useState<boolean>(false);
 
-  const BASE_URL = import.meta.env.VITE_BASE_URL;
-
   // 최근 검색어 불러오는 함수
   const fetchRecentSearch = async () => {
     try {
-      const res = await api.get(`${BASE_URL}/search/history`, {});
+      const res = await api.get(`/search/history`);
 
       if (res.status === 200) {
         setRecent(res.data);
@@ -78,7 +75,7 @@ export default function Search() {
   // 최근 검색어 삭제 함수
   const deleteRecent = async (id: number) => {
     try {
-      const res = await api.delete(`${BASE_URL}/search/history/${id}`, {});
+      const res = await api.delete(`/search/history/${id}`);
       if (res.status == 200) {
         alert(res.data);
       }
@@ -91,7 +88,7 @@ export default function Search() {
   // 추천 검색어 불러오는 함수
   const fetchRecommendSearch = async () => {
     try {
-      const res = await api.get(`${BASE_URL}/recommend`, {});
+      const res = await api.get(`/recommend`);
 
       if (res.status === 200) {
         setRecommendList(res.data);
@@ -106,10 +103,12 @@ export default function Search() {
   };
   // 검색 함수
   const handleSearch = async (inputText: string) => {
+    if (inputText === "") {
+      alert("검색어를 입력해주세요!");
+      return;
+    }
     try {
-      const res = await api.get<ApiResponse>(
-        `${BASE_URL}/search?query=${inputText}`
-      );
+      const res = await api.get<ApiResponse>(`/search?query=${inputText}`);
       if (res.status === 200) {
         const data = res.data as ApiResponse;
         setPerformances(data.performances);
