@@ -2,8 +2,9 @@ import searchStyle from "../css/pages/search.module.css";
 import searchSVG from "../assets/pages/search/search.svg";
 import menuSVG from "../assets/pages/search/menu.svg";
 import xSVG from "../assets/pages/search/x.svg";
-import heartSVG from "../assets/pages/search/heart.svg";
 import arrowSVG from "../assets/pages/search/arrow-right.svg";
+import emptyHeart from "../assets/pages/mybands/empty_heart.svg";
+// import fullHeart from "../assets/pages/mybands/full_heart.svg";
 import { useEffect, useState } from "react";
 import Menu from "../components/Menu";
 import api from "../api/api";
@@ -26,10 +27,13 @@ interface PerformanceItem {
   endDate: string;
   artistNames: string[];
 }
-// 밴드 검색 결과 interface => 형식 나오면 수정 필요함!!
+// 밴드 검색 결과 interface
 interface ArtistItem {
-  artistId?: number;
-  name?: string;
+  id: number;
+  bandName: string;
+  relateUrl: string;
+  sessionMem: string;
+  introBand: string;
 }
 // 공연, 밴드 객체 interface
 interface ListResult<T> {
@@ -60,12 +64,10 @@ export default function Search() {
   const [onMenu, setOnMenu] = useState<boolean>(false);
   const [animateMenu, setAnimateMenu] = useState<boolean>(false);
 
-  const BASE_URL = import.meta.env.VITE_BASE_URL;
-
   // 최근 검색어 불러오는 함수
   const fetchRecentSearch = async () => {
     try {
-      const res = await api.get(`${BASE_URL}/search/history`, {});
+      const res = await api.get(`/search/history`);
 
       if (res.status === 200) {
         setRecent(res.data);
@@ -75,7 +77,7 @@ export default function Search() {
   // 최근 검색어 삭제 함수
   const deleteRecent = async (id: number) => {
     try {
-      const res = await api.delete(`${BASE_URL}/search/history/${id}`, {});
+      const res = await api.delete(`/search/history/${id}`);
       if (res.status == 200) {
         alert(res.data);
       }
@@ -88,7 +90,7 @@ export default function Search() {
   // 추천 검색어 불러오는 함수
   const fetchRecommendSearch = async () => {
     try {
-      const res = await api.get(`${BASE_URL}/recommend`, {});
+      const res = await api.get(`/recommend`);
 
       if (res.status === 200) {
         setRecommendList(res.data);
@@ -101,13 +103,14 @@ export default function Search() {
       handleSearch(inputText);
     }
   };
-
   // 검색 함수
   const handleSearch = async (inputText: string) => {
+    if (inputText === "") {
+      alert("검색어를 입력해주세요!");
+      return;
+    }
     try {
-      const res = await api.get<ApiResponse>(
-        `${BASE_URL}/search?query=${inputText}`
-      );
+      const res = await api.get<ApiResponse>(`/search?query=${inputText}`);
       if (res.status === 200) {
         const data = res.data as ApiResponse;
         setPerformances(data.performances);
@@ -125,6 +128,17 @@ export default function Search() {
     const [ey, em, ed] = end.split("-");
 
     return `${sy}.${sm}.${sd} - ${ey}.${em}.${ed}`;
+  };
+  // 하트 눌렀을 때 MY BANDS에 밴드 추가 함수
+  const handleLikeBands = async (id: number) => {
+    try {
+      const res = await api.post(`/likes/artists/${id}`);
+      if (res.status === 200) {
+        alert("MY BANDS에 밴드를 추가했습니다!");
+      }
+    } catch (error: any) {
+      console.log(error.message);
+    }
   };
 
   // 처음 마운트될 때
@@ -280,10 +294,8 @@ export default function Search() {
                     <div className={searchStyle.titleAndInfo}>
                       <span className={searchStyle.title}>{item.title}</span>
                       <div className={searchStyle.info}>
-                        <span className={searchStyle.heart}>
-                          <img src={heartSVG} alt="좋아요" />
-                        </span>
-                        | <span>{item.artistNames[0]}</span>
+                        <span>{item.artistNames[0]}</span>
+                        <span className={searchStyle.innerText}>|</span>
                         <span>
                           {formatDateRange(item.startDate, item.endDate)}
                         </span>
@@ -298,36 +310,31 @@ export default function Search() {
                 ))}
               </>
             )}
-            {/* {!onFestival && (
+            {!onFestival && (
               <>
                 {artists?.items.map((item) => (
-                  <li
-                    className={searchStyle.searchResultItem}
-                    key={item.artistId}
-                  >
-                    <img src={item.posterUrl} className={searchStyle.testImg} />
-                    <div className={searchStyle.titleAndInfo}>
-                      <span className={searchStyle.title}>{item.title}</span>
-                      <div className={searchStyle.info}>
-                        <span className={searchStyle.heart}>
-                          <img src={heartSVG} alt="좋아요" />
-                          999
-                        </span>
-                        | <span>{item.artistNames[0]}</span>
-                        <span>
-                          {formatDateRange(item.startDate, item.endDate)}
-                        </span>
-                      </div>
+                  <li className={searchStyle.searchResultItem} key={item.id}>
+                    <img
+                      src={item.relateUrl}
+                      className={searchStyle.bandTestImg}
+                    />
+                    <div className={searchStyle.bandNameAndInfo}>
+                      <span className={searchStyle.bandName}>
+                        {item.bandName}
+                      </span>
                     </div>
                     <img
-                      src={arrowSVG}
-                      alt="이동"
-                      className={searchStyle.arrowIcon}
+                      src={emptyHeart}
+                      alt="하트"
+                      className={searchStyle.hearIcon}
+                      onClick={() => {
+                        handleLikeBands(item.id);
+                      }}
                     />
                   </li>
                 ))}
               </>
-            )} */}
+            )}
           </ul>
         </>
       )}
