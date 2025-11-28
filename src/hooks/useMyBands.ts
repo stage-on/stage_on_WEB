@@ -10,13 +10,20 @@ interface MyBands {
 export default function useMyBands() {
   const [bandList, setBandList] = useState<MyBands[]>([]);
   const [checkedList, setCheckedList] = useState<boolean[]>([]);
+  const [deleteReq, setDeleteReq] = useState<number[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const toggleCheck = (index: number) => {
+  // 밴드 선택 함수
+  const toggleCheck = (index: number, id: number) => {
     setCheckedList((prev) =>
       prev.map((checked, i) => (i === index ? !checked : checked))
     );
+    setDeleteReq((prev) =>
+      prev.includes(id) ? prev.filter((v) => v !== id) : [...prev, id]
+    );
   };
+
+  // MY BANDS 정보 불러오기
   const fetchMyBands = async () => {
     try {
       const res = await api.get("/likes/my/bands");
@@ -31,9 +38,12 @@ export default function useMyBands() {
     }
   };
 
+  // 선택한 밴드 삭제하기
   const removeMyBands = async () => {
     try {
-      const res = await api.delete(`/likes/artists`);
+      const res = await api.post(`/likes/artists`, {
+        artistIds: deleteReq,
+      });
       if (res.status === 200) {
         alert("삭제 완료했습니다!");
       }

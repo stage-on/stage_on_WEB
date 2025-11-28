@@ -58,7 +58,7 @@ export default function MyBands() {
                         src={checkedList[index] ? fullSVG : emptySVG}
                         alt="checkbox"
                         className={myBandsStyle.checkBox}
-                        onClick={() => toggleCheck(index)}
+                        onClick={() => toggleCheck(index, item.artistId)}
                       />
                     )}
                   </div>
