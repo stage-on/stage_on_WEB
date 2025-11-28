@@ -5,14 +5,21 @@ import menuSearchSVG from "../assets/component/menu/search.svg";
 import menuTimeTableSVG from "../assets/component/menu/calendar.svg";
 import menuBandsSVG from "../assets/component/menu/music.svg";
 import menuConcertsSVG from "../assets/component/menu/speaker.svg";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import api from "../api/api";
 
 type Props = {
   animateMenu: boolean;
   setAnimateMenu: React.Dispatch<React.SetStateAction<boolean>>;
   setOnMenu: React.Dispatch<React.SetStateAction<boolean>>;
 };
+
+interface Profile {
+  name: string;
+  email: string;
+  profileImage: string;
+}
 
 export default function Menu({
   animateMenu,
@@ -24,6 +31,7 @@ export default function Menu({
     const timer = setTimeout(() => setAnimateMenu(true), 10);
     return () => clearTimeout(timer);
   }, []);
+  const [profile, setProfile] = useState<Profile | null>(null);
 
   const movePage = (e: React.MouseEvent<HTMLLIElement>) => {
     const span = e.currentTarget.dataset.value;
@@ -40,6 +48,19 @@ export default function Menu({
       navigate("/main/myconcerts");
     }
   };
+  const fetchProfile = async () => {
+    try {
+      const res = await api.get("/profile");
+      if (res.status === 200) {
+        setProfile(res.data);
+      }
+    } catch (error: any) {
+      console.log(error.message);
+    }
+  };
+  useEffect(() => {
+    fetchProfile();
+  }, []);
 
   return (
     <div className={menuStyle.overlay}>
@@ -60,8 +81,8 @@ export default function Menu({
           />
         </div>
         <div className={menuStyle.profileDiv}>
-          <div className={menuStyle.profileImg}></div>
-          <span className={menuStyle.profileName}>김슈니</span>
+          <img src={profile?.profileImage} className={menuStyle.profileImg} />
+          <span className={menuStyle.profileName}>{profile?.name}</span>
         </div>
         <ul className={menuStyle.menuList}>
           <li

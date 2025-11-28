@@ -4,6 +4,11 @@ import fullSVG from "../assets/pages/mybands/fullCheckbox.svg";
 import { useEffect, useState } from "react";
 import useMyBands from "../hooks/useMyBands";
 
+interface MyBands {
+  artistId: number;
+  artistName: string;
+  artistPictureUrl: string;
+}
 export default function MyBands() {
   const [onDelete, setOnDelete] = useState<boolean>(false);
   const [onCheck, setOnCheck] = useState<boolean>(false);
