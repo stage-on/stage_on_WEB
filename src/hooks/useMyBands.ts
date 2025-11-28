@@ -39,12 +39,17 @@ export default function useMyBands() {
   };
 
   // 선택한 밴드 삭제하기
-  const removeMyBands = async () => {
+  const removeMyBands = async (id: number) => {
     setLoading(true);
     try {
-      const res = await api.post(`/likes/artists/delete`, {
-        artistIds: deleteReq,
-      });
+      const res =
+        id === -1
+          ? await api.post(`/likes/artists/delete`, {
+              artistIds: deleteReq,
+            })
+          : await api.post(`/likes/artists/delete`, {
+              artistIds: [id],
+            });
       if (res.status === 200) {
         alert("삭제 완료했습니다!");
         fetchMyBands();

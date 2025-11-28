@@ -36,7 +36,7 @@ export default function MyBands() {
             {onDelete ? (
               <span
                 onClick={() =>
-                  !onCheck ? setOnDelete((prev) => !prev) : removeMyBands()
+                  !onCheck ? setOnDelete((prev) => !prev) : removeMyBands(-1)
                 }
               >
                 삭제하기
