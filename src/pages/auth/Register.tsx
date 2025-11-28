@@ -5,8 +5,7 @@ import registerStyle from "../../css/pages/register.module.css";
 import vector from "../../assets/auth/Vector.svg";
 import icon_microphone from "../../assets/auth/icon_microphone.svg";
 import woman_singer_light_skin_tone from "../../assets/auth/Woman Singer Light Skin Tone.svg";
-
-import { getArtists, likeArtist } from "../../api/artistsApi";
+import { getArtists, submitFirstSelect } from "../../api/artistsApi"; 
 import type { Artist } from "../../api/artistsApi";
 
 // 1 = 국내, 2 = 해외
@@ -45,7 +44,7 @@ const Register = () => {
     fetchArtists();
   }, []);
 
-  // typeofartist 값으로 국내 / 해외 분리
+  // 국내 / 해외
   const localBand = artists.filter(
     (artist) => artist.typeofartist === LOCAL_TYPE
   );
@@ -62,36 +61,36 @@ const Register = () => {
       return;
     }
 
-    // 5개 선택되어 있으면 더 이상 선택 불가
-    if (selectedBandIds.length >= 5) {
+    // 10개 선택되어 있으면 더 이상 선택 불가
+    if (selectedBandIds.length >= 10) {
       return;
     }
 
-    // 새로 선택
+  
     setSelectedBandIds((prev) => [...prev, id]);
   };
 
-  const handleSubmit = async () => {
-    if (!isNextEnabled || isSubmitting) return;
+const handleSubmit = async () => {
+  if (!isNextEnabled || isSubmitting) return;
 
-    try {
-      setIsSubmitting(true);
+  try {
+    setIsSubmitting(true);
+    await submitFirstSelect(selectedBandIds);
 
-      await Promise.all(selectedBandIds.map((id) => likeArtist(id)));
+    navigate("/Registerfinish");
+  } catch (err: any) {
+    console.error(err);
 
-      navigate("/Registerfinish");
-    } catch (err: any) {
-      console.error(err);
-
-      if (err.response?.status === 400) {
-        alert(err.response.data?.message ?? "선택 가능한 밴드 수를 초과했어요.");
-      } else {
-        alert("관심 밴드를 저장하는 데 실패했어요. 잠시 후 다시 시도해 주세요.");
-      }
-    } finally {
-      setIsSubmitting(false);
+    if (err.response?.status === 400) {
+      alert(err.response.data?.message ?? "선택 가능한 밴드 수를 초과했어요.");
+    } else {
+      alert("관심 밴드를 저장하는 데 실패했어요. 잠시 후 다시 시도해 주세요.");
     }
-  };
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
 
   return (
     <>
