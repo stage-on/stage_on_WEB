@@ -10,10 +10,16 @@ interface MyBands {
   artistPictureUrl: string;
 }
 export default function MyBands() {
-  const [onDelete, setOnDelete] = useState<boolean>(false);
   const [onCheck, setOnCheck] = useState<boolean>(false);
-  const { bandList, checkedList, toggleCheck, removeMyBands, loading } =
-    useMyBands();
+  const {
+    bandList,
+    checkedList,
+    toggleCheck,
+    removeMyBands,
+    loading,
+    onDelete,
+    setOnDelete,
+  } = useMyBands();
 
   useEffect(() => {
     setOnCheck(checkedList.some((v) => v));

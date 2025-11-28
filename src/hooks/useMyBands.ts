@@ -8,6 +8,7 @@ interface MyBands {
 }
 
 export default function useMyBands() {
+  const [onDelete, setOnDelete] = useState<boolean>(false);
   const [bandList, setBandList] = useState<MyBands[]>([]);
   const [checkedList, setCheckedList] = useState<boolean[]>([]);
   const [deleteReq, setDeleteReq] = useState<number[]>([]);
@@ -52,6 +53,7 @@ export default function useMyBands() {
             });
       if (res.status === 200) {
         alert("삭제 완료했습니다!");
+        setOnDelete(false);
         fetchMyBands();
       }
     } catch (error: any) {
@@ -68,7 +70,8 @@ export default function useMyBands() {
     bandList,
     checkedList,
     toggleCheck,
-    // handleLikeBands,
+    onDelete,
+    setOnDelete,
     removeMyBands,
     loading,
     setCheckedList,

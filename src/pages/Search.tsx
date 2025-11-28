@@ -18,7 +18,7 @@ export default function Search() {
   // 메뉴 눌렀는지 아닌지
   const [onMenu, setOnMenu] = useState<boolean>(false);
   const [animateMenu, setAnimateMenu] = useState<boolean>(false);
-  const [liked, setLiked] = useState<boolean | null>(null);
+  const [liked, setLiked] = useState<boolean[]>([]);
   const {
     recent,
     recommendList,
@@ -58,11 +58,13 @@ export default function Search() {
       fetchRecommendSearch();
     }
   }, [inputText]);
-  useEffect(() => {
-    const firstLiked = artists?.items?.[0]?.liked ?? null;
-    setLiked(firstLiked);
-  }, [artists]);
 
+  useEffect(() => {
+    // artists가 바뀔 때 liked 배열 초기화
+    if (artists?.items) {
+      setLiked(artists.items.map((artist) => artist.liked ?? false));
+    }
+  }, [artists]);
   return (
     <>
       {onMenu && (
@@ -215,7 +217,7 @@ export default function Search() {
             )}
             {!onFestival && (
               <>
-                {artists?.items.map((item) => (
+                {artists?.items.map((item, index) => (
                   <li className={searchStyle.searchResultItem} key={item.id}>
                     <img
                       src={item.relateUrl}
@@ -227,14 +229,19 @@ export default function Search() {
                       </span>
                     </div>
                     <img
-                      src={liked === true ? fullHeart : emptyHeart}
+                      src={liked[index] ? fullHeart : emptyHeart}
                       alt="하트"
                       className={searchStyle.hearIcon}
                       onClick={() => {
-                        item.liked === true
-                          ? removeMyBands(item.id)
-                          : handleLikeBands(item.id);
-                        setLiked(!liked);
+                        if (liked[index]) {
+                          removeMyBands(item.id);
+                        } else {
+                          handleLikeBands(item.id);
+                        }
+                        // 클릭 시 해당 인덱스 liked만 토글
+                        setLiked((prev) =>
+                          prev.map((v, i) => (i === index ? !v : v))
+                        );
                       }}
                     />
                   </li>
