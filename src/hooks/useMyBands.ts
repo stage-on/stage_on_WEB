@@ -40,15 +40,20 @@ export default function useMyBands() {
 
   // 선택한 밴드 삭제하기
   const removeMyBands = async () => {
+    setLoading(true);
     try {
-      const res = await api.post(`/likes/artists`, {
+      const res = await api.post(`/likes/artists/delete`, {
         artistIds: deleteReq,
       });
       if (res.status === 200) {
         alert("삭제 완료했습니다!");
+        fetchMyBands();
       }
     } catch (error: any) {
+      alert(error.message);
       console.log(error.message);
+    } finally {
+      setLoading(false);
     }
   };
   useEffect(() => {
