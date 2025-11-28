@@ -2,50 +2,18 @@ import myBandsStyle from "../css/pages/myBands.module.css";
 import emptySVG from "../assets/pages/mybands/emptyCheckBox.svg";
 import fullSVG from "../assets/pages/mybands/fullCheckbox.svg";
 import { useEffect, useState } from "react";
-import api from "../api/api";
+import useMyBands from "../hooks/useMyBands";
 
-interface MyBands {
-  artistId: number;
-  artistName: string;
-  artistPictureUrl: string;
-}
 export default function MyBands() {
-  const [bandList, setBandList] = useState<MyBands[]>([]);
-
   const [onDelete, setOnDelete] = useState<boolean>(false);
   const [onCheck, setOnCheck] = useState<boolean>(false);
-  const [checkedList, setCheckedList] = useState<boolean[]>(
-    Array(bandList.length).fill(false)
-  );
-
-  const toggleCheck = (index: number) => {
-    setCheckedList((prev) =>
-      prev.map((checked, i) => (i === index ? !checked : checked))
-    );
-  };
-  const fetchMyBands = async () => {
-    try {
-      const res = await api.get("/likes/my/bands");
-      if (res.status === 200) {
-        setBandList(res.data);
-      }
-    } catch (error: any) {
-      console.log(error.message);
-    }
-  };
-  useEffect(() => {
-    fetchMyBands();
-  }, []);
+  const { bandList, checkedList, toggleCheck, removeMyBands, loading } =
+    useMyBands();
 
   useEffect(() => {
-    const trueCount = checkedList.filter((v) => v === true).length;
-    if (trueCount > 0) {
-      setOnCheck(true);
-    } else if (trueCount === 0) {
-      setOnCheck(false);
-    }
+    setOnCheck(checkedList.some((v) => v));
   }, [checkedList]);
-
+  if (loading) return <div>로딩중...</div>;
   return (
     <div className={myBandsStyle.container}>
       <div className={myBandsStyle.title}>MY BANDS</div>
@@ -63,31 +31,29 @@ export default function MyBands() {
             {onDelete ? (
               <span
                 onClick={() =>
-                  !onCheck
-                    ? setOnDelete((prev) => !prev)
-                    : console.log("삭제로직")
+                  !onCheck ? setOnDelete((prev) => !prev) : removeMyBands()
                 }
               >
                 삭제하기
               </span>
             ) : (
               <span onClick={() => setOnDelete((prev) => !prev)}>
-                선택 삭제 
+                선택 삭제
               </span>
             )}
           </div>
 
           <div className={myBandsStyle.grid}>
-            {bandList.map((item) => (
+            {bandList.map((item, index) => (
               <div key={item.artistId} className={myBandsStyle.bandItem}>
                 <div className={myBandsStyle.itemInner}>
                   <div className={myBandsStyle.checkBoxDiv}>
                     {(onDelete || onCheck) && (
                       <img
-                        src={checkedList[item.artistId] ? fullSVG : emptySVG}
+                        src={checkedList[index] ? fullSVG : emptySVG}
                         alt="checkbox"
                         className={myBandsStyle.checkBox}
-                        onClick={() => toggleCheck(item.artistId)}
+                        onClick={() => toggleCheck(index)}
                       />
                     )}
                   </div>
