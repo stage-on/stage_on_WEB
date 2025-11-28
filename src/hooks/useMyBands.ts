@@ -63,6 +63,7 @@ export default function useMyBands() {
     bandList,
     checkedList,
     toggleCheck,
+    // handleLikeBands,
     removeMyBands,
     loading,
     setCheckedList,

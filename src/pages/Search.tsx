@@ -4,10 +4,11 @@ import menuSVG from "../assets/pages/search/menu.svg";
 import xSVG from "../assets/pages/search/x.svg";
 import arrowSVG from "../assets/pages/search/arrow-right.svg";
 import emptyHeart from "../assets/pages/mybands/empty_heart.svg";
-// import fullHeart from "../assets/pages/mybands/full_heart.svg";
+import fullHeart from "../assets/pages/mybands/full_heart.svg";
 import { useEffect, useState } from "react";
 import Menu from "../components/Menu";
 import api from "../api/api";
+import useMyBands from "../hooks/useMyBands";
 
 // 최근 검색어 interface
 interface RecentSearch {
@@ -34,6 +35,7 @@ interface ArtistItem {
   relateUrl: string;
   sessionMem: string;
   introBand: string;
+  liked: boolean;
 }
 // 공연, 밴드 객체 interface
 interface ListResult<T> {
@@ -63,6 +65,9 @@ export default function Search() {
   const [onFestival, setOnFestival] = useState<boolean>(true);
   const [onMenu, setOnMenu] = useState<boolean>(false);
   const [animateMenu, setAnimateMenu] = useState<boolean>(false);
+
+  // const { handleLikeBands } = useMyBands();
+  const [artistList, setArtistList] = useState<ArtistItem[] | null>(null);
 
   // 최근 검색어 불러오는 함수
   const fetchRecentSearch = async () => {
@@ -129,8 +134,14 @@ export default function Search() {
 
     return `${sy}.${sm}.${sd} - ${ey}.${em}.${ed}`;
   };
+
   // 하트 눌렀을 때 MY BANDS에 밴드 추가 함수
   const handleLikeBands = async (id: number) => {
+    setArtistList((prev) =>
+      prev!.map((artist) =>
+        artist.id === id ? { ...artist, liked: !artist.liked } : artist
+      )
+    );
     try {
       const res = await api.post(`/likes/artists/${id}`);
       if (res.status === 200) {
@@ -155,6 +166,13 @@ export default function Search() {
       fetchRecommendSearch();
     }
   }, [inputText]);
+
+  // artist바뀔 때 좋아요 로컬로 가져옴
+  useEffect(() => {
+    if (artists?.items) {
+      setArtistList(artists.items);
+    }
+  }, [artists]);
   return (
     <>
       {onMenu && (
@@ -312,7 +330,7 @@ export default function Search() {
             )}
             {!onFestival && (
               <>
-                {artists?.items.map((item) => (
+                {artistList?.map((item) => (
                   <li className={searchStyle.searchResultItem} key={item.id}>
                     <img
                       src={item.relateUrl}
@@ -324,7 +342,7 @@ export default function Search() {
                       </span>
                     </div>
                     <img
-                      src={emptyHeart}
+                      src={item.liked === true ? fullHeart : emptyHeart}
                       alt="하트"
                       className={searchStyle.hearIcon}
                       onClick={() => {
