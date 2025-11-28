@@ -49,10 +49,9 @@ export default function useSearch() {
     useState<ListResult<PerformanceItem> | null>(null);
   // 밴드 검색 결과 담는 배열
   const [artists, setArtists] = useState<ListResult<ArtistItem> | null>(null);
-  //   // api로 조회한 밴드 결과 로컬에 담는 배열
-  //   const [artistList, setArtistList] = useState<ArtistItem[] | null>(null);
   // 통합 검색 여부
   const [isSearch, setIsSearch] = useState<boolean>(false);
+  const [loading, setLoading] = useState(false);
 
   // 최근 검색어 불러오는 함수
   const fetchRecentSearch = async () => {
@@ -92,11 +91,6 @@ export default function useSearch() {
 
   // 하트 눌렀을 때 MY BANDS에 밴드 추가 함수
   const handleLikeBands = async (id: number) => {
-    // setArtistList((prev) =>
-    //   prev!.map((artist) =>
-    //     artist.id === id ? { ...artist, liked: !artist.liked } : artist
-    //   )
-    // );
     try {
       const res = await api.post(`/likes/artists/${id}`);
       if (res.status === 200) {
@@ -113,6 +107,7 @@ export default function useSearch() {
       alert("검색어를 입력해주세요!");
       return;
     }
+    setLoading(true);
     try {
       const res = await api.get<ApiResponse>(`/search?query=${inputText}`);
       if (res.status === 200) {
@@ -123,6 +118,8 @@ export default function useSearch() {
       }
     } catch (error: any) {
       console.log(error.response?.data?.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -132,20 +129,13 @@ export default function useSearch() {
     fetchRecommendSearch();
   }, []);
 
-  // artist바뀔 때 좋아요 로컬로 가져옴
-  //   useEffect(() => {
-  //     if (artists?.items) {
-  //       setArtistList(artists.items);
-  //     }
-  //   }, [artists]);
-
   return {
     recent,
     recommendList,
     performances,
     artists,
-    // artistList,
     isSearch,
+    loading,
     setIsSearch,
     handleSearch,
     handleLikeBands,

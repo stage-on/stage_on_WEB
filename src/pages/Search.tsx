@@ -24,7 +24,7 @@ export default function Search() {
     recommendList,
     performances,
     artists,
-    // artistList,
+    loading,
     isSearch,
     setIsSearch,
     handleSearch,
@@ -59,12 +59,14 @@ export default function Search() {
     }
   }, [inputText]);
 
+  // artists가 바뀔 때 liked 배열 초기화
   useEffect(() => {
-    // artists가 바뀔 때 liked 배열 초기화
     if (artists?.items) {
       setLiked(artists.items.map((artist) => artist.liked ?? false));
     }
   }, [artists]);
+
+  if (loading) return <div>로딩중...</div>;
   return (
     <>
       {onMenu && (
