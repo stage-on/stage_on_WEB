@@ -1,4 +1,3 @@
-// src/pages/Home.tsx (파일 위치는 프로젝트 구조에 맞게)
 import { useEffect, useState } from "react";
 import Alarm from "../components/Alarm";
 import BandCardName from "../components/BandCardName";
@@ -6,8 +5,10 @@ import concertimage from "../assets/component/home/concert_image.svg";
 
 import { getMyBandPerformances } from "../api/kopisApi";
 import type { KopisBand, KopisPerformance } from "../api/kopisApi";
+
+// 콘서트 타입 정의
 type Concert = {
-  id: number;     // string -> number 로 변경
+  id: number;     
   name: string;
   date: string;
   image: string;
@@ -28,10 +29,10 @@ const mapPerformanceToConcert = (perf: KopisPerformance): Concert => {
 
   return {
   id: Number(perf.mt20id),        
-  
+
     name: perf.prfnm,
     date: period,
-    image: perf.poster || concertimage, // 포스터 없으면 기본 이미지
+    image: perf.poster || concertimage, 
     isNew: perf.newstate,
   };
 };
