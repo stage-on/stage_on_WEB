@@ -1,63 +1,72 @@
-import Alarm from "../components/Alarm"
-import BandCardName from "../components/BandCardName"
+// src/pages/Home.tsx (파일 위치는 프로젝트 구조에 맞게)
+import { useEffect, useState } from "react";
+import Alarm from "../components/Alarm";
+import BandCardName from "../components/BandCardName";
 import concertimage from "../assets/component/home/concert_image.svg";
 
-const favoriteBands = [ // 연동전 더미데이터
-  {
-    id: 1,
-    name: "쏜애플",
-    concerts: [
-      {
-        id: 1,
-        name: "쏜애플 콘서트 '바다와 구름과 무대'",
-        date: "2025.12.20 - 2025.12.21",
-        image: concertimage,
-         isNew: true,
-      },
-      {
-        id: 2,
-        name: "쏜애플 콘서트 '도시전설'",
-        date: "2024.12.14 - 2024.12.15",
-        image: concertimage,
-      },
-      {
-        id: 3,
-        name: "쏜애플 콘서트 '불꽃'",
-        date: "2025.06.22",
-        image: concertimage,
-      },
-    ],
-  },
-  {
-    id: 2,
-    name: "유다빈밴드",
-    concerts: [
-      { id: 1, name: "콘서트 이름", date: "2025.12.20 - 2025.12.21", image: concertimage, isNew: true, },
-      { id: 2, name: "콘서트 이름", date: "2025.12.20 - 2025.12.21", image: concertimage },
-      { id: 3, name: "콘서트 이름", date: "2025.12.20 - 2025.12.21", image: concertimage },
-    ],
-  },
-  {
-    id: 3,
-    name: "터치드",
-    concerts: [
-      { id: 1, name: "콘서트 이름", date: "2025.12.20 - 2025.12.21", image: concertimage },
-      { id: 2, name: "콘서트 이름", date: "2025.12.20 - 2025.12.21", image: concertimage },
-      { id: 3, name: "콘서트 이름", date: "2025.12.20 - 2025.12.21", image: concertimage },
-    ],
-  },
-];
+import { getMyBandPerformances } from "../api/kopisApi";
+import type { KopisBand, KopisPerformance } from "../api/kopisApi";
+type Concert = {
+  id: number;     // string -> number 로 변경
+  name: string;
+  date: string;
+  image: string;
+  isNew?: boolean;
+};
+
+type FavoriteBand = {
+  id: number;
+  name: string;
+  concerts: Concert[];
+};
+
+const mapPerformanceToConcert = (perf: KopisPerformance): Concert => {
+  const period =
+    perf.prfpdfrom === perf.prfpdto
+      ? perf.prfpdfrom
+      : `${perf.prfpdfrom} - ${perf.prfpdto}`;
+
+  return {
+  id: Number(perf.mt20id),        
+  
+    name: perf.prfnm,
+    date: period,
+    image: perf.poster || concertimage, // 포스터 없으면 기본 이미지
+    isNew: perf.newstate,
+  };
+};
+
+const mapBandToFavoriteBand = (band: KopisBand): FavoriteBand => ({
+  id: band.artistId,
+  name: band.artistName,
+  concerts: band.performances.map(mapPerformanceToConcert),
+});
 
 const Home = () => {
+  const [favoriteBands, setFavoriteBands] = useState<FavoriteBand[]>([]);
+
+  useEffect(() => {
+    const fetchBands = async () => {
+      try {
+        const data = await getMyBandPerformances();
+        const mapped = data.map(mapBandToFavoriteBand);
+        setFavoriteBands(mapped);
+      } catch (e) {
+        console.error("관심 밴드 공연 불러오기 실패:", e);
+      }
+    };
+
+    fetchBands();
+  }, []);
+
   return (
     <>
-   <Alarm/>
-     {favoriteBands.map((band) => (
+      <Alarm />
+      {favoriteBands.map((band) => (
         <BandCardName key={band.id} band={band} />
       ))}
     </>
-  
-  )
-}
+  );
+};
 
-export default Home
+export default Home;
