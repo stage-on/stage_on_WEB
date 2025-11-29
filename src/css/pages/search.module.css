@@ -174,7 +174,7 @@
   margin-left: 10px;
 }
 .title {
-  width: 250px;
+  width: 220px;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -182,25 +182,29 @@
   color: #1a1a1a;
   font-weight: 600;
 }
+@media (min-width: 600px) {
+  .title,
+  .bandName {
+    width: 400px;
+  }
+}
 .info {
   display: flex;
   font-size: 11px;
   color: #8f8f8f;
   gap: 4px;
 }
+.innerText {
+  margin: 0 3px;
+}
 .heart {
   display: flex;
   align-items: center;
 }
-.heart img {
-  color: #8f8f8f;
-  width: 11px;
-  width: 11px;
-  margin-right: 2px;
-}
-.arrowIcon {
-  width: 18px;
-  height: 18px;
+
+.hearIcon {
+  width: 24px;
+  height: 24px;
 }
 /* 검색 후 공연 결과 리스트 */
 
@@ -214,7 +218,7 @@
   margin-left: 10px;
 }
 .bandName {
-  width: 250px;
+  width: 220px;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -222,18 +226,7 @@
   color: #1a1a1a;
   font-weight: 600;
 }
-.bandHeart {
-  display: flex;
-  align-items: center;
-  color: #8f8f8f;
-  font-size: 11px;
-}
-.bandHeart img {
-  color: #8f8f8f;
-  width: 11px;
-  width: 11px;
-  margin-right: 2px;
-}
+
 /* 검색 후 밴드 결과 리스트 */
 
 /* 테스트용 */
