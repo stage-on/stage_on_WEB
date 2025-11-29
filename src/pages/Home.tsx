@@ -46,19 +46,25 @@ const mapBandToFavoriteBand = (band: KopisBand): FavoriteBand => ({
 const Home = () => {
   const [favoriteBands, setFavoriteBands] = useState<FavoriteBand[]>([]);
 
-  useEffect(() => {
-    const fetchBands = async () => {
-      try {
-        const data = await getMyBandPerformances();
-        const mapped = data.map(mapBandToFavoriteBand);
-        setFavoriteBands(mapped);
-      } catch (e) {
-        console.error("관심 밴드 공연 불러오기 실패:", e);
-      }
-    };
+useEffect(() => {
+  const fetchBands = async () => {
+    try {
+      const data = await getMyBandPerformances();
 
-    fetchBands();
-  }, []);
+      const mapped = data
+        .map(mapBandToFavoriteBand)
+        // 공연이 1개 이상 있는 밴드만 보여주기
+        .filter((band) => band.concerts.length > 0);
+
+      setFavoriteBands(mapped);
+    } catch (e) {
+      console.error("관심 밴드 공연 불러오기 실패:", e);
+    }
+  };
+
+  fetchBands();
+}, []);
+
 
   return (
     <>

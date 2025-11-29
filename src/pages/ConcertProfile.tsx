@@ -100,7 +100,7 @@ const ConcertProfile = () => {
             <button className={concertProfileStyle.detailButton}>타임테이블 커스텀</button>
             <button className={concertProfileStyle.detailButton}>예매처 바로 가기</button>
             <button className={concertProfileStyle.detailButton}>공연장 위치 보기</button>
-            <button className={concertProfileStyle.detailButton}>공식 인스타그램 계정</button>
+           
         </div>
         </div>
     
