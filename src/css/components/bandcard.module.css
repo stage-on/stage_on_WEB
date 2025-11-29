@@ -63,13 +63,14 @@
   font-weight: 400;
 }
 
-.bandcardRow{
+.bandcardRow{ 
     overflow-x: auto;
     width: 100%; 
     display: flex;
     flex-direction: row; 
     gap: 23px;
     scrollbar-width: none;  
+    min-height: 200px; /*공연이 없을 경우에도 최소 높이 조정 -> 상의 부분*/
 }
 
 .imageWrapper {
