@@ -201,6 +201,8 @@ export default function Search() {
                     <div className={searchStyle.titleAndInfo}>
                       <span className={searchStyle.title}>{item.title}</span>
                       <div className={searchStyle.info}>
+                        <img src={emptyHeart} alt="좋아요" />
+                        <span className={searchStyle.innerText}>|</span>
                         <span>{item.artistNames[0]}</span>
                         <span className={searchStyle.innerText}>|</span>
                         <span>
