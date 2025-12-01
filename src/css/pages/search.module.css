@@ -194,6 +194,10 @@
   color: #8f8f8f;
   gap: 4px;
 }
+.info img {
+  height: 18px;
+  width: 18px;
+}
 .innerText {
   margin: 0 3px;
 }

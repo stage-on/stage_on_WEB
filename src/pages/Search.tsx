@@ -4,121 +4,41 @@ import menuSVG from "../assets/pages/search/menu.svg";
 import xSVG from "../assets/pages/search/x.svg";
 import arrowSVG from "../assets/pages/search/arrow-right.svg";
 import emptyHeart from "../assets/pages/mybands/empty_heart.svg";
-// import fullHeart from "../assets/pages/mybands/full_heart.svg";
+import fullHeart from "../assets/pages/mybands/full_heart.svg";
 import { useEffect, useState } from "react";
 import Menu from "../components/Menu";
-import api from "../api/api";
-
-// 최근 검색어 interface
-interface RecentSearch {
-  id: number;
-  keyword: string;
-}
-// 추천 검색어 interface
-interface Recommend {
-  keyword: string;
-}
-// 공연 검색 결과 interface
-interface PerformanceItem {
-  performanceId: number;
-  title: string;
-  posterUrl: string;
-  startDate: string;
-  endDate: string;
-  artistNames: string[];
-}
-// 밴드 검색 결과 interface
-interface ArtistItem {
-  id: number;
-  bandName: string;
-  relateUrl: string;
-  sessionMem: string;
-  introBand: string;
-}
-// 공연, 밴드 객체 interface
-interface ListResult<T> {
-  count: number;
-  items: T[];
-}
-// API 호출 결과 interface
-interface ApiResponse {
-  performances: ListResult<PerformanceItem>;
-  artists: ListResult<ArtistItem>;
-}
+import useSearch from "../hooks/useSearch";
+import useMyBands from "../hooks/useMyBands";
 
 export default function Search() {
-  // 최근 검색어 담는 배열
-  const [recent, setRecent] = useState<RecentSearch[]>([]);
-  // 추천 검색어 담는 배열
-  const [recommendList, setRecommendList] = useState<Recommend[]>([]);
-  // 공연 검색 결과 담는 배열
-  const [performances, setPerformances] =
-    useState<ListResult<PerformanceItem> | null>(null);
-  // 밴드 검색 결과 담는 배열
-  const [artists, setArtists] = useState<ListResult<ArtistItem> | null>(null);
-
+  // 입력된 검색어
   const [inputText, setInputText] = useState<string>("");
-
-  const [isSearch, setIsSearch] = useState<boolean>(false);
+  // 공연 탭인지 아닌지
   const [onFestival, setOnFestival] = useState<boolean>(true);
+  // 메뉴 눌렀는지 아닌지
   const [onMenu, setOnMenu] = useState<boolean>(false);
   const [animateMenu, setAnimateMenu] = useState<boolean>(false);
+  const [liked, setLiked] = useState<boolean[]>([]);
+  const {
+    recent,
+    recommendList,
+    performances,
+    artists,
+    loading,
+    isSearch,
+    setIsSearch,
+    handleSearch,
+    handleLikeBands,
+    deleteRecent,
+    fetchRecentSearch,
+    fetchRecommendSearch,
+  } = useSearch();
+  const { removeMyBands } = useMyBands();
 
-  // 최근 검색어 불러오는 함수
-  const fetchRecentSearch = async () => {
-    try {
-      const res = await api.get(`/search/history`);
-
-      if (res.status === 200) {
-        setRecent(res.data);
-      }
-    } catch (error) {}
-  };
-  // 최근 검색어 삭제 함수
-  const deleteRecent = async (id: number) => {
-    try {
-      const res = await api.delete(`/search/history/${id}`);
-      if (res.status == 200) {
-        alert(res.data);
-      }
-    } catch (error: any) {
-      console.log(error.response?.data?.message);
-    } finally {
-      fetchRecentSearch();
-    }
-  };
-  // 추천 검색어 불러오는 함수
-  const fetchRecommendSearch = async () => {
-    try {
-      const res = await api.get(`/recommend`);
-
-      if (res.status === 200) {
-        setRecommendList(res.data);
-      }
-    } catch (error) {}
-  };
   // enter key 눌렀을 때 검색 함수 호출
   const handleEnter = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       handleSearch(inputText);
-    }
-  };
-  // 검색 함수
-  const handleSearch = async (inputText: string) => {
-    if (inputText === "") {
-      alert("검색어를 입력해주세요!");
-      return;
-    }
-    try {
-      const res = await api.get<ApiResponse>(`/search?query=${inputText}`);
-      if (res.status === 200) {
-        const data = res.data as ApiResponse;
-        setPerformances(data.performances);
-        setArtists(data.artists);
-        setIsSearch(true);
-      }
-    } catch (error: any) {
-      console.log(error.response?.data?.message);
     }
   };
 
@@ -129,23 +49,6 @@ export default function Search() {
 
     return `${sy}.${sm}.${sd} - ${ey}.${em}.${ed}`;
   };
-  // 하트 눌렀을 때 MY BANDS에 밴드 추가 함수
-  const handleLikeBands = async (id: number) => {
-    try {
-      const res = await api.post(`/likes/artists/${id}`);
-      if (res.status === 200) {
-        alert("MY BANDS에 밴드를 추가했습니다!");
-      }
-    } catch (error: any) {
-      console.log(error.message);
-    }
-  };
-
-  // 처음 마운트될 때
-  useEffect(() => {
-    fetchRecentSearch();
-    fetchRecommendSearch();
-  }, []);
 
   // 검색창에 아무것도 입력 안 하면 isSearch = false로 변경
   useEffect(() => {
@@ -155,6 +58,15 @@ export default function Search() {
       fetchRecommendSearch();
     }
   }, [inputText]);
+
+  // artists가 바뀔 때 liked 배열 초기화
+  useEffect(() => {
+    if (artists?.items) {
+      setLiked(artists.items.map((artist) => artist.liked ?? false));
+    }
+  }, [artists]);
+
+  if (loading) return <div>로딩중...</div>;
   return (
     <>
       {onMenu && (
@@ -166,12 +78,7 @@ export default function Search() {
       )}
       <div className={searchStyle.fixedDiv}>
         <div className={searchStyle.inputDiv}>
-          <img
-            src={searchSVG}
-            alt="검색"
-            className={searchStyle.searchIcon}
-            // onClick={() => setIsSearch((prev) => !prev)}
-          />
+          <img src={searchSVG} alt="검색" className={searchStyle.searchIcon} />
           <input
             placeholder="검색어를 입력하세요"
             type="text"
@@ -294,6 +201,8 @@ export default function Search() {
                     <div className={searchStyle.titleAndInfo}>
                       <span className={searchStyle.title}>{item.title}</span>
                       <div className={searchStyle.info}>
+                        <img src={emptyHeart} alt="좋아요" />
+                        <span className={searchStyle.innerText}>|</span>
                         <span>{item.artistNames[0]}</span>
                         <span className={searchStyle.innerText}>|</span>
                         <span>
@@ -312,7 +221,7 @@ export default function Search() {
             )}
             {!onFestival && (
               <>
-                {artists?.items.map((item) => (
+                {artists?.items.map((item, index) => (
                   <li className={searchStyle.searchResultItem} key={item.id}>
                     <img
                       src={item.relateUrl}
@@ -324,11 +233,19 @@ export default function Search() {
                       </span>
                     </div>
                     <img
-                      src={emptyHeart}
+                      src={liked[index] ? fullHeart : emptyHeart}
                       alt="하트"
                       className={searchStyle.hearIcon}
                       onClick={() => {
-                        handleLikeBands(item.id);
+                        if (liked[index]) {
+                          removeMyBands(item.id);
+                        } else {
+                          handleLikeBands(item.id);
+                        }
+                        // 클릭 시 해당 인덱스 liked만 토글
+                        setLiked((prev) =>
+                          prev.map((v, i) => (i === index ? !v : v))
+                        );
                       }}
                     />
                   </li>
