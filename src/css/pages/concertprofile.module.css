@@ -27,6 +27,10 @@
   display: block;
   width: max-content;
   line-height: 1.2;
+  max-width: 70%;    
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .posterImg {
