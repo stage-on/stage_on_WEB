@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import Menu from "../components/Menu";
 import useSearch from "../hooks/useSearch";
 import useMyBands from "../hooks/useMyBands";
+import { likePerformance, cancelLikePerformance } from "../api/performanceLike";
 
 export default function Search() {
   // 입력된 검색어
@@ -209,20 +210,24 @@ export default function Search() {
                     <div className={searchStyle.titleAndInfo}>
                       <span className={searchStyle.title}>{item.title}</span>
                       <div className={searchStyle.info}>
-                        <img
-                          src={performanceLiked[index] ? fullHeart : emptyHeart}
-                          alt="좋아요"
-                          onClick={() => {
-                            if (performanceLiked[index]) {
-                              // 공연 좋아요 취소 함수
-                            } else {
-                              // 공연 좋아요 추가 함수
-                            }
-                            setPerformanceLiked((prev) =>
-                              prev.map((v, i) => (i === index ? !v : v))
-                            );
-                          }}
-                        />
+                       <img
+                        src={performanceLiked[index] ? fullHeart : emptyHeart}
+                        alt="좋아요"
+                        onClick={async () => {
+                          const performanceId = item.performanceId;
+
+                          if (performanceLiked[index]) {
+                            await cancelLikePerformance(performanceId);
+                          } else {
+                            await likePerformance(performanceId);
+                          }
+
+                          setPerformanceLiked((prev) =>
+                            prev.map((v, i) => (i === index ? !v : v))
+                          );
+                        }}
+                      />
+
                         <span className={searchStyle.innerText}>|</span>
                         <span>{item.artistNames[0]}</span>
                         <span className={searchStyle.innerText}>|</span>
