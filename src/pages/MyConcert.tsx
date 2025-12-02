@@ -12,7 +12,8 @@ import type { MyConcertResponse } from "../api/myConcerts";
 
 
 interface Concert {
-  id: number;        
+  id: number;     
+  mt20id: string;    
   festivalName: string;
   location: string;   
   date: string;       
@@ -39,9 +40,10 @@ const MyConcert = () => {
     const fetchMyConcerts = async () => {
       try {
         const data: MyConcertResponse[] = await getMyConcerts();
-
+           console.log("likes/my/concerts 응답", data);
         const mapped: Concert[] = data.map((c) => ({
           id: c.performanceId,
+           mt20id: c.mt20id,
           festivalName: c.title,
           location: c.fcltynm,
           date: formatDateRange(c.prfpdfrom, c.prfpdto),
@@ -89,6 +91,7 @@ const MyConcert = () => {
           <MyConcertsCard
             key={concert.id}
             id={concert.id}
+              mt20id={concert.mt20id}
             festivalName={concert.festivalName}
             location={concert.location}
             date={concert.date}
