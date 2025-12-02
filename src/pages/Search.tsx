@@ -18,7 +18,10 @@ export default function Search() {
   // 메뉴 눌렀는지 아닌지
   const [onMenu, setOnMenu] = useState<boolean>(false);
   const [animateMenu, setAnimateMenu] = useState<boolean>(false);
-  const [liked, setLiked] = useState<boolean[]>([]);
+  // 밴드 좋아요 여부 담는 배열
+  const [bandLiked, setBandLiked] = useState<boolean[]>([]);
+  // 공연 좋아요 여부 담는 배열
+  const [performanceLiked, setPerformanceLiked] = useState<boolean[]>([]);
   const {
     recent,
     recommendList,
@@ -62,9 +65,14 @@ export default function Search() {
   // artists가 바뀔 때 liked 배열 초기화
   useEffect(() => {
     if (artists?.items) {
-      setLiked(artists.items.map((artist) => artist.liked ?? false));
+      setBandLiked(artists.items.map((artist) => artist.liked ?? false));
     }
-  }, [artists]);
+    if (performances?.items) {
+      setPerformanceLiked(
+        performances.items.map((performance) => performance.liked ?? false)
+      );
+    }
+  }, [artists, performances]);
 
   if (loading) return <div>로딩중...</div>;
   return (
@@ -192,7 +200,7 @@ export default function Search() {
           <ul className={searchStyle.searchResultDiv}>
             {onFestival && (
               <>
-                {performances?.items.map((item) => (
+                {performances?.items.map((item, index) => (
                   <li
                     className={searchStyle.searchResultItem}
                     key={item.performanceId}
@@ -201,7 +209,20 @@ export default function Search() {
                     <div className={searchStyle.titleAndInfo}>
                       <span className={searchStyle.title}>{item.title}</span>
                       <div className={searchStyle.info}>
-                        <img src={emptyHeart} alt="좋아요" />
+                        <img
+                          src={performanceLiked[index] ? fullHeart : emptyHeart}
+                          alt="좋아요"
+                          onClick={() => {
+                            if (performanceLiked[index]) {
+                              // 공연 좋아요 취소 함수
+                            } else {
+                              // 공연 좋아요 추가 함수
+                            }
+                            setPerformanceLiked((prev) =>
+                              prev.map((v, i) => (i === index ? !v : v))
+                            );
+                          }}
+                        />
                         <span className={searchStyle.innerText}>|</span>
                         <span>{item.artistNames[0]}</span>
                         <span className={searchStyle.innerText}>|</span>
@@ -233,17 +254,17 @@ export default function Search() {
                       </span>
                     </div>
                     <img
-                      src={liked[index] ? fullHeart : emptyHeart}
+                      src={bandLiked[index] ? fullHeart : emptyHeart}
                       alt="하트"
                       className={searchStyle.hearIcon}
                       onClick={() => {
-                        if (liked[index]) {
+                        if (bandLiked[index]) {
                           removeMyBands(item.id);
                         } else {
                           handleLikeBands(item.id);
                         }
                         // 클릭 시 해당 인덱스 liked만 토글
-                        setLiked((prev) =>
+                        setBandLiked((prev) =>
                           prev.map((v, i) => (i === index ? !v : v))
                         );
                       }}

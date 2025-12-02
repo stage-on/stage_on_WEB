@@ -8,6 +8,7 @@ import menuConcertsSVG from "../assets/component/menu/speaker.svg";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api/api";
+import { useStore } from "../store/store";
 
 type Props = {
   animateMenu: boolean;
@@ -32,6 +33,11 @@ export default function Menu({
     return () => clearTimeout(timer);
   }, []);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const logout = useStore((state) => state.logout);
+  const handleLogOut = () => {
+    logout();
+    navigate("/login", { replace: true });
+  };
 
   const movePage = (e: React.MouseEvent<HTMLLIElement>) => {
     const span = e.currentTarget.dataset.value;
@@ -126,7 +132,9 @@ export default function Menu({
             <span>MY CONCERTS</span>
           </li>
         </ul>
-        <span className={menuStyle.logout}>로그아웃</span>
+        <span className={menuStyle.logout} onClick={handleLogOut}>
+          로그아웃
+        </span>
       </div>
     </div>
   );
