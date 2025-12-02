@@ -17,7 +17,8 @@ interface Concert {
   festivalName: string;
   location: string;   
   date: string;       
-  liked: boolean;      
+  liked: boolean;
+   posterUrl: string;      
 }
 
 
@@ -48,6 +49,7 @@ const MyConcert = () => {
           location: c.fcltynm,
           date: formatDateRange(c.prfpdfrom, c.prfpdto),
           liked: true,
+           posterUrl: c.posterUrl,
         }));
 
         setConcerts(mapped);
@@ -89,6 +91,7 @@ const MyConcert = () => {
       {!loading &&
         concerts.map((concert) => (
           <MyConcertsCard
+           posterUrl={concert.posterUrl} 
             key={concert.id}
             id={concert.id}
               mt20id={concert.mt20id}
