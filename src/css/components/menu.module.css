@@ -87,5 +87,6 @@
   font-weight: 600;
   position: absolute;
   bottom: 40px;
+  cursor: pointer;
 }
 /* 메뉴 창 아이템들 */
