@@ -27,7 +27,7 @@ export default function App() {
           <Route path="mybands" element={<MyBands />} />
           <Route path="home" element={<Home />} />
           <Route path="myconcerts" element={<MyConcert />} />
-          <Route path="concert/:id" element={<ConcertProfile />} />
+         <Route path="concert/:mt20id" element={<ConcertProfile />} />
           <Route path="timetable">
             <Route index element={<TimetableMainPage />} />
             <Route path=":id" element={<TimetableDetailPage />} />
