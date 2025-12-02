@@ -8,6 +8,7 @@ import { Link } from "react-router-dom";
 
 interface MyConcertsCardProps {
   id: number;
+  mt20id: string;
   festivalName: string;
   location: string;
   date: string;
@@ -17,6 +18,7 @@ interface MyConcertsCardProps {
 
 const MyConcertsCard = ({
   id,
+  mt20id,
   festivalName,
   location,
   date,
@@ -31,8 +33,11 @@ const MyConcertsCard = ({
 
   return (
     <>
-    <Link to={`/main/concert/${id}`}
-     className={myConcertsStyle.cardLink}>
+  <Link
+      to={`/main/concert/${mt20id}`}
+      state={{ liked }}               
+      className={myConcertsStyle.cardLink}
+    >
       <div className={myConcertsStyle.concertCardContainer}>
         <img src={concertimage} className={myConcertsStyle.concertImg} />
 
