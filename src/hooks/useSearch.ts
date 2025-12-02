@@ -18,6 +18,7 @@ interface PerformanceItem {
   startDate: string;
   endDate: string;
   artistNames: string[];
+  liked: boolean;
 }
 // 밴드 검색 결과 interface
 interface ArtistItem {
