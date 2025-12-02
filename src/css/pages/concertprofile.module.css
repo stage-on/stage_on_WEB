@@ -3,6 +3,11 @@
   margin: -20px; 
 }
 
+.infoSection2{
+  background: #000;
+  margin: -20px;
+}
+
 .header {
     padding: 12px 0;
     display: flex;

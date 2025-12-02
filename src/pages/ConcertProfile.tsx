@@ -1,4 +1,3 @@
-// src/pages/ConcertProfile.tsx
 import { useEffect, useState } from "react";
 import { HiChevronLeft } from "react-icons/hi2";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
@@ -8,9 +7,11 @@ import posterPlaceholder from "../assets/poster image.svg";
 import heartFilled from "../assets/timetable/heart.svg";
 import heartEmpty from "../assets/myconcertheartEmpty.svg";
 import bandListImg from "../assets/bandlistimg.svg";
-
-import { getPerformanceDetail, type PerformanceDetail } 
-  from "../api/performanceDetail";
+import { likePerformance, cancelLikePerformance } from "../api/performanceLike";
+import {
+  getPerformanceDetail,
+  type PerformanceDetail,
+} from "../api/performanceDetail";
 
 type RouteParams = {
   mt20id?: string;
@@ -34,8 +35,33 @@ const ConcertProfile = () => {
   const state = location.state as LocationState | null;
 
   const [liked, setLiked] = useState<boolean>(state?.liked ?? true);
+  const [isProcessing, setIsProcessing] = useState(false);
   const [detail, setDetail] = useState<PerformanceDetail | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const handleToggleLike = async () => {
+    if (!detail) return;
+    if (isProcessing) return;
+
+    const performanceId = detail.id;
+
+    try {
+      setIsProcessing(true);
+
+      if (liked) {
+        await cancelLikePerformance(performanceId);
+        setLiked(false);
+      } else {
+        await likePerformance(performanceId);
+        setLiked(true);
+      }
+    } catch (error) {
+      console.error("관심 공연 처리 실패:", error);
+      alert("관심 공연 처리에 실패했습니다. 잠시 후 다시 시도해주세요.");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
   useEffect(() => {
     if (!mt20id) return;
@@ -63,9 +89,7 @@ const ConcertProfile = () => {
             className={concertProfileStyle.Vector}
             onClick={() => navigate("/main/myconcerts")}
           />
-          <span className={concertProfileStyle.concertName}>
-            로딩 중...
-          </span>
+          <span className={concertProfileStyle.concertName}>로딩 중...</span>
         </div>
       </div>
     );
@@ -102,8 +126,7 @@ const ConcertProfile = () => {
     locationUrl,
   } = detail;
 
-  const ticketSite = relates?.[0]; 
-  
+  const ticketSite = relates?.[0];
 
   const handleOpenTicket = () => {
     if (ticketSite?.relateurl) {
@@ -135,41 +158,44 @@ const ConcertProfile = () => {
       />
 
       <div className={concertProfileStyle.SectionWrapper}>
-        {/* 상단 기본 정보 + 좋아요 */}
         <div className={concertProfileStyle.infoSection}>
           <div className={concertProfileStyle.leftBlock}>
             <span className={concertProfileStyle.title}>{prfnm}</span>
             <span className={concertProfileStyle.location}>{fcltynm}</span>
           </div>
+<div className={concertProfileStyle.rightBlock}>
 
-          <div className={concertProfileStyle.rightBlock}>
-            <div className={concertProfileStyle.likeRow}>
-              <img
-                src={liked ? heartFilled : heartEmpty}
-                className={concertProfileStyle.heartIcon}
-                onClick={() => {
-                  // 여기서 나중에 좋아요 API 연동
-                  setLiked((prev) => !prev);
-                }}
-              />
-            </div>
+  <div className={concertProfileStyle.likeRow}>
+    <img
+      src={liked ? heartFilled : heartEmpty}
+      className={concertProfileStyle.heartIcon}
+    />
+  </div>
 
-            {liked ? (
-              <button className={concertProfileStyle.interestButton}>
-                나의 관심 공연
-              </button>
-            ) : (
-              <button
-                className={concertProfileStyle.interestButtonInactive}
-                onClick={() => setLiked(true)}
-              >
-                관심 공연으로 추가하기
-              </button>
-            )}
+    {liked ? (
+      <button
+        className={concertProfileStyle.interestButton}
+        onClick={handleToggleLike}
+        disabled={isProcessing}
+      >
+        나의 관심 공연
+      </button>
+    ) : (
+      <button
+        className={concertProfileStyle.interestButtonInactive}
+        onClick={handleToggleLike}
+        disabled={isProcessing}
+      >
+        관심 공연으로 추가하기
+      </button>
+    )}
+  </div>
+
           </div>
         </div>
 
         {/* 상세 정보 섹션 */}
+        <div className={concertProfileStyle.infoSection2}>
         <div className={concertProfileStyle.detailSection}>
           <div className={concertProfileStyle.detailLeft}>
             <div className={concertProfileStyle.detailTitle}>상세 정보</div>
@@ -200,10 +226,7 @@ const ConcertProfile = () => {
           </div>
 
           <div className={concertProfileStyle.detailRight}>
-            <button
-              className={concertProfileStyle.detailButton}
-              // 나중에 타임테이블 커스텀 페이지로 이동
-            >
+            <button className={concertProfileStyle.detailButton}>
               타임테이블 커스텀
             </button>
 
@@ -251,7 +274,7 @@ const ConcertProfile = () => {
           </div>
         </div>
       </div>
-    </div>
+</div>
   );
 };
 
