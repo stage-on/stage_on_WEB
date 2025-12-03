@@ -204,11 +204,15 @@ export default function Search() {
             {onFestival && (
               <>
                 {performances?.items.map((item, index) => (
-                  <li
-                    className={searchStyle.searchResultItem}
-                    key={item.performanceId}
-                  onClick={() => navigate(`/main/concert/${item.mt20id}`)}
-                  >
+                        <li
+                          className={searchStyle.searchResultItem}
+                          key={item.performanceId}
+                        onClick={() =>  navigate(`/main/concert/${item.mt20id}`, {
+                state: { liked: item.liked },  
+              })
+            }
+          >
+                
                      
                     <img src={item.posterUrl} className={searchStyle.testImg} />
                     <div className={searchStyle.titleAndInfo}>

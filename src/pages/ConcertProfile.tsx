@@ -34,7 +34,7 @@ const ConcertProfile = () => {
   const location = useLocation();
   const state = location.state as LocationState | null;
 
-  const [liked, setLiked] = useState<boolean>(state?.liked ?? true);
+  const [liked, setLiked] = useState<boolean>(state?.liked ?? false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [detail, setDetail] = useState<PerformanceDetail | null>(null);
   const [loading, setLoading] = useState(true);
