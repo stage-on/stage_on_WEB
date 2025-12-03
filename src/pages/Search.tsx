@@ -10,8 +10,10 @@ import Menu from "../components/Menu";
 import useSearch from "../hooks/useSearch";
 import useMyBands from "../hooks/useMyBands";
 import { likePerformance, cancelLikePerformance } from "../api/performanceLike";
+import { Link, useNavigate } from "react-router-dom"; 
 
 export default function Search() {
+   const navigate = useNavigate(); 
   // 입력된 검색어
   const [inputText, setInputText] = useState<string>("");
   // 공연 탭인지 아닌지
@@ -205,7 +207,9 @@ export default function Search() {
                   <li
                     className={searchStyle.searchResultItem}
                     key={item.performanceId}
+                  onClick={() => navigate(`/main/concert/${item.mt20id}`)}
                   >
+                     
                     <img src={item.posterUrl} className={searchStyle.testImg} />
                     <div className={searchStyle.titleAndInfo}>
                       <span className={searchStyle.title}>{item.title}</span>
@@ -213,7 +217,8 @@ export default function Search() {
                        <img
                         src={performanceLiked[index] ? fullHeart : emptyHeart}
                         alt="좋아요"
-                        onClick={async () => {
+                        onClick={async (e) => {
+                          e.stopPropagation();
                           const performanceId = item.performanceId;
 
                           if (performanceLiked[index]) {
