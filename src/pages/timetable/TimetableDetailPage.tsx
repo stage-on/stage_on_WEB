@@ -1,4 +1,4 @@
-// src/pages/timetable/TimetableDetailPage.tsx (최종 수정 버전: 시간 타입 유연성 확보 및 상태 관리)
+// src/pages/timetable/TimetableDetailPage.tsx
 
 import { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
@@ -7,11 +7,11 @@ import leftarrow from "../../assets/timetable/arrow-left.svg";
 import downarrow from "../../assets/timetable/arrow-down.svg";
 import download from "../../assets/timetable/download.svg";
 import refresh from "../../assets/timetable/refresh.svg";
-import timetableStyles from "../../css/pages/timetable/timetabledetail.module.css"; // 경로 확인 필요
+import timetableStyles from "../../css/pages/timetable/timetabledetail.module.css";
 import TimetableGrid from "../../components/timetable/TimetableGrid"; 
-import api from "../../api/api"; 
+import api from "../../api/api"; // Axios 인스턴스
 
-// ⭐️ Kopis API 응답 타입 (start/end를 객체 또는 문자열로 받도록 수정) ⭐️
+// ⭐️ Kopis API 응답 타입 ⭐️
 export interface KopisFestivalItem {
   id: number; 
   prfnm: string; 
@@ -22,7 +22,6 @@ export interface KopisFestivalItem {
   slots: { 
     date: string; stageId: string; stageName: string; stageOrder: number; 
     artist: string; 
-    // ⭐️ start와 end 필드를 객체이거나 문자열일 수 있도록 정의 ⭐️
     start: string | { hour: number; minute: number; second: number; nano: number; }; 
     end: string | { hour: number; minute: number; second: number; nano: number; }; 
     minutes: number; img: string | null; note: string | null; 
@@ -40,8 +39,7 @@ interface FestivalDetailData {
     days: DayScheduleData[]; 
 }
 
-// ⭐️ (추가) ⭐️ 스케줄 아이템의 고유 키를 생성하는 헬퍼 함수
-// date, stageId, artist, start 시간을 조합하여 고유한 문자열을 만듭니다.
+// ⭐️ 스케줄 아이템의 고유 키를 생성하는 헬퍼 함수
 const createScheduleKey = (s: ScheduleItem) => `${s.date}-${s.stageId}-${s.artist}-${s.start}`;
 
 const formatDayAndDayOfWeek = (dateString: string): string => {
@@ -75,48 +73,31 @@ async function fetchAndProcessTimetableDetail(
     try {
         const response = await api.get(`/kopis/performances/festivals?festivalId=${idNum}`); 
         
-        console.log("📌 API 전체 응답:", response.data);
-
         const rawData = response.data.data || response.data;
         const apiData: KopisFestivalItem | undefined = Array.isArray(rawData)
-            ? rawData.find(f => f.id === idNum) || rawData[0] // 배열일 경우 첫 번째 요소도 고려
+            ? rawData.find(f => f.id === idNum) || rawData[0] 
             : rawData;
 
-        if (!apiData) {
-            console.error(`⚠️ festivalId ${festivalId}에 해당하는 데이터가 없습니다.`);
+        if (!apiData || !apiData.prfnm || (apiData.slots || []).length === 0) {
+            console.error(`⚠️ festivalId ${festivalId}에 해당하는 데이터가 없거나 필수 필드가 누락되었습니다.`);
             setDetailData(null);
             setIsLoading(false);
             return null;
         }
 
-        const slots = apiData.slots || [];
-
-        if (!apiData.prfnm || slots.length === 0) { 
-             console.error("⚠️ 필수 필드 누락 또는 slots 없음");
-             setDetailData(null);
-             setIsLoading(false);
-             return null;
-        }
-
         const schedulesByDateMap: Record<string, ScheduleItem[]> = {};
 
-        slots.forEach(slot => {
+        apiData.slots.forEach(slot => {
             const dateString = slot.date;
             
-            // ⭐️⭐️ 시간 포맷팅 로직 수정: 문자열과 객체 모두 처리 ⭐️⭐️
             let startString = "00:00:00";
             let endString = "00:00:00";
 
-            // 1. start/end가 이미 문자열인 경우 (Main Page에서 본 유효한 형식)
             if (typeof slot.start === 'string') {
                 startString = slot.start;
-            } 
-            // 2. start/end가 객체인 경우 (Detail Page의 인터페이스 형식)
-            else if (slot.start && typeof slot.start === 'object') {
+            } else if (slot.start && typeof slot.start === 'object') {
                 const startHour = slot.start.hour ?? 0;
                 const startMinute = slot.start.minute ?? 0;
-                
-                // **주의:** 여기서 hour/minute이 0이라면 "00:00:00"이 되며, 이는 서버 데이터 문제
                 startString = `${startHour.toString().padStart(2,'0')}:${startMinute.toString().padStart(2,'0')}:00`;
             }
             
@@ -128,15 +109,14 @@ async function fetchAndProcessTimetableDetail(
                 endString = `${endHour.toString().padStart(2,'0')}:${endMinute.toString().padStart(2,'0')}:00`;
             }
 
-
             const scheduleItem: ScheduleItem = {
                 date: slot.date,
                 stageId: slot.stageId,
                 stageName: slot.stageName,
                 stageOrder: slot.stageOrder,
                 artist: slot.artist,
-                start: startString, // 수정된 문자열 사용
-                end: endString,     // 수정된 문자열 사용
+                start: startString, 
+                end: endString,     
                 minutes: slot.minutes,
                 img: slot.img || null,
                 note: slot.note || null,
@@ -147,14 +127,9 @@ async function fetchAndProcessTimetableDetail(
             schedulesByDateMap[dateString].push(scheduleItem);
         });
 
-        console.log("📌 모든 ScheduleItem:", Object.values(schedulesByDateMap).flat().slice(0, 5)); // 상위 5개만 로그 출력
-
         const processedDays: DayScheduleData[] = Object.keys(schedulesByDateMap)
             .sort()
-            .map(date => ({
-                date,
-                schedules: schedulesByDateMap[date]
-            }));
+            .map(date => ({ date, schedules: schedulesByDateMap[date] }));
 
         processedData = {
             festivalId: idNum,
@@ -162,10 +137,7 @@ async function fetchAndProcessTimetableDetail(
             days: processedDays
         };
         
-        console.log("✅ processedData:", processedData);
-
         setDetailData(processedData);
-            
         if (processedData.days.length > 0) setCurrentDayIndex(0);
 
     } catch (error) {
@@ -188,38 +160,29 @@ export default function TimetableDetailPage() {
     const [currentDayIndex, setCurrentDayIndex] = useState(-1);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-    // ⭐️ (추가) ⭐️ 선택된 스케줄을 추적하는 상태 (Set 사용)
     const [activeScheduleKeys, setActiveScheduleKeys] = useState<Set<string>>(new Set());
     
-    // ⭐️ (수정/추가) ⭐️ 스케줄을 클릭했을 때 상태를 토글하는 함수
     const handleScheduleToggle = (schedule: ScheduleItem) => {
         const key = createScheduleKey(schedule);
         
-        // ⭐️ (수정) ⭐️ const로 명확하게 선언하여 스코프 오류를 해결합니다.
-        // 현재 상태를 기준으로 클릭 후의 예상 상태를 미리 계산합니다.
         const newStateIsActive = !activeScheduleKeys.has(key); 
 
         setActiveScheduleKeys(prev => {
             const newSet = new Set(prev);
             if (newSet.has(key)) {
-                newSet.delete(key); // 이미 선택되었으면 제거 (inverted: false)
+                newSet.delete(key); 
             } else {
-                newSet.add(key); // 선택되지 않았으면 추가 (inverted: true)
+                newSet.add(key); 
             }
             return newSet;
         });
         
-        // ⭐️ (수정) 콘솔 로깅으로 inverted 여부 확인 ⭐️
         console.log("--- Schedule Toggled ---");
         console.log("Date:", schedule.date);
         console.log("Artist:", schedule.artist);
         console.log("Stage Order:", schedule.stageOrder);
-        // 계산된 로컬 변수 newStateIsActive를 사용합니다.
-        console.log("Inverted/Selected (New State):", newStateIsActive);
+        console.log("Inverted/Selected (New State):", newStateIsActive); 
         console.log("------------------------");
-        
-        // ⭐️ (추가) ⭐️ 상태 변경 후 페이로드 생성 함수를 호출할 수 있습니다.
-        // 예를 들어: createAndSendInvertedSlotsPayload();
     };
 
     const currentMode: TimetableMode = useMemo(() => {
@@ -228,33 +191,38 @@ export default function TimetableDetailPage() {
         return 'view'; 
     }, [location.pathname]);
     
-    // ⭐️ (추가) ⭐️ 서버 전송 페이로드를 생성하는 함수 (나중에 버튼에 연결)
-    const createInvertedSlotsPayload = (): { mt20id: string; invertedSlots: any[] } | null => {
-        if (!detailData || currentDayIndex === -1) return null;
+    // ⭐️ (수정) ⭐️ 페이로드 생성 시 선택 여부(hasSelections)도 함께 반환하도록 수정
+    const getPayloadAndCheckSelection = (): { payload: { mt20id: string; invertedSlots: any[] } | null, hasSelections: boolean } => {
+        if (!detailData || currentDayIndex === -1) return { payload: null, hasSelections: false };
         
         const currentDaySchedules = detailData.days[currentDayIndex]?.schedules || [];
+        let hasSelections = false;
 
-        // 현재 날짜의 모든 스케줄을 순회하며 inverted 여부를 결정합니다.
         const invertedSlots = currentDaySchedules.map(schedule => {
             const key = createScheduleKey(schedule);
-            const isInverted = activeScheduleKeys.has(key); // Set에 있으면 true (선택됨)
+            const isInverted = activeScheduleKeys.has(key); 
+            
+            if (isInverted) {
+                hasSelections = true;
+            }
             
             return {
                 date: schedule.date,
                 stageOrder: schedule.stageOrder,
                 artist: schedule.artist,
-                // ⭐️ 활성화 상태를 inverted 필드 값으로 사용 ⭐️
                 inverted: isInverted 
             };
         });
 
+        // ⚠️ 이 mt20id는 실제 사용자 ID 또는 타임테이블 고유 ID로 대체되어야 합니다.
+        const TEMP_MT20ID = "TEMP_USER_OR_TABLE_ID"; 
+
         const payload = {
-            mt20id: "TEMP_USER_ID_OR_MT_ID", // 실제 사용자 ID나 테이블 ID로 대체
+            mt20id: TEMP_MT20ID, 
             invertedSlots: invertedSlots
         };
         
-        console.log("🚀 서버 전송 페이로드 미리보기:", payload);
-        return payload;
+        return { payload, hasSelections };
     };
 
 
@@ -270,7 +238,6 @@ export default function TimetableDetailPage() {
             stageMap[s.stageName].push(s);
         });
         
-        // 무대 순서에 따라 정렬 (TimetableGrid에서 사용됨)
         const uniqueStages = Array.from(new Set(allSchedules.map(s => JSON.stringify({ name: s.stageName, order: s.stageOrder }))));
         const sortedStages = uniqueStages.map(s => JSON.parse(s)).sort((a, b) => a.order - b.order);
         const stageNames: Record<string, string> = {}; 
@@ -280,7 +247,6 @@ export default function TimetableDetailPage() {
     }, [allSchedules]);
 
     useEffect(() => {
-        console.log("🎯 현재 festivalId:", festivalId);
         if (festivalId) {
             fetchAndProcessTimetableDetail(festivalId, setCurrentDayIndex, setDetailData, setIsLoading);
         } else {
@@ -288,16 +254,50 @@ export default function TimetableDetailPage() {
              setDetailData(null); 
         }
     }, [festivalId]);
-
-
-    const handleGoBack = () => navigate(-1);
     
-    // ⭐️ (수정) ⭐️ 다운로드 버튼을 서버 저장 버튼으로 가정하고 페이로드 생성 로직 연결
-    const handleSaveTimetable = () => {
-        const payload = createInvertedSlotsPayload();
-        if (payload) {
-            console.log("Saving timetable to server...", payload);
-            // 여기에 api.put('/mytimetable', payload) 같은 서버 저장 로직 추가
+    // ⭐️ (추가) ⭐️ 핵심 저장 로직. 성공/건너뛰면 true, 실패하면 false 반환
+    const saveTimetableData = async (): Promise<boolean> => { 
+        const { payload, hasSelections } = getPayloadAndCheckSelection();
+
+        if (!payload) return true;
+        
+        // ⭐️ 조건: 선택된 스케줄이 없으면 서버에 저장 요청을 건너뜁니다. ⭐️
+        if (!hasSelections) {
+            console.log("ℹ️ 선택된 스케줄이 없어 서버에 저장 요청을 건너뜁니다.");
+            return true; 
+        }
+
+        const mt20id = payload.mt20id;
+        const API_ENDPOINT = `/festivals/${mt20id}/custom-slots`; 
+        const HTTP_METHOD = 'PUT'; 
+
+        console.log(`💾 Final Payload Ready for ${HTTP_METHOD} to ${API_ENDPOINT}:`, payload);
+
+        try {
+            const response = await api.put(API_ENDPOINT, payload); 
+
+            console.log(`✅ 타임테이블 저장 성공 (${HTTP_METHOD} ${API_ENDPOINT}):`, response.data);
+            alert("나의 타임테이블이 성공적으로 서버에 저장되었습니다!");
+            return true;
+
+        } catch (error) {
+            const errorMessage = (error as any).response?.data?.message || "알 수 없는 오류가 발생했습니다.";
+            console.error(`❌ 타임테이블 저장 실패 (${HTTP_METHOD} ${API_ENDPOINT}):`, error);
+            alert(`타임테이블 저장 중 오류가 발생했습니다: ${errorMessage}`);
+            return false;
+        }
+    };
+    
+    // ⭐️ (수정) ⭐️ 뒤로 가기 버튼 클릭 시 저장 로직 실행 후 이동
+    const handleGoBack = async () => {
+        const saveSuccessful = await saveTimetableData();
+
+        // 저장에 성공했거나 (true), 데이터가 없어 건너뛰었을 경우 (true), 뒤로 이동
+        if (saveSuccessful) {
+            navigate(-1);
+        } else {
+            // 저장 실패 시 (false) 경고창을 띄우고 페이지에 머무름
+            console.log("저장 실패로 인해 페이지 이동을 취소합니다.");
         }
     };
     
@@ -305,7 +305,6 @@ export default function TimetableDetailPage() {
         console.log("🔄 Refreshing data from API.");
         setCurrentDayIndex(-1); 
         setIsDropdownOpen(false);
-        // ⭐️ (추가) ⭐️ 새로고침 시 선택 상태도 초기화
         setActiveScheduleKeys(new Set()); 
         if (festivalId) fetchAndProcessTimetableDetail(festivalId, setCurrentDayIndex, setDetailData, setIsLoading);
         else { setDetailData(null); setIsLoading(false); }
@@ -316,7 +315,6 @@ export default function TimetableDetailPage() {
         setIsDropdownOpen(false); 
     };
 
-    // ⭐️ 로딩 및 에러 처리 조건부 렌더링 ⭐️
     if (isLoading) return <div className={timetableStyles.pageContainer}>데이터를 불러오는 중입니다...</div>;
     if (!detailData || detailData.days.length === 0) return <div className={timetableStyles.pageContainer}>존재하지 않는 페스티벌이거나 데이터가 없습니다.</div>;
     if (currentDayIndex === -1 || !detailData.days[currentDayIndex]) return <div className={timetableStyles.pageContainer}>날짜 데이터를 준비 중입니다...</div>;
@@ -330,6 +328,7 @@ export default function TimetableDetailPage() {
     return (
         <div className={timetableStyles.pageContainer}>
             <header className={timetableStyles.header}>
+                {/* ⭐️ (연결) ⭐️ 뒤로 가기 버튼에 저장 로직이 포함된 handleGoBack 연결 */}
                 <button className={timetableStyles.backButton} onClick={handleGoBack}>
                     <img src={leftarrow} alt="뒤로 가기" />
                 </button>
@@ -358,9 +357,9 @@ export default function TimetableDetailPage() {
                             )}
                         </div>
                         <div className={timetableStyles.actionButtonWrapper}>
-                            {/* 다운로드 버튼을 저장 버튼으로 재사용 */}
-                            <button className={timetableStyles.actionButton} onClick={handleSaveTimetable}>
-                                <img src={download} alt="저장"/>
+                            {/* ⭐️ (수정) ⭐️ 다운로드 버튼에서 저장 로직 제거 */}
+                            <button className={timetableStyles.actionButton} onClick={() => console.log("저장 기능이 뒤로 가기 버튼으로 이동했습니다.")}>
+                                <img src={download} alt="저장 기능 제거됨"/>
                             </button>
                             <button className={timetableStyles.actionButton} onClick={handleRefresh}>
                                 <img src={refresh} alt="되돌리기"/>
@@ -375,7 +374,6 @@ export default function TimetableDetailPage() {
                             stageMap={schedulesByStage.stageMap} 
                             allSchedules={allSchedules} 
                             mode={currentMode} 
-                            // ⭐️ (추가) ⭐️ 활성화 상태 관리 props 전달
                             onScheduleToggle={handleScheduleToggle}
                             activeScheduleKeys={activeScheduleKeys}
                         />
