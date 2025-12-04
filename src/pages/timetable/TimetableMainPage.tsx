@@ -1,5 +1,3 @@
-// src/pages/timetable/TimetableMainPage.tsx
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import timetablestyles from "../../css/pages/timetable/timetablemain.module.css";
@@ -7,28 +5,46 @@ import FestivalListItem from "../../components/timetable/FestivalListItem";
 import SectionHeader from "../../components/SectionHeader";
 import RecommendCard from "../../components/timetable/RecommendCard";
 import Alarm from "../../components/Alarm";
-import api from "../../api/api"; // ⭐️ 사용자가 import 한 api 객체 ⭐️
+import api from "../../api/api"; 
 
-// ⭐️ API 응답 타입 정의 (더 많은 페스티벌 API의 응답 구조) ⭐️
+// ⭐️ API 응답 타입 정의 (KopisFestivalItem: JSON 요청 형식과 매핑) ⭐️
 // 실제 API 응답 구조를 기반으로 필드명을 사용합니다.
-interface KopisFestivalItem {
+export interface KopisFestivalItem {
   id: number; // FestivalItem의 id와 매핑
-  mt20id: string; 
+  mt20id: string; // Kopis 공연 ID
   prfnm: string; // FestivalItem의 title과 매핑 (공연명)
-  prfpdfrom: string; // 공연 시작일
-  prfpdto: string; // 공연 종료일
+  prfpdfrom: string; // 공연 시작일 (ex. "2025-12-04")
+  prfpdto: string; // 공연 종료일 (ex. "2025-12-04")
   fcltynm: string; // FestivalItem의 location과 매핑 (시설명)
+  prfruntime: string; // 공연 런타임
+  prfage: string; // 관람 연령
+  pcseguidance: string; // 가격 정보
   poster: string; // FestivalItem의 thumbnailUrl과 매핑 (포스터 URL)
-  // ... 기타 필드 (생략)
+  prfstate: string; // 공연 상태
+  dtguidance: string; // 시간 안내
+  tkstdate: string; // 티켓 오픈일
+  // time 객체는 hour, minute 등을 포함한다고 가정
+  tksttime: { hour: number; minute: number; second: number; nano: number; }; 
+  typeofcon: number;
+  newstate: boolean;
+  locationUrl: string;
+  styurls: { relatenm: string; relateurl: string; }[];
+  relates: { relatenm: string; relateurl: string; }[];
+  days: { date: string; open: { hour: number; minute: number; second: number; nano: number; }; close: { hour: number; minute: number; second: number; nano: number; }; }[];
+  // slot의 start/end도 time 객체를 포함한다고 가정
+  slots: { date: string; stageId: string; stageName: string; stageOrder: number; artist: string; start: { hour: number; minute: number; second: number; nano: number; }; end: { hour: number; minute: number; second: number; nano: number; }; minutes: number; img: string; note: string; }[];
+  fesLinks: { relatenm: string; relateurl: string; }[];
+  artistPics: { date: string; relatenm: string; url: string; }[];
 }
 
-// ⭐️ 수정: 인터페이스를 export 합니다. ⭐️
+
+// ⭐️ 수정: 인터페이스를 export 합니다. (UI 컴포넌트에 필요한 필드) ⭐️
 export interface FestivalItem {
   id: number;
   title: string;
-  likes: number; // API에 없는 경우 0으로 임시 설정 필요
+  likes: number; // API에 없는 경우 0으로 임시 설정
   location: string;
-  date: string;
+  date: string; // "YYYY.MM.DD - YYYY.MM.DD" 형식
   thumbnailUrl: string;
 }
 
@@ -61,9 +77,19 @@ const TimetableMainPage = () => {
   const [error, setError] = useState<string | null>(null);
 
 
-  // 1. 커스텀 '생성' 경로 이동 함수
-  const handleCustomizeClick = (festivalId: number) => { 
-    navigate(`/main/timetable/customize/${festivalId}`);
+  // 1. 커스텀 '생성' 경로 이동 함수 (FestivalItem 또는 RecommendItem 객체를 인수로 받도록 수정)
+  const handleCustomizeClick = (item: FestivalItem | RecommendItem) => { 
+    // FestivalItem과 RecommendItem의 공통 필드만 넘겨도 무방합니다.
+    navigate(`/main/timetable/customize/${item.id}`, {
+        state: { 
+            id: item.id,
+            title: item.title,
+            // FestivalItem에만 'location'이 있으므로 타입 캐스팅 및 기본값 처리
+            location: (item as FestivalItem).location || '정보 없음', 
+            date: item.date,
+            thumbnailUrl: item.thumbnailUrl
+        }
+    });
   };
 
   // 2. 나의 타임테이블 '수정' 경로 이동 함수
@@ -77,19 +103,21 @@ const TimetableMainPage = () => {
     setError(null);
     
     try {
-      // ⭐️ api 객체를 사용하여 GET 요청을 보냅니다. ⭐️
-      // API 주소: /kopis/performances/festivals (v1은 제외)
+      // api 객체를 사용하여 GET 요청을 보냅니다.
       const response = await api.get(`/kopis/performances/festivals?sort=${sortKey}`); 
       
+      // KopisFestivalItem[] 타입으로 가정합니다.
       const apiData: KopisFestivalItem[] = response.data; 
       
-      // ⭐️ API 응답을 FestivalItem 타입에 맞게 변환 (매핑) ⭐️
+      // ⭐️ API 응답을 FestivalItem 타입에 맞게 변환 (매핑 로직) ⭐️
       const transformedData: FestivalItem[] = apiData.map(item => ({
           id: item.id,
           title: item.prfnm, 
-          likes: 0, // API에 '좋아요' 데이터가 없으므로 0으로 임시 처리
+          // Kopis API에 좋아요 데이터가 직접 없으므로 0으로 임시 처리
+          likes: 0, 
           location: item.fcltynm, 
-          date: `${item.prfpdfrom} - ${item.prfpdto}`, 
+          // 시작일과 종료일을 묶어 date 필드 생성
+          date: `${item.prfpdfrom.replace(/-/g, '.')} - ${item.prfpdto.replace(/-/g, '.')}`, 
           thumbnailUrl: item.poster, 
       }));
 
@@ -97,7 +125,6 @@ const TimetableMainPage = () => {
       
     } catch (err) {
       console.error("페스티벌 목록을 불러오는 중 오류 발생:", err);
-      // 에러 객체에 따라 메시지를 다르게 처리할 수 있습니다.
       setError("데이터를 불러오는 데 실패했습니다. 다시 시도해 주세요.");
       setMorefestival([]);
     } finally {
@@ -123,8 +150,7 @@ const TimetableMainPage = () => {
      ];
     setRecommendedFestivals(mockData2);
     
-    // ⭐️ 3. 더 많은 페스티벌 Mock Data 제거 (API 호출로 대체) ⭐️
-    // setMorefestival(mockData3);
+    // 3. 더 많은 페스티벌 Mock Data 제거 (API 호출로 대체)
   }, []);
   
   // ⭐️ currentSort 상태가 변경되거나 컴포넌트 마운트 시 API 호출 ⭐️
@@ -153,7 +179,8 @@ const TimetableMainPage = () => {
               <FestivalListItem
                 key={item.id}
                 itemData={item}
-                onClick={() => handleMyTimetableClick(item.id)}
+                // 나의 타임테이블은 ID만 넘겨도 무방
+                onClick={() => handleMyTimetableClick(item.id)} 
               />
             ))}
           </ul>
@@ -171,7 +198,8 @@ const TimetableMainPage = () => {
               <RecommendCard
                 key={item.id}
                 itemData={item}
-                onCustomizeClick={() => handleCustomizeClick(item.id)}
+                // ⭐️ 수정: item 객체 전체를 인수로 전달 ⭐️
+                onCustomizeClick={() => handleCustomizeClick(item)} 
               />
             ))}
           </div>
@@ -210,7 +238,8 @@ const TimetableMainPage = () => {
                 <FestivalListItem
                   key={item.id}
                   itemData={item}
-                  onClick={() => handleCustomizeClick(item.id)}
+                  // ⭐️ 수정: item 객체 전체를 인수로 전달 ⭐️
+                  onClick={() => handleCustomizeClick(item)}
                 />
               ))}
             </ul>
