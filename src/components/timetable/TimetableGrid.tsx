@@ -13,6 +13,9 @@ interface TimetableGridProps {
     allSchedules: ScheduleItem[];
     mode: 'customize' | 'my' | 'view';
     
+    // ⭐️ (추가) ⭐️ 토글 처리 함수와 활성화된 키 목록을 받습니다.
+    onScheduleToggle: (schedule: ScheduleItem) => void;
+    activeScheduleKeys: Set<string>; 
 }
 
 const TIME_UNIT_MINUTES = 10; 
@@ -23,7 +26,14 @@ const timeToMinutes = (time: string) => { const [h,m] = time.split(':').map(Numb
 const getStartTimeMinutes = (schedules: ScheduleItem[]) => schedules.length===0?900:Math.floor(Math.min(...schedules.map(s=>timeToMinutes(s.start)))/15)*15;
 
 // ⭐️ Prop 목록에서 stageNames를 제거했습니다. ⭐️
-const TimetableGrid: React.FC<TimetableGridProps> = ({ stageMap, allSchedules, mode }) => {
+const TimetableGrid: React.FC<TimetableGridProps> = ({ 
+    stageMap, 
+    allSchedules, 
+    mode, 
+    // ⭐️ (추가) ⭐️ 새로 받은 props를 구조 분해 할당
+    onScheduleToggle, 
+    activeScheduleKeys 
+}) => {
     const startTimeMinutes = useMemo(() => getStartTimeMinutes(allSchedules), [allSchedules]);
     const endTimeMinutes = useMemo(() => {
         if(allSchedules.length===0) return startTimeMinutes+120;
@@ -35,6 +45,11 @@ const TimetableGrid: React.FC<TimetableGridProps> = ({ stageMap, allSchedules, m
 
     const stageKeys = Object.keys(stageMap);
     const totalStageCount = stageKeys.length;
+
+    // ⭐️ (추가) ⭐️ ScheduleItem의 고유 키를 생성하는 헬퍼 함수
+    // TimetableDetailPage와 동일하게 정의되어야 합니다.
+    const createScheduleKey = (s: ScheduleItem) => `${s.date}-${s.stageId}-${s.artist}-${s.start}`;
+
 
     return (
         <div className={gridStyles.timetableContainer}>
@@ -57,7 +72,7 @@ const TimetableGrid: React.FC<TimetableGridProps> = ({ stageMap, allSchedules, m
                         }
                         return (
                             <div key={key} className={`${gridStyles.stageHeaderBlock} ${colorClass}`} style={{width:`${STAGE_WIDTH}px`}}>
-                                LAND STAGE
+                                {key} {/* ⭐️ LAND STAGE 대신 실제 Stage Key(Name) 사용을 권장합니다. ⭐️ */}
                             </div>
                         )
                     })}
@@ -67,9 +82,23 @@ const TimetableGrid: React.FC<TimetableGridProps> = ({ stageMap, allSchedules, m
                 <div className={gridStyles.scheduleArea} style={{ height:`${totalHeightPixels}px`, width:`${totalStageCount*STAGE_WIDTH}px` }}>
                     {stageKeys.map((key,index)=>(
                         <div key={index} className={gridStyles.scheduleColumn} style={{width:`${STAGE_WIDTH}px`}}>
-                            {stageMap[key].map(schedule=>(
-                                <ScheduleBlock key={schedule.start+schedule.artist} schedule={schedule} startTimeMinutes={startTimeMinutes} mode={mode}/>
-                            ))}
+                            {stageMap[key].map(schedule=>{ // ⭐️ (수정) ⭐️ 중괄호를 사용하여 로직 추가
+                                // ⭐️ (추가) ⭐️ ScheduleBlock에 전달할 isActive 상태 결정
+                                const scheduleKey = createScheduleKey(schedule); 
+                                const isActive = activeScheduleKeys.has(scheduleKey);
+
+                                return (
+                                    <ScheduleBlock 
+                                        key={scheduleKey} // ⭐️ (수정) ⭐️ 고유 키 사용
+                                        schedule={schedule} 
+                                        startTimeMinutes={startTimeMinutes} 
+                                        mode={mode}
+                                        // ⭐️ (추가) ⭐️ isActive 상태와 토글 함수 전달
+                                        isActive={isActive} 
+                                        onToggle={onScheduleToggle}
+                                    />
+                                );
+                            })}
                         </div>
                     ))}
                 </div>

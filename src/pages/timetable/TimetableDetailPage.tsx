@@ -1,4 +1,4 @@
-// src/pages/timetable/TimetableDetailPage.tsx (최종 수정 버전: 시간 타입 유연성 확보)
+// src/pages/timetable/TimetableDetailPage.tsx (최종 수정 버전: 시간 타입 유연성 확보 및 상태 관리)
 
 import { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
@@ -7,7 +7,6 @@ import leftarrow from "../../assets/timetable/arrow-left.svg";
 import downarrow from "../../assets/timetable/arrow-down.svg";
 import download from "../../assets/timetable/download.svg";
 import refresh from "../../assets/timetable/refresh.svg";
-
 import timetableStyles from "../../css/pages/timetable/timetabledetail.module.css"; // 경로 확인 필요
 import TimetableGrid from "../../components/timetable/TimetableGrid"; 
 import api from "../../api/api"; 
@@ -40,6 +39,10 @@ interface FestivalDetailData {
     festivalTitle: string; 
     days: DayScheduleData[]; 
 }
+
+// ⭐️ (추가) ⭐️ 스케줄 아이템의 고유 키를 생성하는 헬퍼 함수
+// date, stageId, artist, start 시간을 조합하여 고유한 문자열을 만듭니다.
+const createScheduleKey = (s: ScheduleItem) => `${s.date}-${s.stageId}-${s.artist}-${s.start}`;
 
 const formatDayAndDayOfWeek = (dateString: string): string => {
     const weekdays = ['일', '월', '화', '수', '목', '금', '토'];
@@ -185,11 +188,75 @@ export default function TimetableDetailPage() {
     const [currentDayIndex, setCurrentDayIndex] = useState(-1);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
+    // ⭐️ (추가) ⭐️ 선택된 스케줄을 추적하는 상태 (Set 사용)
+    const [activeScheduleKeys, setActiveScheduleKeys] = useState<Set<string>>(new Set());
+    
+    // ⭐️ (수정/추가) ⭐️ 스케줄을 클릭했을 때 상태를 토글하는 함수
+    const handleScheduleToggle = (schedule: ScheduleItem) => {
+        const key = createScheduleKey(schedule);
+        
+        // ⭐️ (수정) ⭐️ const로 명확하게 선언하여 스코프 오류를 해결합니다.
+        // 현재 상태를 기준으로 클릭 후의 예상 상태를 미리 계산합니다.
+        const newStateIsActive = !activeScheduleKeys.has(key); 
+
+        setActiveScheduleKeys(prev => {
+            const newSet = new Set(prev);
+            if (newSet.has(key)) {
+                newSet.delete(key); // 이미 선택되었으면 제거 (inverted: false)
+            } else {
+                newSet.add(key); // 선택되지 않았으면 추가 (inverted: true)
+            }
+            return newSet;
+        });
+        
+        // ⭐️ (수정) 콘솔 로깅으로 inverted 여부 확인 ⭐️
+        console.log("--- Schedule Toggled ---");
+        console.log("Date:", schedule.date);
+        console.log("Artist:", schedule.artist);
+        console.log("Stage Order:", schedule.stageOrder);
+        // 계산된 로컬 변수 newStateIsActive를 사용합니다.
+        console.log("Inverted/Selected (New State):", newStateIsActive);
+        console.log("------------------------");
+        
+        // ⭐️ (추가) ⭐️ 상태 변경 후 페이로드 생성 함수를 호출할 수 있습니다.
+        // 예를 들어: createAndSendInvertedSlotsPayload();
+    };
+
     const currentMode: TimetableMode = useMemo(() => {
         if (location.pathname.includes('/my/')) return 'my';
         if (location.pathname.includes('/customize/')) return 'customize';
         return 'view'; 
     }, [location.pathname]);
+    
+    // ⭐️ (추가) ⭐️ 서버 전송 페이로드를 생성하는 함수 (나중에 버튼에 연결)
+    const createInvertedSlotsPayload = (): { mt20id: string; invertedSlots: any[] } | null => {
+        if (!detailData || currentDayIndex === -1) return null;
+        
+        const currentDaySchedules = detailData.days[currentDayIndex]?.schedules || [];
+
+        // 현재 날짜의 모든 스케줄을 순회하며 inverted 여부를 결정합니다.
+        const invertedSlots = currentDaySchedules.map(schedule => {
+            const key = createScheduleKey(schedule);
+            const isInverted = activeScheduleKeys.has(key); // Set에 있으면 true (선택됨)
+            
+            return {
+                date: schedule.date,
+                stageOrder: schedule.stageOrder,
+                artist: schedule.artist,
+                // ⭐️ 활성화 상태를 inverted 필드 값으로 사용 ⭐️
+                inverted: isInverted 
+            };
+        });
+
+        const payload = {
+            mt20id: "TEMP_USER_ID_OR_MT_ID", // 실제 사용자 ID나 테이블 ID로 대체
+            invertedSlots: invertedSlots
+        };
+        
+        console.log("🚀 서버 전송 페이로드 미리보기:", payload);
+        return payload;
+    };
+
 
     const allSchedules = useMemo(() => {
         if (!detailData || currentDayIndex === -1 || !detailData.days[currentDayIndex]) return [];
@@ -224,11 +291,22 @@ export default function TimetableDetailPage() {
 
 
     const handleGoBack = () => navigate(-1);
-    const handleDownload = () => console.log("Download clicked");
+    
+    // ⭐️ (수정) ⭐️ 다운로드 버튼을 서버 저장 버튼으로 가정하고 페이로드 생성 로직 연결
+    const handleSaveTimetable = () => {
+        const payload = createInvertedSlotsPayload();
+        if (payload) {
+            console.log("Saving timetable to server...", payload);
+            // 여기에 api.put('/mytimetable', payload) 같은 서버 저장 로직 추가
+        }
+    };
+    
     const handleRefresh = () => {
         console.log("🔄 Refreshing data from API.");
         setCurrentDayIndex(-1); 
         setIsDropdownOpen(false);
+        // ⭐️ (추가) ⭐️ 새로고침 시 선택 상태도 초기화
+        setActiveScheduleKeys(new Set()); 
         if (festivalId) fetchAndProcessTimetableDetail(festivalId, setCurrentDayIndex, setDetailData, setIsLoading);
         else { setDetailData(null); setIsLoading(false); }
     };
@@ -280,8 +358,9 @@ export default function TimetableDetailPage() {
                             )}
                         </div>
                         <div className={timetableStyles.actionButtonWrapper}>
-                            <button className={timetableStyles.actionButton} onClick={handleDownload}>
-                                <img src={download} alt="다운로드"/>
+                            {/* 다운로드 버튼을 저장 버튼으로 재사용 */}
+                            <button className={timetableStyles.actionButton} onClick={handleSaveTimetable}>
+                                <img src={download} alt="저장"/>
                             </button>
                             <button className={timetableStyles.actionButton} onClick={handleRefresh}>
                                 <img src={refresh} alt="되돌리기"/>
@@ -296,6 +375,9 @@ export default function TimetableDetailPage() {
                             stageMap={schedulesByStage.stageMap} 
                             allSchedules={allSchedules} 
                             mode={currentMode} 
+                            // ⭐️ (추가) ⭐️ 활성화 상태 관리 props 전달
+                            onScheduleToggle={handleScheduleToggle}
+                            activeScheduleKeys={activeScheduleKeys}
                         />
                     </div></div>
                     
