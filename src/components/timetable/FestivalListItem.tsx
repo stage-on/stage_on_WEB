@@ -1,8 +1,6 @@
-// src/components/timetable/FestivalListItem.tsx
-
 import { useState } from 'react';
 import festivalListStyles from "../../css/components/timetable/festivallistitem.module.css"; 
-import sampleposter from "../../assets/timetable/poster.svg"; 
+// import sampleposter from "../../assets/timetable/poster.svg"; // ⭐️ 이 줄을 제거하거나 주석 처리합니다. ⭐️
 import arrowIconSVG from "../../assets/timetable/arrow-right.svg"; 
 import heartFilled from "../../assets/timetable/heart.svg";
 import heartEmpty from "../../assets/timetable/heart-empty.svg";
@@ -35,8 +33,11 @@ export default function FestivalListItem({ itemData, onClick }: FestivalListItem
             className={festivalListStyles.timetableListItem} 
             onClick={handleNavigation} 
         >
+            {/* ⭐️ 수정: src 속성을 itemData.thumbnailUrl로 변경 ⭐️
+                이 itemData.thumbnailUrl은 TimetableMainPage에서 item.poster를 매핑한 값입니다.
+            */}
             <img 
-                src={sampleposter} 
+                src={itemData.thumbnailUrl} // ⭐️ 이 부분을 수정했습니다. ⭐️
                 alt={`${itemData.title} 포스터`} 
                 className={festivalListStyles.listThumbnail} 
             />
@@ -50,6 +51,7 @@ export default function FestivalListItem({ itemData, onClick }: FestivalListItem
                 </div>
                 
                 <div className={festivalListStyles.listDetails}>
+                    {/* ... (나머지 좋아요, 위치, 날짜 정보는 그대로 유지) ... */}
                     <img 
                         src={isLiked ? heartFilled : heartEmpty} 
                         alt="좋아요 아이콘" 
