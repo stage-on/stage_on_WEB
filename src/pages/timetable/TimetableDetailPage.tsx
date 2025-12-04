@@ -13,19 +13,29 @@ import api from "../../api/api"; // Axios 인스턴스
 
 // ⭐️ Kopis API 응답 타입 ⭐️
 export interface KopisFestivalItem {
-  id: number; 
+   id: number; 
+  mt20id: string; // <-- 이 값을 사용합니다.
   prfnm: string; 
   prfpdfrom: string; 
   prfpdto: string; 
   fcltynm: string; 
-  days: { date: string; open: any; close: any; }[]; 
-  slots: { 
-    date: string; stageId: string; stageName: string; stageOrder: number; 
-    artist: string; 
-    start: string | { hour: number; minute: number; second: number; nano: number; }; 
-    end: string | { hour: number; minute: number; second: number; nano: number; }; 
-    minutes: number; img: string | null; note: string | null; 
-  }[];
+  prfruntime: string; 
+  prfage: string; 
+  pcseguidance: string; 
+  poster: string; 
+  prfstate: string; 
+  dtguidance: string; 
+  tkstdate: string; 
+  tksttime: { hour: number; minute: number; second: number; nano: number; };
+  typeofcon: number;
+  newstate: boolean;
+  locationUrl: string;
+  styurls: { relatenm: string; relateurl: string; }[];
+  relates: { relatenm: string; relateurl: string; }[];
+  days: { date: string; open: { hour: number; minute: number; second: number; nano: number; }; close: { hour: number; minute: number; second: number; nano: number; }; }[];
+  slots: { date: string; stageId: string; stageName: string; stageOrder: number; artist: string; start: { hour: number; minute: number; second: number; nano: number; }; end: { hour: number; minute: number; second: number; nano: number; }; minutes: number; img: string; note: string; }[];
+  fesLinks: { relatenm: string; relateurl: string; }[];
+  artistPics: { date: string; relatenm: string; url: string; }[];
 }
 export interface ScheduleItem { 
   date: string; stageId: string; stageName: string; stageOrder: number; 
@@ -33,8 +43,10 @@ export interface ScheduleItem {
   img: string | null; note: string | null; isCustomized?: boolean; 
 }
 interface DayScheduleData { date: string; schedules: ScheduleItem[]; }
+// ⭐️ mt20id 필드 추가
 interface FestivalDetailData { 
     festivalId: number; 
+    mt20id: string; // API 응답에서 받은 고유 ID
     festivalTitle: string; 
     days: DayScheduleData[]; 
 }
@@ -84,6 +96,9 @@ async function fetchAndProcessTimetableDetail(
             setIsLoading(false);
             return null;
         }
+        
+        // ⭐️ (추가) ⭐️ mt20id가 누락되었을 경우를 대비해 festivalId를 폴백으로 사용
+        const mt20idValue = apiData.mt20id || festivalId;
 
         const schedulesByDateMap: Record<string, ScheduleItem[]> = {};
 
@@ -113,7 +128,8 @@ async function fetchAndProcessTimetableDetail(
                 date: slot.date,
                 stageId: slot.stageId,
                 stageName: slot.stageName,
-                stageOrder: slot.stageOrder,
+                // 주의: slot.stageOrder는 이미 Number 타입으로 가정되지만, 아래에서 Number()로 한번 더 변환하여 안전성 확보
+                stageOrder: slot.stageOrder, 
                 artist: slot.artist,
                 start: startString, 
                 end: endString,     
@@ -133,6 +149,7 @@ async function fetchAndProcessTimetableDetail(
 
         processedData = {
             festivalId: idNum,
+            mt20id: mt20idValue, // ⭐️ API에서 가져온 mt20id 저장
             festivalTitle: apiData.prfnm,
             days: processedDays
         };
@@ -191,14 +208,16 @@ export default function TimetableDetailPage() {
         return 'view'; 
     }, [location.pathname]);
     
-    // ⭐️ (수정) ⭐️ 페이로드 생성 시 선택 여부(hasSelections)도 함께 반환하도록 수정
+    // ⭐️ (수정된 함수) ⭐️ 페이로드 생성 시 detailData.mt20id 사용, 타입 캐스팅 및 필터링 적용
     const getPayloadAndCheckSelection = (): { payload: { mt20id: string; invertedSlots: any[] } | null, hasSelections: boolean } => {
-        if (!detailData || currentDayIndex === -1) return { payload: null, hasSelections: false };
+        // detailData.mt20id가 없거나 데이터 준비가 안됐으면 저장 요청을 할 수 없음
+        if (!detailData || currentDayIndex === -1 || !detailData.mt20id) return { payload: null, hasSelections: false };
         
         const currentDaySchedules = detailData.days[currentDayIndex]?.schedules || [];
         let hasSelections = false;
 
-        const invertedSlots = currentDaySchedules.map(schedule => {
+        // 1. 모든 스케줄을 매핑하여 inverted 상태를 포함한 슬롯 객체 생성
+        const allSlots = currentDaySchedules.map(schedule => {
             const key = createScheduleKey(schedule);
             const isInverted = activeScheduleKeys.has(key); 
             
@@ -208,21 +227,26 @@ export default function TimetableDetailPage() {
             
             return {
                 date: schedule.date,
-                stageOrder: schedule.stageOrder,
+                // ⭐️⭐️ 수정 1: stageOrder를 Number() 함수로 감싸서 확실히 숫자 타입으로 전송 (백엔드 타입 오류 방지) ⭐️⭐️
+                stageOrder: Number(schedule.stageOrder), 
                 artist: schedule.artist,
                 inverted: isInverted 
             };
         });
 
-        // ⚠️ 이 mt20id는 실제 사용자 ID 또는 타임테이블 고유 ID로 대체되어야 합니다.
-        const TEMP_MT20ID = "TEMP_USER_OR_TABLE_ID"; 
-
+        // 2. ⭐️⭐️ 수정 2: inverted: true 인 항목만 필터링하여 전송 (서버가 수정 대상만 받기를 기대할 경우 오류 방지) ⭐️⭐️
+        const invertedSlots = allSlots.filter(slot => slot.inverted === true);
+        
+        // 필터링 후에도 선택된 항목이 있는지 다시 확인
+        const finalHasSelections = invertedSlots.length > 0;
+        
         const payload = {
-            mt20id: TEMP_MT20ID, 
+            mt20id: detailData.mt20id, 
             invertedSlots: invertedSlots
         };
         
-        return { payload, hasSelections };
+        // 선택된 항목이 없으면 payload가 null은 아니지만, hasSelections가 false임을 반환
+        return { payload, hasSelections: finalHasSelections };
     };
 
 
@@ -255,13 +279,16 @@ export default function TimetableDetailPage() {
         }
     }, [festivalId]);
     
-    // ⭐️ (추가) ⭐️ 핵심 저장 로직. 성공/건너뛰면 true, 실패하면 false 반환
+    // ⭐️ 핵심 저장 로직. 성공/건너뛰면 true, 실패하면 false 반환
     const saveTimetableData = async (): Promise<boolean> => { 
         const { payload, hasSelections } = getPayloadAndCheckSelection();
 
-        if (!payload) return true;
+        // detailData.mt20id가 없거나 데이터 준비가 안됐으면 저장 요청 건너뛰기
+        if (!payload) {
+            console.log("⚠️ 저장할 데이터가 준비되지 않았습니다. (mt20id 누락 또는 데이터 로딩 문제)");
+            return true;
+        }
         
-        // ⭐️ 조건: 선택된 스케줄이 없으면 서버에 저장 요청을 건너뜁니다. ⭐️
         if (!hasSelections) {
             console.log("ℹ️ 선택된 스케줄이 없어 서버에 저장 요청을 건너뜁니다.");
             return true; 
@@ -282,21 +309,20 @@ export default function TimetableDetailPage() {
 
         } catch (error) {
             const errorMessage = (error as any).response?.data?.message || "알 수 없는 오류가 발생했습니다.";
-            console.error(`❌ 타임테이블 저장 실패 (${HTTP_METHOD} ${API_ENDPOINT}):`, error);
+            // ⭐️ 500 에러 메시지 콘솔 출력 ⭐️
+            console.error(`❌ 타임테이블 저장 실패 (${HTTP_METHOD} ${API_ENDPOINT}):`, error); 
             alert(`타임테이블 저장 중 오류가 발생했습니다: ${errorMessage}`);
             return false;
         }
     };
     
-    // ⭐️ (수정) ⭐️ 뒤로 가기 버튼 클릭 시 저장 로직 실행 후 이동
+    // ⭐️ 뒤로 가기 버튼 클릭 시 저장 로직 실행 후 이동
     const handleGoBack = async () => {
         const saveSuccessful = await saveTimetableData();
 
-        // 저장에 성공했거나 (true), 데이터가 없어 건너뛰었을 경우 (true), 뒤로 이동
         if (saveSuccessful) {
             navigate(-1);
         } else {
-            // 저장 실패 시 (false) 경고창을 띄우고 페이지에 머무름
             console.log("저장 실패로 인해 페이지 이동을 취소합니다.");
         }
     };
@@ -316,7 +342,8 @@ export default function TimetableDetailPage() {
     };
 
     if (isLoading) return <div className={timetableStyles.pageContainer}>데이터를 불러오는 중입니다...</div>;
-    if (!detailData || detailData.days.length === 0) return <div className={timetableStyles.pageContainer}>존재하지 않는 페스티벌이거나 데이터가 없습니다.</div>;
+    // detailData.mt20id도 확인
+    if (!detailData || detailData.days.length === 0 || !detailData.mt20id) return <div className={timetableStyles.pageContainer}>존재하지 않는 페스티벌이거나 데이터가 없습니다. (ID 누락 확인)</div>;
     if (currentDayIndex === -1 || !detailData.days[currentDayIndex]) return <div className={timetableStyles.pageContainer}>날짜 데이터를 준비 중입니다...</div>;
 
     const selectedDayData = detailData.days[currentDayIndex];
@@ -328,7 +355,7 @@ export default function TimetableDetailPage() {
     return (
         <div className={timetableStyles.pageContainer}>
             <header className={timetableStyles.header}>
-                {/* ⭐️ (연결) ⭐️ 뒤로 가기 버튼에 저장 로직이 포함된 handleGoBack 연결 */}
+                {/* ⭐️ 뒤로 가기 버튼에 저장 로직이 포함된 handleGoBack 연결 */}
                 <button className={timetableStyles.backButton} onClick={handleGoBack}>
                     <img src={leftarrow} alt="뒤로 가기" />
                 </button>
@@ -357,7 +384,7 @@ export default function TimetableDetailPage() {
                             )}
                         </div>
                         <div className={timetableStyles.actionButtonWrapper}>
-                            {/* ⭐️ (수정) ⭐️ 다운로드 버튼에서 저장 로직 제거 */}
+                            {/* 다운로드 버튼은 기능이 제거됨 */}
                             <button className={timetableStyles.actionButton} onClick={() => console.log("저장 기능이 뒤로 가기 버튼으로 이동했습니다.")}>
                                 <img src={download} alt="저장 기능 제거됨"/>
                             </button>
