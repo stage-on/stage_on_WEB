@@ -208,7 +208,7 @@ export default function TimetableDetailPage() {
         return 'view'; 
     }, [location.pathname]);
     
-    // ⭐️ (수정된 함수) ⭐️ 페이로드 생성 시 detailData.mt20id 사용, 타입 캐스팅 및 필터링 적용
+    // ⭐️ (최종 안전 수정 함수) ⭐️ 페이로드 생성 시 mt20id 중복 방지 및 필터링 적용
     const getPayloadAndCheckSelection = (): { payload: { mt20id: string; invertedSlots: any[] } | null, hasSelections: boolean } => {
         // detailData.mt20id가 없거나 데이터 준비가 안됐으면 저장 요청을 할 수 없음
         if (!detailData || currentDayIndex === -1 || !detailData.mt20id) return { payload: null, hasSelections: false };
@@ -227,20 +227,21 @@ export default function TimetableDetailPage() {
             
             return {
                 date: schedule.date,
-                // ⭐️⭐️ 수정 1: stageOrder를 Number() 함수로 감싸서 확실히 숫자 타입으로 전송 (백엔드 타입 오류 방지) ⭐️⭐️
+                // ⭐️ stageOrder를 Number() 함수로 감싸서 확실히 숫자 타입으로 전송 (백엔드 타입 오류 방지) ⭐️
                 stageOrder: Number(schedule.stageOrder), 
                 artist: schedule.artist,
                 inverted: isInverted 
             };
         });
 
-        // 2. ⭐️⭐️ 수정 2: inverted: true 인 항목만 필터링하여 전송 (서버가 수정 대상만 받기를 기대할 경우 오류 방지) ⭐️⭐️
+        // 2. inverted: true 인 항목만 필터링하여 전송 
         const invertedSlots = allSlots.filter(slot => slot.inverted === true);
         
         // 필터링 후에도 선택된 항목이 있는지 다시 확인
         const finalHasSelections = invertedSlots.length > 0;
         
-        const payload = {
+        // ⭐️⭐️ 수정 1: 객체를 단순하게 만들어 mt20id 중복 가능성을 제거 ⭐️⭐️
+        const payload: { mt20id: string; invertedSlots: any[] } = {
             mt20id: detailData.mt20id, 
             invertedSlots: invertedSlots
         };
@@ -299,6 +300,8 @@ export default function TimetableDetailPage() {
         const HTTP_METHOD = 'PUT'; 
 
         console.log(`💾 Final Payload Ready for ${HTTP_METHOD} to ${API_ENDPOINT}:`, payload);
+        // ⭐️⭐️ 추가 로그: JSON.stringify로 실제 전송될 문자열 확인 (디버깅용) ⭐️⭐️
+        console.log('⭐️ RAW JSON STRING:', JSON.stringify(payload)); 
 
         try {
             const response = await api.put(API_ENDPOINT, payload); 
