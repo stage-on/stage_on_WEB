@@ -12,6 +12,7 @@ interface TimetableGridProps {
     // stageNames: Record<string, string>; 
     allSchedules: ScheduleItem[];
     mode: 'customize' | 'my' | 'view';
+    
 }
 
 const TIME_UNIT_MINUTES = 10; 
@@ -56,8 +57,7 @@ const TimetableGrid: React.FC<TimetableGridProps> = ({ stageMap, allSchedules, m
                         }
                         return (
                             <div key={key} className={`${gridStyles.stageHeaderBlock} ${colorClass}`} style={{width:`${STAGE_WIDTH}px`}}>
-                                {/* ⭐️ Stage 이름 동적 표시: 하드코딩된 'LAND STAGE' 대신 실제 이름(key) 사용 ⭐️ */}
-                                {key}
+                                LAND STAGE
                             </div>
                         )
                     })}

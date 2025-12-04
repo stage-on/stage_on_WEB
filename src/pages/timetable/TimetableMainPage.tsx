@@ -23,15 +23,14 @@ export interface KopisFestivalItem {
   prfstate: string; // 공연 상태
   dtguidance: string; // 시간 안내
   tkstdate: string; // 티켓 오픈일
-  // time 객체는 hour, minute 등을 포함한다고 가정
-  tksttime: { hour: number; minute: number; second: number; nano: number; }; 
+  // ... 기타 필드 (요청하신 JSON 형식에 포함된 필드를 모두 추가했습니다.)
+  tksttime: { hour: number; minute: number; second: number; nano: number; };
   typeofcon: number;
   newstate: boolean;
   locationUrl: string;
   styurls: { relatenm: string; relateurl: string; }[];
   relates: { relatenm: string; relateurl: string; }[];
   days: { date: string; open: { hour: number; minute: number; second: number; nano: number; }; close: { hour: number; minute: number; second: number; nano: number; }; }[];
-  // slot의 start/end도 time 객체를 포함한다고 가정
   slots: { date: string; stageId: string; stageName: string; stageOrder: number; artist: string; start: { hour: number; minute: number; second: number; nano: number; }; end: { hour: number; minute: number; second: number; nano: number; }; minutes: number; img: string; note: string; }[];
   fesLinks: { relatenm: string; relateurl: string; }[];
   artistPics: { date: string; relatenm: string; url: string; }[];
@@ -77,19 +76,9 @@ const TimetableMainPage = () => {
   const [error, setError] = useState<string | null>(null);
 
 
-  // 1. 커스텀 '생성' 경로 이동 함수 (FestivalItem 또는 RecommendItem 객체를 인수로 받도록 수정)
-  const handleCustomizeClick = (item: FestivalItem | RecommendItem) => { 
-    // FestivalItem과 RecommendItem의 공통 필드만 넘겨도 무방합니다.
-    navigate(`/main/timetable/customize/${item.id}`, {
-        state: { 
-            id: item.id,
-            title: item.title,
-            // FestivalItem에만 'location'이 있으므로 타입 캐스팅 및 기본값 처리
-            location: (item as FestivalItem).location || '정보 없음', 
-            date: item.date,
-            thumbnailUrl: item.thumbnailUrl
-        }
-    });
+  // 1. 커스텀 '생성' 경로 이동 함수
+  const handleCustomizeClick = (festivalId: number) => { 
+    navigate(`/main/timetable/customize/${festivalId}`);
   };
 
   // 2. 나의 타임테이블 '수정' 경로 이동 함수
@@ -179,8 +168,7 @@ const TimetableMainPage = () => {
               <FestivalListItem
                 key={item.id}
                 itemData={item}
-                // 나의 타임테이블은 ID만 넘겨도 무방
-                onClick={() => handleMyTimetableClick(item.id)} 
+                onClick={() => handleMyTimetableClick(item.id)}
               />
             ))}
           </ul>
@@ -198,8 +186,7 @@ const TimetableMainPage = () => {
               <RecommendCard
                 key={item.id}
                 itemData={item}
-                // ⭐️ 수정: item 객체 전체를 인수로 전달 ⭐️
-                onCustomizeClick={() => handleCustomizeClick(item)} 
+                onCustomizeClick={() => handleCustomizeClick(item.id)}
               />
             ))}
           </div>
@@ -238,8 +225,7 @@ const TimetableMainPage = () => {
                 <FestivalListItem
                   key={item.id}
                   itemData={item}
-                  // ⭐️ 수정: item 객체 전체를 인수로 전달 ⭐️
-                  onClick={() => handleCustomizeClick(item)}
+                  onClick={() => handleCustomizeClick(item.id)}
                 />
               ))}
             </ul>
