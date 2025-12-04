@@ -13,6 +13,7 @@ interface Recommend {
 // 공연 검색 결과 interface
 interface PerformanceItem {
   performanceId: number;
+   mt20id: string;
   title: string;
   posterUrl: string;
   startDate: string;

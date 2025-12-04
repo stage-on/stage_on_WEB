@@ -9,8 +9,11 @@ import { useEffect, useState } from "react";
 import Menu from "../components/Menu";
 import useSearch from "../hooks/useSearch";
 import useMyBands from "../hooks/useMyBands";
+import { likePerformance, cancelLikePerformance } from "../api/performanceLike";
+import { useNavigate } from "react-router-dom"; 
 
 export default function Search() {
+   const navigate = useNavigate(); 
   // 입력된 검색어
   const [inputText, setInputText] = useState<string>("");
   // 공연 탭인지 아닌지
@@ -201,28 +204,39 @@ export default function Search() {
             {onFestival && (
               <>
                 {performances?.items.map((item, index) => (
-                  <li
-                    className={searchStyle.searchResultItem}
-                    key={item.performanceId}
-                  >
+                        <li
+                          className={searchStyle.searchResultItem}
+                          key={item.performanceId}
+                        onClick={() =>  navigate(`/main/concert/${item.mt20id}`, {
+                state: { liked: item.liked },  
+              })
+            }
+          >
+                
+                     
                     <img src={item.posterUrl} className={searchStyle.testImg} />
                     <div className={searchStyle.titleAndInfo}>
                       <span className={searchStyle.title}>{item.title}</span>
                       <div className={searchStyle.info}>
-                        <img
-                          src={performanceLiked[index] ? fullHeart : emptyHeart}
-                          alt="좋아요"
-                          onClick={() => {
-                            if (performanceLiked[index]) {
-                              // 공연 좋아요 취소 함수
-                            } else {
-                              // 공연 좋아요 추가 함수
-                            }
-                            setPerformanceLiked((prev) =>
-                              prev.map((v, i) => (i === index ? !v : v))
-                            );
-                          }}
-                        />
+                       <img
+                        src={performanceLiked[index] ? fullHeart : emptyHeart}
+                        alt="좋아요"
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          const performanceId = item.performanceId;
+
+                          if (performanceLiked[index]) {
+                            await cancelLikePerformance(performanceId);
+                          } else {
+                            await likePerformance(performanceId);
+                          }
+
+                          setPerformanceLiked((prev) =>
+                            prev.map((v, i) => (i === index ? !v : v))
+                          );
+                        }}
+                      />
+
                         <span className={searchStyle.innerText}>|</span>
                         <span>{item.artistNames[0]}</span>
                         <span className={searchStyle.innerText}>|</span>

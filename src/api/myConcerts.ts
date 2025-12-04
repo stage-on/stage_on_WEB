@@ -1,4 +1,3 @@
-// src/api/myConcertsApi.ts
 import api from "./api";
 
 export interface MyConcertResponse {
@@ -8,7 +7,7 @@ export interface MyConcertResponse {
   prfpdfrom: string; 
   prfpdto: string;   
   fcltynm: string;  
-}
+  mt20id: string; }
 
 // MY Concerts 조회 API
 export const getMyConcerts = async (): Promise<MyConcertResponse[]> => {
