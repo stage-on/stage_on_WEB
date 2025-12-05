@@ -1,3 +1,5 @@
+// src/pages/timetable/TimetableMainPage.tsx
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import timetablestyles from "../../css/pages/timetable/timetablemain.module.css";
@@ -7,8 +9,7 @@ import RecommendCard from "../../components/timetable/RecommendCard";
 import Alarm from "../../components/Alarm";
 import api from "../../api/api"; 
 
-// ⭐️ API 응답 타입 정의 (KopisFestivalItem: JSON 요청 형식과 매핑) ⭐️
-// 실제 API 응답 구조를 기반으로 필드명을 사용합니다.
+// ⭐️ API 응답 타입 정의 (KopisFestivalItem: /kopis 및 /festivals/custom 모두 사용) ⭐️
 export interface KopisFestivalItem {
   id: number; // FestivalItem의 id와 매핑
   mt20id: string; // Kopis 공연 ID
@@ -23,7 +24,6 @@ export interface KopisFestivalItem {
   prfstate: string; // 공연 상태
   dtguidance: string; // 시간 안내
   tkstdate: string; // 티켓 오픈일
-  // ... 기타 필드 (요청하신 JSON 형식에 포함된 필드를 모두 추가했습니다.)
   tksttime: { hour: number; minute: number; second: number; nano: number; };
   typeofcon: number;
   newstate: boolean;
@@ -32,12 +32,12 @@ export interface KopisFestivalItem {
   relates: { relatenm: string; relateurl: string; }[];
   days: { date: string; open: { hour: number; minute: number; second: number; nano: number; }; close: { hour: number; minute: number; second: number; nano: number; }; }[];
   slots: { date: string; stageId: string; stageName: string; stageOrder: number; artist: string; start: { hour: number; minute: number; second: number; nano: number; }; end: { hour: number; minute: number; second: number; nano: number; }; minutes: number; img: string; note: string; }[];
-  fesLinks: { relatenm: string; relateurl: string; }[];
+  fesLinks: { relatenm: string; url: string; }[];
   artistPics: { date: string; relatenm: string; url: string; }[];
 }
 
 
-// ⭐️ 수정: 인터페이스를 export 합니다. (UI 컴포넌트에 필요한 필드) ⭐️
+// ⭐️ UI 컴포넌트에 필요한 최종 FestivalItem 타입 (기존 유지) ⭐️
 export interface FestivalItem {
   id: number;
   title: string;
@@ -63,8 +63,8 @@ const sortOptions = [
 const TimetableMainPage = () => {
   const navigate = useNavigate();
   
-  // Mock 데이터
-  const [timetableList, setTimetableList] = useState<FestivalItem[]>([]);
+  // ⭐️ [수정] 나의 타임테이블 목록 상태를 API 데이터로 변경 ⭐️
+  const [myTimetables, setMyTimetables] = useState<FestivalItem[]>([]);
   const [recommendedFestivals, setRecommendedFestivals] = useState<RecommendItem[]>([]);
   
   // ⭐️ API 데이터 상태 ⭐️
@@ -73,7 +73,10 @@ const TimetableMainPage = () => {
   
   // ⭐️ API 호출 상태 ⭐️
   const [isLoading, setIsLoading] = useState(false);
+  // ⭐️ [추가] 나의 타임테이블 전용 로딩/에러 상태 ⭐️
+  const [isMyListLoading, setIsMyListLoading] = useState(true); 
   const [error, setError] = useState<string | null>(null);
+  const [myListError, setMyListError] = useState<string | null>(null); 
 
 
   // 1. 커스텀 '생성' 경로 이동 함수
@@ -85,8 +88,48 @@ const TimetableMainPage = () => {
   const handleMyTimetableClick = (festivalId: number) => { 
     navigate(`/main/timetable/my/${festivalId}`);
   };
+  
+  // ⭐️ ⭐️ [새로운 API 호출] 나의 타임테이블 목록 조회 함수 ⭐️ ⭐️
+  // API 주소: /festivals/custom
+  const fetchMyTimetables = async () => {
+    setIsMyListLoading(true);
+    setMyListError(null);
+    
+    const API_ENDPOINT = '/festivals/custom'; 
+    
+    try {
+      // ⭐️ GET /festivals/custom 호출 (인증 헤더 필요) ⭐️
+      const response = await api.get(API_ENDPOINT); 
+      
+      // API 응답 데이터가 KopisFestivalItem[] 배열 형태라고 가정합니다.
+      const apiData: KopisFestivalItem[] = response.data.data || response.data; 
+      
+      // ⭐️ API 응답을 FestivalItem 타입에 맞게 변환 (매핑 로직) ⭐️
+      const transformedData: FestivalItem[] = apiData.map(item => ({
+          id: item.id, // FestivalListItem의 key와 id로 사용
+          title: item.prfnm, // 공연명 (title)
+          likes: 0, // 좋아요 데이터가 없다면 임시 값 사용
+          location: item.fcltynm, // 시설명 (location)
+          // prfpdfrom(시작일)과 prfpdto(종료일)을 조합하여 date 형식으로 만듦
+          date: `${item.prfpdfrom.replace(/-/g, '.')} - ${item.prfpdto.replace(/-/g, '.')}`, 
+          thumbnailUrl: item.poster, // 포스터 URL (thumbnailUrl)
+      }));
 
-  // ⭐️ API 호출 함수: 더 많은 페스티벌 목록 조회 ⭐️
+      setMyTimetables(transformedData);
+      console.log(`✅ [GET ${API_ENDPOINT}] 나의 타임테이블 목록 응답:`, response.data);
+      
+    } catch (err) {
+      console.error(`❌ 나의 타임테이블 목록 (${API_ENDPOINT}) 로드 중 오류 발생:`, err);
+      // 로그인 문제 등 4xx 에러 처리를 위해 에러 메시지 업데이트
+      setMyListError("나의 타임테이블을 불러오는 데 실패했습니다. (로그인 상태 확인)");
+      setMyTimetables([]);
+    } finally {
+      setIsMyListLoading(false);
+    }
+  };
+
+
+  // ⭐️ API 호출 함수: 더 많은 페스티벌 목록 조회 (기존 유지) ⭐️
   const fetchMoreFestivals = async (sortKey: string) => {
     setIsLoading(true);
     setError(null);
@@ -123,14 +166,10 @@ const TimetableMainPage = () => {
 
 
   useEffect(() => {
-    // 1. 나의 타임테이블 (Mock Data)
-    const mockData1: FestivalItem[] = [
-       { id: 1, title: "그랜드 민트 페스티벌 2025", likes: 12, location: "일산 킨텍스", date: "2025.12.20 - 2025.12.21", thumbnailUrl: "/path/to/img1.png" },
-      { id: 2, title: "COUNTDOWN FANTASY 2025-2026", likes: 10, location: "일산 킨텍스", date: "2025.12.30 - 2025.12.31", thumbnailUrl: "/path/to/img2.png" },
-    ];
-    setTimetableList(mockData1);
-
-    // 2. 추천 페스티벌 (Mock Data)
+    // ⭐️ ⭐️ [수정] 1. 나의 타임테이블 API 호출로 대체 ⭐️ ⭐️
+    fetchMyTimetables();
+    
+    // 2. 추천 페스티벌 (Mock Data 유지)
     const mockData2: RecommendItem[] = [
        { id: 3, title: "COUNTDOWN FANTASY 2025-2026", date: "2025.12.20 - 2025.12.21", thumbnailUrl: "/path/to/poster1.png" },
       { id: 4, title: "DMZ 피스트레인 뮤직 페스티벌 2025", date: "2025.10.18 - 2025.10.19", thumbnailUrl: "/path/to/poster2.png" },
@@ -139,15 +178,15 @@ const TimetableMainPage = () => {
      ];
     setRecommendedFestivals(mockData2);
     
-    // 3. 더 많은 페스티벌 Mock Data 제거 (API 호출로 대체)
   }, []);
   
-  // ⭐️ currentSort 상태가 변경되거나 컴포넌트 마운트 시 API 호출 ⭐️
+  // ⭐️ currentSort 상태가 변경되거나 컴포넌트 마운트 시 API 호출 (기존 유지) ⭐️
   useEffect(() => {
     fetchMoreFestivals(currentSort);
-  }, [currentSort]); // currentSort이 변경될 때마다 실행
+  }, [currentSort]); 
 
-  const listData = timetableList;
+  // ⭐️ [수정] myTimetables 상태 사용 ⭐️
+  const myTimetableDisplayData = myTimetables; 
   const recommendData = recommendedFestivals;
   const displayFestivalData = morefestival; 
 
@@ -163,17 +202,29 @@ const TimetableMainPage = () => {
             boldParts={[1]}
           />
 
-          <ul className={timetablestyles.timetableList}>
-            {listData.map((item) => (
-              <FestivalListItem
-                key={item.id}
-                itemData={item}
-                onClick={() => handleMyTimetableClick(item.id)}
-              />
-            ))}
-          </ul>
+          {/* ⭐️ [수정] 나의 타임테이블 로딩/에러/데이터 표시 로직 ⭐️ */}
+          {isMyListLoading && <p className={timetablestyles.loadingText}>나의 타임테이블을 불러오는 중...</p>}
+          {myListError && <p className={timetablestyles.errorText}>{myListError}</p>}
+
+          {!isMyListLoading && !myListError && myTimetableDisplayData.length > 0 && (
+            <ul className={timetablestyles.timetableList}>
+              {myTimetableDisplayData.map((item) => (
+                <FestivalListItem
+                  key={item.id}
+                  itemData={item}
+                  onClick={() => handleMyTimetableClick(item.id)}
+                />
+              ))}
+            </ul>
+          )}
+          
+          {!isMyListLoading && !myListError && myTimetableDisplayData.length === 0 && (
+            <p className={timetablestyles.noDataText}>나만의 타임테이블을 만들어 보세요!</p>
+          )}
+
         </section>
 
+        {/* --- 추천 페스티벌 섹션은 변경 없음 --- */}
         <section className={timetablestyles.check}>
           <SectionHeader
             subtitle="나의 관심 페스티벌의"
@@ -191,7 +242,9 @@ const TimetableMainPage = () => {
             ))}
           </div>
         </section>
+        {/* --- */}
 
+        {/* --- 더 많은 페스티벌 섹션은 변경 없음 --- */}
         <section className={timetablestyles.moretimetableSection}>
           <SectionHeader
             subtitle="더 많은 페스티벌의"
@@ -206,7 +259,6 @@ const TimetableMainPage = () => {
                 className={`${timetablestyles.sortButton} ${
                   currentSort === option.key ? timetablestyles.active : ""
                 }`}
-                // ⭐️ 정렬 버튼 클릭 시 currentSort 상태 업데이트 (-> useEffect 실행) ⭐️
                 onClick={() => setCurrentSort(option.key)}
               >
                 {option.label}

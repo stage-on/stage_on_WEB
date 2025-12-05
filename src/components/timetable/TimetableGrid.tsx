@@ -71,8 +71,8 @@ const TimetableGrid: React.FC<TimetableGridProps> = ({
                             default: colorClass = gridStyles.colorStage1;
                         }
                         return (
-                            <div key={key} className={`${gridStyles.stageHeaderBlock} ${colorClass}`} style={{width:`${STAGE_WIDTH}px`}}>
-                                {key} {/* ⭐️ LAND STAGE 대신 실제 Stage Key(Name) 사용을 권장합니다. ⭐️ */}
+                            <div className={`${gridStyles.stageHeaderBlock} ${colorClass}`} style={{width:`${STAGE_WIDTH}px`}}>
+                                LAND STAGE
                             </div>
                         )
                     })}

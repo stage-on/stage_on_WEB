@@ -208,7 +208,7 @@ export default function TimetableDetailPage() {
         return 'view'; 
     }, [location.pathname]);
     
-    // ⭐️ (최종 안전 수정 함수) ⭐️ 페이로드 생성 시 mt20id 중복 방지 및 필터링 적용
+    // ⭐️ (userId 제거) 페이로드: mt20id와 invertedSlots만 포함 ⭐️
     const getPayloadAndCheckSelection = (): { payload: { mt20id: string; invertedSlots: any[] } | null, hasSelections: boolean } => {
         // detailData.mt20id가 없거나 데이터 준비가 안됐으면 저장 요청을 할 수 없음
         if (!detailData || currentDayIndex === -1 || !detailData.mt20id) return { payload: null, hasSelections: false };
@@ -240,7 +240,7 @@ export default function TimetableDetailPage() {
         // 필터링 후에도 선택된 항목이 있는지 다시 확인
         const finalHasSelections = invertedSlots.length > 0;
         
-        // ⭐️⭐️ 수정 1: 객체를 단순하게 만들어 mt20id 중복 가능성을 제거 ⭐️⭐️
+        // ⭐️ userId 필드 제거 ⭐️
         const payload: { mt20id: string; invertedSlots: any[] } = {
             mt20id: detailData.mt20id, 
             invertedSlots: invertedSlots
@@ -282,6 +282,9 @@ export default function TimetableDetailPage() {
     
     // ⭐️ 핵심 저장 로직. 성공/건너뛰면 true, 실패하면 false 반환
     const saveTimetableData = async (): Promise<boolean> => { 
+        
+        // ❌ userId 확보 및 검증 로직 완전히 제거 ❌
+        
         const { payload, hasSelections } = getPayloadAndCheckSelection();
 
         // detailData.mt20id가 없거나 데이터 준비가 안됐으면 저장 요청 건너뛰기
@@ -297,14 +300,14 @@ export default function TimetableDetailPage() {
 
         const mt20id = payload.mt20id;
         const API_ENDPOINT = `/festivals/${mt20id}/custom-slots`; 
-        const HTTP_METHOD = 'PUT'; 
+        const HTTP_METHOD = 'POST'; 
 
         console.log(`💾 Final Payload Ready for ${HTTP_METHOD} to ${API_ENDPOINT}:`, payload);
-        // ⭐️⭐️ 추가 로그: JSON.stringify로 실제 전송될 문자열 확인 (디버깅용) ⭐️⭐️
         console.log('⭐️ RAW JSON STRING:', JSON.stringify(payload)); 
 
         try {
-            const response = await api.put(API_ENDPOINT, payload); 
+            // ⭐️⭐️ api.post 호출 시, userId 쿼리 파라미터 전달 로직 제거 ⭐️⭐️
+            const response = await api.post(API_ENDPOINT, payload); 
 
             console.log(`✅ 타임테이블 저장 성공 (${HTTP_METHOD} ${API_ENDPOINT}):`, response.data);
             alert("나의 타임테이블이 성공적으로 서버에 저장되었습니다!");
@@ -312,14 +315,14 @@ export default function TimetableDetailPage() {
 
         } catch (error) {
             const errorMessage = (error as any).response?.data?.message || "알 수 없는 오류가 발생했습니다.";
-            // ⭐️ 500 에러 메시지 콘솔 출력 ⭐️
+            // ⭐️ 에러 발생 시 로그에서 userId 관련 정보 제거 ⭐️
             console.error(`❌ 타임테이블 저장 실패 (${HTTP_METHOD} ${API_ENDPOINT}):`, error); 
             alert(`타임테이블 저장 중 오류가 발생했습니다: ${errorMessage}`);
             return false;
         }
     };
     
-    // ⭐️ 뒤로 가기 버튼 클릭 시 저장 로직 실행 후 이동
+    // ⭐️ 뒤로 가기 버튼 클릭 시 저장 로직이 포함된 handleGoBack 연결
     const handleGoBack = async () => {
         const saveSuccessful = await saveTimetableData();
 
