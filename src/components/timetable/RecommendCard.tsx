@@ -1,20 +1,19 @@
-// src/components/timetable/RecommendCard.tsx
+// src/components/timetable/RecommendCard.tsx (이미지 소스 수정)
 
 import cardstyles from "../../css/components/timetable/recommendcard.module.css"; 
-import concertImage from "../../assets/timetable/concert_image.svg"
+// import concertImage from "../../assets/timetable/concert_image.svg" // ⭐️ 제거: itemData에서 URL 받음 ⭐️
 
 interface RecommendCardProps {
     itemData: {
         id: number;
         title: string;
         date: string;
-        thumbnailUrl: string;
+        thumbnailUrl: string; // ⭐️ 사용될 이미지 URL ⭐️
     };
     onCustomizeClick: (id: number) => void; 
 }
 
 const RecommendCard = ({ itemData, onCustomizeClick }: RecommendCardProps) => {
-    
     const handleClick = () => {
         onCustomizeClick(itemData.id); 
     };
@@ -22,8 +21,9 @@ const RecommendCard = ({ itemData, onCustomizeClick }: RecommendCardProps) => {
     return (
         <div className={cardstyles.recommendCard}>
             
-            <div className={cardstyles.cardThumbnail}>
-                <img src={concertImage} alt={`${itemData.title} 포스터`} />
+            <div>
+                {/* ⭐️ [수정] 이미지 소스를 itemData.thumbnailUrl로 교체 ⭐️ */}
+                <img src={itemData.thumbnailUrl} className={cardstyles.cardThumbnail}alt={`${itemData.title} 포스터`} />
             </div>
             
             <div className={cardstyles.cardInfo}>

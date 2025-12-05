@@ -1,6 +1,6 @@
-// src/pages/timetable/TimetableMainPage.tsx
+// src/pages/timetable/TimetableMainPage.tsx (최종 수정: 좋아요 목록 섹션 제거 및 데이터 흐름 변경)
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import timetablestyles from "../../css/pages/timetable/timetablemain.module.css";
 import FestivalListItem from "../../components/timetable/FestivalListItem";
@@ -9,50 +9,37 @@ import RecommendCard from "../../components/timetable/RecommendCard";
 import Alarm from "../../components/Alarm";
 import api from "../../api/api"; 
 
-// ⭐️ API 응답 타입 정의 (KopisFestivalItem: /kopis 및 /festivals/custom 모두 사용) ⭐️
+// ⭐️ [가정] API 응답 타입 ⭐️
 export interface KopisFestivalItem {
-  id: number; // FestivalItem의 id와 매핑
-  mt20id: string; // Kopis 공연 ID
-  prfnm: string; // FestivalItem의 title과 매핑 (공연명)
-  prfpdfrom: string; // 공연 시작일 (ex. "2025-12-04")
-  prfpdto: string; // 공연 종료일 (ex. "2025-12-04")
-  fcltynm: string; // FestivalItem의 location과 매핑 (시설명)
-  prfruntime: string; // 공연 런타임
-  prfage: string; // 관람 연령
-  pcseguidance: string; // 가격 정보
-  poster: string; // FestivalItem의 thumbnailUrl과 매핑 (포스터 URL)
-  prfstate: string; // 공연 상태
-  dtguidance: string; // 시간 안내
-  tkstdate: string; // 티켓 오픈일
-  tksttime: { hour: number; minute: number; second: number; nano: number; };
-  typeofcon: number;
-  newstate: boolean;
-  locationUrl: string;
-  styurls: { relatenm: string; relateurl: string; }[];
-  relates: { relatenm: string; relateurl: string; }[];
-  days: { date: string; open: { hour: number; minute: number; second: number; nano: number; }; close: { hour: number; minute: number; second: number; nano: number; }; }[];
-  slots: { date: string; stageId: string; stageName: string; stageOrder: number; artist: string; start: { hour: number; minute: number; second: number; nano: number; }; end: { hour: number; minute: number; second: number; nano: number; }; minutes: number; img: string; note: string; }[];
-  fesLinks: { relatenm: string; url: string; }[];
-  artistPics: { date: string; relatenm: string; url: string; }[];
+  id: number;
+  mt20id: string; 
+  prfnm: string; 
+  prfpdfrom: string; 
+  prfpdto: string; 
+  fcltynm: string; 
+  poster: string; 
+  
+  performanceId?: number; 
+  title?: string; 
+  posterUrl?: string; 
+
+  isLiked?: boolean; 
+  likeCount?: number; 
 }
 
-
-// ⭐️ UI 컴포넌트에 필요한 최종 FestivalItem 타입 (기존 유지) ⭐️
+// ⭐️ [UI 타입] 최종 FestivalItem 타입 ⭐️
 export interface FestivalItem {
   id: number;
   title: string;
-  likes: number; // API에 없는 경우 0으로 임시 설정
+  likeCount: number; 
+  isLiked: boolean; 
   location: string;
-  date: string; // "YYYY.MM.DD - YYYY.MM.DD" 형식
+  date: string; 
   thumbnailUrl: string;
 }
 
-export interface RecommendItem {
-  id: number;
-  title: string;
-  date: string;
-  thumbnailUrl: string;
-}
+// ⭐️ [RecommendItem 타입] FestivalItem과 동일한 구조를 가집니다. ⭐️
+export interface RecommendItem extends FestivalItem {}
 
 const sortOptions = [
   { label: "최신 등록순", key: "latest" },
@@ -63,64 +50,92 @@ const sortOptions = [
 const TimetableMainPage = () => {
   const navigate = useNavigate();
   
-  // ⭐️ [수정] 나의 타임테이블 목록 상태를 API 데이터로 변경 ⭐️
   const [myTimetables, setMyTimetables] = useState<FestivalItem[]>([]);
-  const [recommendedFestivals, setRecommendedFestivals] = useState<RecommendItem[]>([]);
+  // myFavorites 상태는 데이터를 가져오는 역할만 합니다.
+  const [myFavorites, setMyFavorites] = useState<FestivalItem[]>([]); 
   
-  // ⭐️ API 데이터 상태 ⭐️
+  // ⭐️ recommendedFestivals는 myFavorites 데이터를 받아 RecommendCard에 표시합니다. ⭐️
+  const [recommendedFestivals, setRecommendedFestivals] = useState<RecommendItem[]>([]); 
+  
   const [morefestival, setMorefestival] = useState<FestivalItem[]>([]);
   const [currentSort, setCurrentSort] = useState(sortOptions[0].key); 
   
-  // ⭐️ API 호출 상태 ⭐️
   const [isLoading, setIsLoading] = useState(false);
-  // ⭐️ [추가] 나의 타임테이블 전용 로딩/에러 상태 ⭐️
   const [isMyListLoading, setIsMyListLoading] = useState(true); 
+  const [isFavoritesLoading, setIsFavoritesLoading] = useState(false); // 로딩 상태는 유지
+  
   const [error, setError] = useState<string | null>(null);
   const [myListError, setMyListError] = useState<string | null>(null); 
+  const [favoritesError, setFavoritesError] = useState<string | null>(null);
 
-
-  // 1. 커스텀 '생성' 경로 이동 함수
+  
   const handleCustomizeClick = (festivalId: number) => { 
     navigate(`/main/timetable/customize/${festivalId}`);
   };
 
-  // 2. 나의 타임테이블 '수정' 경로 이동 함수
   const handleMyTimetableClick = (festivalId: number) => { 
     navigate(`/main/timetable/my/${festivalId}`);
   };
+
+
+  // ⭐️ 나의 관심 페스티벌 목록 조회 (좋아요 목록) ⭐️
+  const fetchMyFavorites = useCallback(async () => {
+    setIsFavoritesLoading(true);
+    setFavoritesError(null);
+    const API_ENDPOINT = '/likes/my/festivals'; 
+    
+    try {
+      const response = await api.get(API_ENDPOINT); 
+      const apiData: any[] = response.data.data || response.data; 
+      
+      const transformedData: FestivalItem[] = apiData.map(item => ({
+          id: item.performanceId,
+          title: item.title,
+          likeCount: 0, 
+          isLiked: true, 
+          location: item.fcltynm,
+          date: `${item.prfpdfrom.replace(/-/g, '.')} - ${item.prfpdto.replace(/-/g, '.')}`, 
+          thumbnailUrl: item.posterUrl,
+      }));
+
+      // ⭐️ 핵심 변경: myFavorites와 recommendedFestivals를 모두 업데이트 ⭐️
+      setMyFavorites(transformedData); 
+      setRecommendedFestivals(transformedData as RecommendItem[]); // 데이터를 RecommendCard 섹션으로 전달
+      
+    } catch (err) {
+      console.error(`❌ 나의 관심 페스티벌 목록 로드 중 오류 발생:`, err);
+      setFavoritesError("관심 목록을 불러오는 데 실패했습니다.");
+      setMyFavorites([]);
+      setRecommendedFestivals([]);
+    } finally {
+      setIsFavoritesLoading(false);
+    }
+  }, []); 
+
   
-  // ⭐️ ⭐️ [새로운 API 호출] 나의 타임테이블 목록 조회 함수 ⭐️ ⭐️
-  // API 주소: /festivals/custom
   const fetchMyTimetables = async () => {
     setIsMyListLoading(true);
     setMyListError(null);
-    
+    // ... (나의 타임테이블 로직 유지) ...
     const API_ENDPOINT = '/festivals/custom'; 
     
     try {
-      // ⭐️ GET /festivals/custom 호출 (인증 헤더 필요) ⭐️
       const response = await api.get(API_ENDPOINT); 
-      
-      // API 응답 데이터가 KopisFestivalItem[] 배열 형태라고 가정합니다.
       const apiData: KopisFestivalItem[] = response.data.data || response.data; 
       
-      // ⭐️ API 응답을 FestivalItem 타입에 맞게 변환 (매핑 로직) ⭐️
       const transformedData: FestivalItem[] = apiData.map(item => ({
-          id: item.id, // FestivalListItem의 key와 id로 사용
-          title: item.prfnm, // 공연명 (title)
-          likes: 0, // 좋아요 데이터가 없다면 임시 값 사용
-          location: item.fcltynm, // 시설명 (location)
-          // prfpdfrom(시작일)과 prfpdto(종료일)을 조합하여 date 형식으로 만듦
+          id: item.id,
+          title: item.prfnm,
+          likeCount: item.likeCount || 0, 
+          isLiked: item.isLiked || false, 
+          location: item.fcltynm, 
           date: `${item.prfpdfrom.replace(/-/g, '.')} - ${item.prfpdto.replace(/-/g, '.')}`, 
-          thumbnailUrl: item.poster, // 포스터 URL (thumbnailUrl)
+          thumbnailUrl: item.poster, 
       }));
 
       setMyTimetables(transformedData);
-      console.log(`✅ [GET ${API_ENDPOINT}] 나의 타임테이블 목록 응답:`, response.data);
-      
     } catch (err) {
       console.error(`❌ 나의 타임테이블 목록 (${API_ENDPOINT}) 로드 중 오류 발생:`, err);
-      // 로그인 문제 등 4xx 에러 처리를 위해 에러 메시지 업데이트
       setMyListError("나의 타임테이블을 불러오는 데 실패했습니다. (로그인 상태 확인)");
       setMyTimetables([]);
     } finally {
@@ -129,26 +144,21 @@ const TimetableMainPage = () => {
   };
 
 
-  // ⭐️ API 호출 함수: 더 많은 페스티벌 목록 조회 (기존 유지) ⭐️
-  const fetchMoreFestivals = async (sortKey: string) => {
+  // 더 많은 페스티벌 목록 조회
+  const fetchMoreFestivals = useCallback(async (sortKey: string) => {
     setIsLoading(true);
     setError(null);
     
     try {
-      // api 객체를 사용하여 GET 요청을 보냅니다.
       const response = await api.get(`/kopis/performances/festivals?sort=${sortKey}`); 
-      
-      // KopisFestivalItem[] 타입으로 가정합니다.
       const apiData: KopisFestivalItem[] = response.data; 
       
-      // ⭐️ API 응답을 FestivalItem 타입에 맞게 변환 (매핑 로직) ⭐️
       const transformedData: FestivalItem[] = apiData.map(item => ({
           id: item.id,
           title: item.prfnm, 
-          // Kopis API에 좋아요 데이터가 직접 없으므로 0으로 임시 처리
-          likes: 0, 
+          likeCount: item.likeCount || 0, 
+          isLiked: item.isLiked || false, 
           location: item.fcltynm, 
-          // 시작일과 종료일을 묶어 date 필드 생성
           date: `${item.prfpdfrom.replace(/-/g, '.')} - ${item.prfpdto.replace(/-/g, '.')}`, 
           thumbnailUrl: item.poster, 
       }));
@@ -162,32 +172,31 @@ const TimetableMainPage = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []); 
+
+
+  // 좋아요 상태 변경 시 목록 전체 새로고침 콜백
+  const handleLikeChangeSuccess = useCallback(() => {
+    // 좋아요 상태가 변경되면, 모든 목록을 새로고침하여 isLiked 상태를 동기화합니다.
+    fetchMyFavorites(); // 이 호출이 recommendedFestivals를 새로고침합니다.
+    fetchMoreFestivals(currentSort); 
+  }, [fetchMyFavorites, fetchMoreFestivals, currentSort]);
 
 
   useEffect(() => {
-    // ⭐️ ⭐️ [수정] 1. 나의 타임테이블 API 호출로 대체 ⭐️ ⭐️
     fetchMyTimetables();
+    // ⭐️ 좋아요 목록을 가져와 recommendedFestivals에 설정 ⭐️
+    fetchMyFavorites(); 
     
-    // 2. 추천 페스티벌 (Mock Data 유지)
-    const mockData2: RecommendItem[] = [
-       { id: 3, title: "COUNTDOWN FANTASY 2025-2026", date: "2025.12.20 - 2025.12.21", thumbnailUrl: "/path/to/poster1.png" },
-      { id: 4, title: "DMZ 피스트레인 뮤직 페스티벌 2025", date: "2025.10.18 - 2025.10.19", thumbnailUrl: "/path/to/poster2.png" },
-      { id: 5, title: "2025 부산 락 페스티벌", date: "2025.12.20 - 2025.12.21", thumbnailUrl: "/path/to/poster3.png" },
-      { id: 6, title: "서울 재즈 페스티벌 2025", date: "2025.05.28 - 2025.05.30", thumbnailUrl: "/path/to/poster4.png" },
-     ];
-    setRecommendedFestivals(mockData2);
-    
-  }, []);
+  }, [fetchMyFavorites]); 
   
-  // ⭐️ currentSort 상태가 변경되거나 컴포넌트 마운트 시 API 호출 (기존 유지) ⭐️
   useEffect(() => {
     fetchMoreFestivals(currentSort);
-  }, [currentSort]); 
+  }, [currentSort, fetchMoreFestivals]); 
 
-  // ⭐️ [수정] myTimetables 상태 사용 ⭐️
+
   const myTimetableDisplayData = myTimetables; 
-  const recommendData = recommendedFestivals;
+  const recommendData = recommendedFestivals; // 좋아요 목록 데이터
   const displayFestivalData = morefestival; 
 
   return (
@@ -195,14 +204,13 @@ const TimetableMainPage = () => {
        <Alarm></Alarm>
       <div className={timetablestyles.mainContentWrapper}>
         
+        {/* --- 1. 나의 타임테이블 섹션 (유지) --- */}
         <section className={timetablestyles.mytimetableSection}>
           <SectionHeader
             subtitle="공연 관람이 며칠 안 남았다면?"
             mainTitleLines={["나의\u00A0", "타임테이블"]}
             boldParts={[1]}
           />
-
-          {/* ⭐️ [수정] 나의 타임테이블 로딩/에러/데이터 표시 로직 ⭐️ */}
           {isMyListLoading && <p className={timetablestyles.loadingText}>나의 타임테이블을 불러오는 중...</p>}
           {myListError && <p className={timetablestyles.errorText}>{myListError}</p>}
 
@@ -213,6 +221,7 @@ const TimetableMainPage = () => {
                   key={item.id}
                   itemData={item}
                   onClick={() => handleMyTimetableClick(item.id)}
+                  onLikeChangeSuccess={handleLikeChangeSuccess} 
                 />
               ))}
             </ul>
@@ -221,10 +230,13 @@ const TimetableMainPage = () => {
           {!isMyListLoading && !myListError && myTimetableDisplayData.length === 0 && (
             <p className={timetablestyles.noDataText}>나만의 타임테이블을 만들어 보세요!</p>
           )}
-
         </section>
 
-        {/* --- 추천 페스티벌 섹션은 변경 없음 --- */}
+        
+        {/* ❌ 2. 나의 관심 페스티벌 섹션 (제거 완료) ❌ */}
+
+        
+        {/* --- 3. 나의 관심 페스티벌의 타임테이블 확인하기 (RecommendCard로 좋아요 목록 표시) --- */}
         <section className={timetablestyles.check}>
           <SectionHeader
             subtitle="나의 관심 페스티벌의"
@@ -232,19 +244,29 @@ const TimetableMainPage = () => {
             boldParts={[0]}
           />
 
-          <div className={timetablestyles.recommendListWrapper}>
-            {recommendData.map((item) => (
-              <RecommendCard
-                key={item.id}
-                itemData={item}
-                onCustomizeClick={() => handleCustomizeClick(item.id)}
-              />
-            ))}
-          </div>
+          {isFavoritesLoading && <p className={timetablestyles.loadingText}>관심 목록을 불러오는 중...</p>}
+          {favoritesError && <p className={timetablestyles.errorText}>{favoritesError}</p>}
+          
+          {/* 좋아요 목록이 로드되면 RecommendCard로 표시 */}
+          {!isFavoritesLoading && !favoritesError && recommendData.length > 0 && (
+            <div className={timetablestyles.recommendListWrapper}>
+              {recommendData.map((item) => (
+                <RecommendCard
+                  key={item.id}
+                  itemData={item} // 좋아요 목록 데이터
+                  onCustomizeClick={() => handleCustomizeClick(item.id)}
+                />
+              ))}
+            </div>
+          )}
+          
+          {!isFavoritesLoading && !favoritesError && recommendData.length === 0 && (
+            <p className={timetablestyles.noDataText}>관심 페스티벌 데이터가 없습니다.</p>
+          )}
         </section>
         {/* --- */}
 
-        {/* --- 더 많은 페스티벌 섹션은 변경 없음 --- */}
+        {/* --- 4. 더 많은 페스티벌 섹션 (유지) --- */}
         <section className={timetablestyles.moretimetableSection}>
           <SectionHeader
             subtitle="더 많은 페스티벌의"
@@ -266,11 +288,9 @@ const TimetableMainPage = () => {
             ))}
           </div>
           
-          {/* ⭐️ 로딩 및 에러 상태 표시 ⭐️ */}
           {isLoading && <p className={timetablestyles.loadingText}>페스티벌 목록을 불러오는 중...</p>}
           {error && <p className={timetablestyles.errorText}>{error}</p>}
           
-          {/* ⭐️ 데이터가 로드되었을 때만 목록 표시 ⭐️ */}
           {!isLoading && !error && displayFestivalData.length > 0 && (
             <ul className={timetablestyles.timetableList}>
               {displayFestivalData.map((item) => (
@@ -278,6 +298,7 @@ const TimetableMainPage = () => {
                   key={item.id}
                   itemData={item}
                   onClick={() => handleCustomizeClick(item.id)}
+                  onLikeChangeSuccess={handleLikeChangeSuccess} 
                 />
               ))}
             </ul>
