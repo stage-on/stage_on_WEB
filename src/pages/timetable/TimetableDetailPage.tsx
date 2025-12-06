@@ -1,4 +1,4 @@
-// src/pages/timetable/TimetableDetailPage.tsx (최종 수정 완료 버전)
+// src/pages/timetable/TimetableDetailPage.tsx (최종 수정 완료 버전 - my-detail 적용)
 
 import { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
@@ -11,7 +11,16 @@ import timetableStyles from "../../css/pages/timetable/timetabledetail.module.cs
 import TimetableGrid from "../../components/timetable/TimetableGrid"; 
 import api from "../../api/api"; // Axios 인스턴스
 
-// ⭐️ Kopis API 응답 타입 ⭐️
+// ⭐️ 시간 객체 타입 (공통 사용) ⭐️
+interface TimeObject {
+    hour: number;
+    minute: number;
+    second: number;
+    nano: number;
+}
+
+
+// ⭐️ Kopis API 응답 타입 (기본 공연 정보) ⭐️
 export interface KopisFestivalItem {
    id: number; 
   mt20id: string; 
@@ -26,36 +35,43 @@ export interface KopisFestivalItem {
   prfstate: string; 
   dtguidance: string; 
   tkstdate: string; 
-  tksttime: { hour: number; minute: number; second: number; nano: number; };
+  tksttime: TimeObject;
   typeofcon: number;
   newstate: boolean;
   locationUrl: string;
   styurls: { relatenm: string; relateurl: string; }[];
   relates: { relatenm: string; relateurl: string; }[];
-  days: { date: string; open: { hour: number; minute: number; second: number; nano: number; }; close: { hour: number; minute: number; second: number; nano: number; }; }[];
-  slots: { date: string; stageId: string; stageName: string; stageOrder: number; artist: string; start: { hour: number; minute: number; second: number; nano: number; }; end: { hour: number; minute: number; second: number; nano: number; }; minutes: number; img: string; note: string; }[];
+  days: { date: string; open: TimeObject; close: TimeObject; }[]; // Kopis days 타입
+  slots: { date: string; stageId: string; stageName: string; stageOrder: number; artist: string; start: TimeObject; end: TimeObject; minutes: number; img: string; note: string; }[]; // Kopis slots 타입
   fesLinks: { relatenm: string; relateurl: string; }[];
   artistPics: { date: string; relatenm: string; url: string; }[];
 }
 
-// ⭐️ 서버의 /festivals/{mt20id}/detail 응답 타입 정의 ⭐️
+// ⭐️ 서버의 /festivals/{mt20id}/my-detail 응답 타입 정의 ⭐️
+// (사용자님이 제공해주신 응답 스키마와 일치하도록 반영)
 export interface CustomDetailAPIItem {
     mt20id: string; 
     prfnm: string; 
-    hasCustom: boolean;
+    prfpdfrom: string; 
+    prfpdto: string; 
+    fcltynm: string; 
+    locationUrl: string;
+    hasCustom: boolean; // 커스텀 내역 존재 여부
+    days: { date: string; open: TimeObject; close: TimeObject; }[]; // my-detail days 타입
     slots: { 
         date: string; 
         stageId: string; 
         stageName: string; 
         stageOrder: number; 
         artist: string; 
-        start: { hour: number; minute: number; second: number; nano: number; } | string; 
-        end: { hour: number; minute: number; second: number; nano: number; } | string; 
+        start: TimeObject | string; // TimeObject 또는 string 처리
+        end: TimeObject | string; 
         minutes: number; 
         img: string | null; 
         note: string | null; 
         inverted?: boolean; // 사용자가 선택했는지 여부
     }[];
+    artistPics: { date: string; relatenm: string; url: string; }[];
 }
 
 export interface ScheduleItem { 
@@ -85,6 +101,15 @@ const formatDayAndDayOfWeek = (dateString: string): string => {
 
 type TimetableMode = 'customize' | 'my' | 'view'; 
 
+// ⭐️ TimeObject 또는 string을 "HH:MM:SS" 문자열로 변환하는 헬퍼 함수 ⭐️
+const timeToTimeString = (time: any): string => {
+    if (typeof time === 'string') return time;
+    const hour = time?.hour ?? 0;
+    const minute = time?.minute ?? 0;
+    return `${hour.toString().padStart(2,'0')}:${minute.toString().padStart(2,'0')}:00`;
+};
+
+
 // ⭐️ 1. Kopis API 호출 및 데이터 변환 함수 (기본 데이터 로드) ⭐️
 async function fetchAndProcessTimetableDetail(
     festivalId: string | undefined, 
@@ -103,7 +128,7 @@ async function fetchAndProcessTimetableDetail(
     let processedData: FestivalDetailData | null = null;
     
     try {
-        // Kopis API 엔드포인트 사용
+        // Kopis API 엔드포인트 사용 (기본 데이터 구조 로드)
         const response = await api.get(`/kopis/performances/festivals?festivalId=${idNum}`); 
         
         const rawData = response.data.data || response.data;
@@ -124,15 +149,6 @@ async function fetchAndProcessTimetableDetail(
 
         apiData.slots.forEach(slot => {
             const dateString = slot.date;
-            
-            const timeObjToString = (time: any) => {
-                const hour = time.hour ?? 0;
-                const minute = time.minute ?? 0;
-                return `${hour.toString().padStart(2,'0')}:${minute.toString().padStart(2,'0')}:00`;
-            };
-
-            const startString = typeof slot.start === 'string' ? slot.start : timeObjToString(slot.start);
-            const endString = typeof slot.end === 'string' ? slot.end : timeObjToString(slot.end);
 
             const scheduleItem: ScheduleItem = {
                 date: slot.date,
@@ -140,8 +156,8 @@ async function fetchAndProcessTimetableDetail(
                 stageName: slot.stageName,
                 stageOrder: slot.stageOrder, 
                 artist: slot.artist,
-                start: startString, 
-                end: endString,     
+                start: timeToTimeString(slot.start), // 헬퍼 함수 사용
+                end: timeToTimeString(slot.end),     // 헬퍼 함수 사용
                 minutes: slot.minutes,
                 img: slot.img || null,
                 note: slot.note || null,
@@ -175,33 +191,33 @@ async function fetchAndProcessTimetableDetail(
     return processedData;
 }
 
-// ⭐️ 2. 사용자 커스텀 슬롯만 가져오는 함수 ⭐️
+// ⭐️ 2. 사용자 커스텀 슬롯만 가져오는 함수 (my-detail API 사용) ⭐️
 async function fetchCustomSlots(
     mt20id: string,
     setActiveScheduleKeys: (keys: Set<string>) => void
 ): Promise<void> {
-    const API_URL = `/festivals/${mt20id}/detail`;
+    // ⭐️ API URL 변경 적용: detail -> my-detail (요청하신 대로) ⭐️
+    const API_URL = `/festivals/${mt20id}/my-detail`; 
     
     try {
         const response = await api.get(API_URL);
-        const apiData: CustomDetailAPIItem = response.data.data || response.data;
+        // 응답 데이터가 배열이 아닌 CustomDetailAPIItem 형식이라고 가정합니다.
+        const apiData: CustomDetailAPIItem = response.data.data || response.data; 
         
         const initialActiveKeys = new Set<string>();
 
-        if (apiData.hasCustom && apiData.slots) {
+        // hasCustom이 true이고 slots가 존재하며, slots가 배열인지 확인
+        if (apiData.hasCustom && Array.isArray(apiData.slots)) {
             apiData.slots.forEach(slot => {
-                 const timeObjToString = (time: any) => {
-                    const hour = time.hour ?? 0;
-                    const minute = time.minute ?? 0;
-                    return `${hour.toString().padStart(2,'0')}:${minute.toString().padStart(2,'0')}:00`;
-                };
-
-                const startString = typeof slot.start === 'string' ? slot.start : timeObjToString(slot.start);
-
+                const startString = timeToTimeString(slot.start); // 헬퍼 함수 사용
+                
                 if (slot.inverted === true) {
                      // ScheduleItem의 키 생성 방식과 동일하게 구성
-                     const scheduleKey = `${slot.date}-${slot.stageId}-${slot.artist}-${startString}`;
-                     initialActiveKeys.add(scheduleKey);
+                     // slot.artist가 없을 경우를 대비해 artist 필드가 있음을 확인
+                     if (slot.artist) {
+                         const scheduleKey = `${slot.date}-${slot.stageId}-${slot.artist}-${startString}`;
+                         initialActiveKeys.add(scheduleKey);
+                     }
                 }
             });
         }
@@ -251,16 +267,22 @@ export default function TimetableDetailPage() {
 
 
     const currentMode: TimetableMode = useMemo(() => {
+        // 커스텀 내역은 'my' 모드와 'customize' 모드에서 모두 필요하지만,
+        // 사용자 데이터를 가져오는 것은 'my'와 'customize' 모드가 구분되지 않는 경우가 많습니다.
+        // 현재 로직은 'my' 모드에서만 fetchCustomSlots을 호출하지만,
+        // 요청의 의도("나의 타임테이블 뿐 아니라 더많은 타임테이블에서도 보고싶어서")에 따라
+        // API 호출은 모든 커스텀 가능한 페이지에서 필요할 수 있습니다.
+        // 일단 기존 로직대로 'my'/'customize'를 구분하되, fetchCustomSlots을 호출하도록 유지합니다.
+        
         if (location.pathname.includes('/my/')) return 'my';
         if (location.pathname.includes('/customize/')) return 'customize';
         return 'view'; 
     }, [location.pathname]);
     
-    // ⭐️ [수정] getPayloadAndCheckSelection 함수: 현재 날짜가 아닌 페스티벌 전체 스케줄을 포함하도록 수정 ⭐️
+    // getPayloadAndCheckSelection 함수는 이전과 동일
     const getPayloadAndCheckSelection = (): { payload: { mt20id: string; invertedSlots: any[] } | null, hasSelections: boolean } => {
         if (!detailData || !detailData.mt20id) return { payload: null, hasSelections: false };
         
-        // ⭐️ [수정] currentDayIndex 대신, detailData.days 전체를 순회하여 모든 스케줄을 모읍니다. ⭐️
         let allFestivalSchedules: ScheduleItem[] = [];
         detailData.days.forEach(day => {
             allFestivalSchedules = allFestivalSchedules.concat(day.schedules);
@@ -269,7 +291,6 @@ export default function TimetableDetailPage() {
         const invertedSlots: any[] = [];
         let finalHasSelections = false;
 
-        // ⭐️ [수정] 페스티벌 전체 스케줄(allFestivalSchedules)을 순회합니다. ⭐️
         allFestivalSchedules.forEach(schedule => {
             const key = createScheduleKey(schedule);
             const isInverted = activeScheduleKeys.has(key); 
@@ -277,7 +298,6 @@ export default function TimetableDetailPage() {
             if (isInverted) {
                 finalHasSelections = true; // 하나라도 선택되면 true
                 
-                // 선택된 슬롯만 페이로드에 포함합니다.
                 invertedSlots.push({
                     date: schedule.date,
                     stageOrder: Number(schedule.stageOrder), 
@@ -289,7 +309,7 @@ export default function TimetableDetailPage() {
         
         const payload: { mt20id: string; invertedSlots: any[] } = {
             mt20id: detailData.mt20id, 
-            invertedSlots: invertedSlots // 이제 이 배열은 모든 날짜의 선택된 슬롯을 포함합니다.
+            invertedSlots: invertedSlots 
         };
         
         return { payload, hasSelections: finalHasSelections };
@@ -326,26 +346,29 @@ export default function TimetableDetailPage() {
         }
     }, [festivalId]);
     
-    // ⭐️ 2. detailData 로드 후, 'my' 모드일 때만 커스텀 슬롯 API 호출 ⭐️
+    // ⭐️ 2. detailData 로드 후, 커스텀 슬롯 API 호출 (my-detail API는 인증된 사용자의 데이터만 가져옴) ⭐️
     useEffect(() => {
-        if (detailData && detailData.mt20id && currentMode === 'my') {
+        // 'my' 모드뿐 아니라 'customize' 모드에서도 커스텀 내역을 가져와야
+        // 사용자가 이전에 선택한 것을 기반으로 수정을 시작할 수 있습니다.
+        if (detailData && detailData.mt20id && (currentMode === 'my' || currentMode === 'customize')) { 
+            // 커스텀 내역을 불러와 activeScheduleKeys에 설정합니다.
             fetchCustomSlots(detailData.mt20id, setActiveScheduleKeys);
-        } 
+        } else if (currentMode === 'view') {
+            // view 모드에서는 커스텀 내역이 필요 없으므로 초기화
+            setActiveScheduleKeys(new Set());
+        }
     }, [detailData, currentMode]); 
 
-    // ⭐️ [수정] saveTimetableData 함수: 선택 여부와 관계없이 POST 요청을 보내도록 수정 ⭐️
+    // saveTimetableData 함수는 이전과 동일 (선택 상태가 없어도 POST 요청을 보내어 삭제 명령을 서버에 전달)
     const saveTimetableData = async (): Promise<boolean> => { 
         
-        const { payload, hasSelections } = getPayloadAndCheckSelection(); // 이제 페스티벌 전체의 선택 상태를 가져옴
+        const { payload, hasSelections } = getPayloadAndCheckSelection(); 
 
         if (!payload || !payload.mt20id) {
             console.error("⚠️ 저장할 데이터가 준비되지 않았습니다. (mt20id 누락)");
             return false;
         }
         
-        // ⭐️ [수정] 선택된 슬롯이 0개일 때도 POST 요청을 보내어 삭제 명령을 서버에 전달합니다. ⭐️
-        // (이전 코드에서는 hasSelections가 false일 때 return true로 빠져나갔음)
-
         const mt20id = payload.mt20id;
         const API_ENDPOINT = `/festivals/${mt20id}/custom-slots`; 
         const HTTP_METHOD = 'POST'; 
@@ -394,7 +417,6 @@ export default function TimetableDetailPage() {
         else { setDetailData(null); setIsLoading(false); }
     };
     
-    // ⭐️ ⭐️ [오류 수정] handleDaySelect 함수를 컴포넌트 내부로 이동 ⭐️ ⭐️
     const handleDaySelect = (index: number) => { 
         setCurrentDayIndex(index); 
         setIsDropdownOpen(false); 
