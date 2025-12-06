@@ -1,14 +1,10 @@
-/* src/css/components/timetable/scheduleblock.module.css */
-
 .scheduleBlock {
     position: absolute; 
     width: 100%;
     padding: 8px;
     box-sizing: border-box;
-  
     cursor: pointer;
     z-index: 3; 
-    
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -16,10 +12,9 @@
     text-align: center;
     overflow: hidden;
     transition: background-color 0.2s, box-shadow 0.2s;
-    
     color: var(--g-100, #1a1a1a);
     font-family: Inter;
-    background: var(--g-30, #EBEBEB); /* 초기 상태 회색 */
+    background: var(--g-30, #EBEBEB);
 }
 
 .scheduleBlock:hover {
@@ -34,58 +29,46 @@
     white-space: nowrap;
     text-overflow: ellipsis;
     max-width:120px;
-
 }
 
 .time {
     color: var(--g-100, #1A1A1A);
-
-/* light/10 */
-font-family: Inter;
-font-size: 10px;
-font-style: normal;
-font-weight: 300;
-line-height: normal;
-letter-spacing: -0.3px;
+    font-family: Inter;
+    font-size: 10px;
+    font-style: normal;
+    font-weight: 300;
+    line-height: normal;
+    letter-spacing: -0.3px;
 }
 
 .duration {
     color: var(--g-100, #1A1A1A);
-
-/* light/10 */
-font-family: Inter;
-font-size: 10px;
-font-style: normal;
-font-weight: 300;
-line-height: normal;
-letter-spacing: -0.3px;
+    font-family: Inter;
+    font-size: 10px;
+    font-style: normal;
+    font-weight: 300;
+    line-height: normal;
+    letter-spacing: -0.3px;
 }
 
-/* Stage별 색상 클래스 */
 .colorStage1 {
     background: var(--b-1, rgba(251, 188, 5, 0.20));
-box-shadow: 4px 4px 8px 0 rgba(0, 0, 0, 0.25);
+    box-shadow: 4px 4px 8px 0 rgba(0, 0, 0, 0.25);
 }
 
 .colorStage2 {
    background: var(--b-2, rgba(198, 108, 217, 0.20));
-
-/* time_block_shadow */
-box-shadow: 4px 4px 8px 0 rgba(0, 0, 0, 0.25);
+   box-shadow: 4px 4px 8px 0 rgba(0, 0, 0, 0.25);
 }
 
 .colorStage3 {
     background: var(--b-3, rgba(52, 168, 83, 0.20));
-
-/* time_block_shadow */
-box-shadow: 4px 4px 8px 0 rgba(0, 0, 0, 0.25);
+    box-shadow: 4px 4px 8px 0 rgba(0, 0, 0, 0.25);
 }
 
 .colorStage4 {
     background: var(--b-4, rgba(66, 133, 244, 0.20));
-
-/* time_block_shadow */
-box-shadow: 4px 4px 8px 0 rgba(0, 0, 0, 0.25);
+    box-shadow: 4px 4px 8px 0 rgba(0, 0, 0, 0.25);
 }
 
 .colorStage5 {
