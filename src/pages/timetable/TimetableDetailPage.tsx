@@ -1,8 +1,11 @@
-// src/pages/timetable/TimetableDetailPage.tsx (Alert 및 모달 기능 완전히 제거)
+// src/pages/timetable/TimetableDetailPage.tsx (Refresh 로직 수정 및 캡처 기능 추가)
 
 import { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import type { Location } from "react-router-dom"; 
+// ⭐️ [추가] html2canvas 임포트
+import html2canvas from 'html2canvas';
+
 import leftarrow from "../../assets/timetable/arrow-left.svg";
 import downarrow from "../../assets/timetable/arrow-down.svg";
 import download from "../../assets/timetable/download.svg";
@@ -236,6 +239,7 @@ export default function TimetableDetailPage() {
     const [currentDayIndex, setCurrentDayIndex] = useState(-1);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     
+    // 사용자가 선택한 스케줄 키를 저장하는 상태
     const [activeScheduleKeys, setActiveScheduleKeys] = useState<Set<string>>(new Set());
     
     const handleScheduleToggle = (schedule: ScheduleItem) => {
@@ -334,6 +338,8 @@ export default function TimetableDetailPage() {
     
     // ⭐️ 2. detailData 로드 후, 커스텀 슬롯 API 호출 ⭐️
     useEffect(() => {
+        // detailData 로드 후, 'my' 또는 'customize' 모드에서만 서버에 저장된 커스텀 슬롯을 불러옵니다.
+        // 이 로직 때문에, API 재호출을 포함한 기존 Refresh 함수는 로컬 초기화가 덮어씌워지는 문제가 있었습니다.
         if (detailData && detailData.mt20id && (currentMode === 'my' || currentMode === 'customize')) { 
             fetchCustomSlots(detailData.mt20id, setActiveScheduleKeys);
         } else if (currentMode === 'view') {
@@ -386,6 +392,7 @@ export default function TimetableDetailPage() {
         if (currentMode === 'customize' || currentMode === 'my') { 
             const saveSuccessful = await saveTimetableData();
              if (saveSuccessful) {
+                // 저장 성공 시에만 뒤로 이동
                 navigate(-1);
             } else {
                 // 저장 실패 시 사용자에게 알림 없이 콘솔에만 기록하고 이동 취소
@@ -396,13 +403,51 @@ export default function TimetableDetailPage() {
         }
     };
     
+    // ⭐️⭐️ [FIX] handleRefresh 수정: 기본 데이터 재로드 로직 제거 ⭐️⭐️
     const handleRefresh = () => {
-        console.log("🔄 Refreshing data from API.");
-        setCurrentDayIndex(-1); 
-        setIsDropdownOpen(false);
-        setActiveScheduleKeys(new Set()); 
-        if (festivalId) fetchAndProcessTimetableDetail(festivalId, setCurrentDayIndex, setDetailData, setIsLoading);
-        else { setDetailData(null); setIsLoading(false); }
+        // 변경: 현재 로컬에서 선택된 내용만 즉시 모두 해제(false)하도록 수정합니다.
+        console.log("🔄 Refresh 버튼 클릭: 현재 로컬에서 선택된 모든 스케줄을 초기화합니다.");
+        
+        setActiveScheduleKeys(new Set()); // 모든 선택 상태를 빈 Set으로 초기화
+        setIsDropdownOpen(false); // 드롭다운 닫기
+    };
+
+    // ⭐️⭐️ [추가] 캡처 로직 (Download 버튼에 연결) ⭐️⭐️
+    const handleCaptureAndDownload = async () => {
+        console.log("📸 이미지 캡처 시작...");
+        
+        // TimetableGrid를 감싸는 고유 ID를 가진 요소
+        const inputElement = document.getElementById('timetable-capture-area');
+
+        if (!inputElement) {
+            console.error("⚠️ 캡처 대상 요소를 찾을 수 없습니다. (ID: timetable-capture-area)");
+            return;
+        }
+        
+        // 캡처 실행 (긴 콘텐츠를 위해 scroll, scale 옵션 사용)
+        try {
+            const canvas = await html2canvas(inputElement, {
+                useCORS: true, // 외부 이미지 (포스터 등) 로드를 위해 필수
+                scale: 2,       // 고해상도 출력을 위해 스케일 조정 (선택 사항)
+                // 긴 타임테이블이 컨테이너 내부에 스크롤되어도 전체를 캡처하도록 설정
+                windowWidth: inputElement.scrollWidth,
+                windowHeight: inputElement.scrollHeight,
+            });
+
+            // 다운로드 링크 생성 및 클릭
+            const image = canvas.toDataURL('image/png');
+            const a = document.createElement('a');
+            a.href = image;
+            a.download = `${detailData?.festivalTitle || 'Timetable'}_${formatDayAndDayOfWeek(selectedDayData.date).replace(/[\.()]/g, '')}.png`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+
+            console.log("✅ 이미지 다운로드 성공.");
+            
+        } catch (error) {
+            console.error("❌ 이미지 캡처 중 오류 발생:", error);
+        }
     };
     
     const handleDaySelect = (index: number) => { 
@@ -451,10 +496,11 @@ export default function TimetableDetailPage() {
                             )}
                         </div>
                         <div className={timetableStyles.actionButtonWrapper}>
-                            {/* 저장 버튼은 기능이 뒤로 가기에 통합되었고, 모달/alert이 제거되었으므로 콘솔 로그만 남깁니다. */}
-                            <button className={timetableStyles.actionButton} onClick={() => console.log("저장 기능이 뒤로 가기 버튼에 통합되었으며, 모든 알림 창이 제거되었습니다.")}>
-                                <img src={download} alt="저장 기능" />
+                            {/* ⭐️ [수정] Download 아이콘에 캡처 함수 연결 ⭐️ */}
+                            <button className={timetableStyles.actionButton} onClick={handleCaptureAndDownload}>
+                                <img src={download} alt="이미지 캡처 및 다운로드" />
                             </button>
+                            {/* Refresh 버튼에 수정된 handleRefresh 연결 */}
                             <button className={timetableStyles.actionButton} onClick={handleRefresh}>
                                 <img src={refresh} alt="되돌리기"/>
                             </button>
@@ -463,7 +509,9 @@ export default function TimetableDetailPage() {
                 )}
 
                 {currentDayIndex !== -1 && (
-                <div className={timetableStyles.timetableScrollWrapper}><div className={timetableStyles.scheduleArea}>
+                <div className={timetableStyles.timetableScrollWrapper}>
+                    {/* ⭐️ [추가] 캡처를 위한 ID 부여 ⭐️ */}
+                    <div id="timetable-capture-area" className={timetableStyles.scheduleArea}>
                         <TimetableGrid 
                             stageMap={schedulesByStage.stageMap} 
                             allSchedules={allSchedules} 
@@ -471,7 +519,8 @@ export default function TimetableDetailPage() {
                             onScheduleToggle={handleScheduleToggle}
                             activeScheduleKeys={activeScheduleKeys}
                         />
-                    </div></div>
+                    </div>
+                </div>
                     
                 )}
                 

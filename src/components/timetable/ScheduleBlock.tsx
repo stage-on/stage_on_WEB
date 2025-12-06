@@ -46,6 +46,10 @@ const ScheduleBlock: React.FC<ScheduleBlockProps> = ({
                 ? blockStyles.colorStage2
                 : schedule.stageOrder === 3
                 ? blockStyles.colorStage3
+                : schedule.stageOrder === 4
+                ? blockStyles.colorStage4
+                : schedule.stageOrder === 5
+                ? blockStyles.colorStage5
                 : blockStyles.colorStage4
             : blockStyles.colorInactive; // 초기 상태 회색 (비활성화)
 

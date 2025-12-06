@@ -87,3 +87,8 @@ box-shadow: 4px 4px 8px 0 rgba(0, 0, 0, 0.25);
 /* time_block_shadow */
 box-shadow: 4px 4px 8px 0 rgba(0, 0, 0, 0.25);
 }
+
+.colorStage5 {
+    background: var(--b-1, rgba(251, 188, 5, 0.20));
+    box-shadow: 4px 4px 8px 0 rgba(0, 0, 0, 0.25);
+}

@@ -175,7 +175,7 @@ letter-spacing: -0.36px;
     
     /* ⭐️ 수정: .dropdownWrapper 기준이므로 left: 0px ⭐️ */
     left: 0px; 
-    z-index: 10; 
+    z-index: 300; 
     width: 83px; 
     
     padding: 0; 
