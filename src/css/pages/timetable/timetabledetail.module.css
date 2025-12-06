@@ -177,16 +177,12 @@
     all: unset;
     cursor: pointer;
     padding: 4px;
-    border-radius: 4px;
-    transition: background-color 0.2s;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-.actionButton:hover {
-    background-color: var(--g-10, #f0f0f0);
-}
+
 
 .actionButton img {
     width: 24px;
