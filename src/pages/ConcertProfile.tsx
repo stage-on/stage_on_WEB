@@ -63,6 +63,13 @@ const ConcertProfile = () => {
     }
   };
 
+  // ⭐️ [추가] 타임테이블 커스텀 페이지로 이동하는 핸들러 ⭐️
+  const handleCustomizeClick = () => {
+    if (!detail) return;
+    // 경로: /main/timetable/customize/{festivalId}
+    navigate(`/main/timetable/customize/${detail.id}`);
+  };
+
   useEffect(() => {
     if (!mt20id) return;
 
@@ -226,7 +233,11 @@ const ConcertProfile = () => {
           </div>
 
           <div className={concertProfileStyle.detailRight}>
-            <button className={concertProfileStyle.detailButton}>
+            <button 
+              className={concertProfileStyle.detailButton}
+              // ⭐️ [수정] 타임테이블 커스텀 버튼에 핸들러 연결 ⭐️
+              onClick={handleCustomizeClick}
+            >
               타임테이블 커스텀
             </button>
 

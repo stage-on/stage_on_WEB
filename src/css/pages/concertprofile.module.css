@@ -187,6 +187,7 @@
   font-weight: 600;
   border: none;
   letter-spacing: -0.3px;
+  cursor:pointer;
 }
 
 
@@ -250,5 +251,6 @@
   border-radius: 4px;
   background-color: transparent; 
   color: #E69BF5;               
-  border: 1px solid #E69BF5;       
+  border: 1px solid #E69BF5; 
+  cursor: pointer;     
 }
