@@ -1,9 +1,9 @@
-// src/pages/timetable/TimetableDetailPage.tsx (Refresh 로직 수정 및 캡처 기능 추가)
+// src/pages/timetable/TimetableDetailPage.tsx (순수 타임테이블 영역 캡처 최종 버전)
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import type { Location } from "react-router-dom"; 
-// ⭐️ [추가] html2canvas 임포트
+// ⭐️ [필수] html2canvas 임포트 (설치가 필요합니다: npm install html2canvas)
 import html2canvas from 'html2canvas';
 
 import leftarrow from "../../assets/timetable/arrow-left.svg";
@@ -270,7 +270,7 @@ export default function TimetableDetailPage() {
         return 'view'; 
     }, [location.pathname]);
     
-    const getPayloadAndCheckSelection = (): { payload: { mt20id: string; invertedSlots: any[] } | null, hasSelections: boolean } => {
+    const getPayloadAndCheckSelection = useCallback((): { payload: { mt20id: string; invertedSlots: any[] } | null, hasSelections: boolean } => {
         if (!detailData || !detailData.mt20id) return { payload: null, hasSelections: false };
         
         let allFestivalSchedules: ScheduleItem[] = [];
@@ -303,7 +303,7 @@ export default function TimetableDetailPage() {
         };
         
         return { payload, hasSelections: finalHasSelections };
-    };
+    }, [detailData, activeScheduleKeys]);
 
     const allSchedules = useMemo(() => {
         if (!detailData || currentDayIndex === -1 || !detailData.days[currentDayIndex]) return [];
@@ -338,8 +338,6 @@ export default function TimetableDetailPage() {
     
     // ⭐️ 2. detailData 로드 후, 커스텀 슬롯 API 호출 ⭐️
     useEffect(() => {
-        // detailData 로드 후, 'my' 또는 'customize' 모드에서만 서버에 저장된 커스텀 슬롯을 불러옵니다.
-        // 이 로직 때문에, API 재호출을 포함한 기존 Refresh 함수는 로컬 초기화가 덮어씌워지는 문제가 있었습니다.
         if (detailData && detailData.mt20id && (currentMode === 'my' || currentMode === 'customize')) { 
             fetchCustomSlots(detailData.mt20id, setActiveScheduleKeys);
         } else if (currentMode === 'view') {
@@ -347,8 +345,8 @@ export default function TimetableDetailPage() {
         }
     }, [detailData, currentMode]); 
 
-    // ⭐️⭐️ [Alert 제거] 저장/삭제 성공 메시지를 console.log로 대체 ⭐️⭐️
-    const saveTimetableData = async (): Promise<boolean> => { 
+    // ⭐️⭐️ 저장/삭제 로직 ⭐️⭐️
+    const saveTimetableData = useCallback(async (): Promise<boolean> => { 
         
         const { payload, hasSelections } = getPayloadAndCheckSelection(); 
 
@@ -370,7 +368,6 @@ export default function TimetableDetailPage() {
         try {
             const response = await api.post(API_ENDPOINT, payload); 
 
-            // ⚠️ 성공 메시지를 console.log로 대체
             const successMessage = hasSelections 
                 ? "나의 타임테이블이 성공적으로 서버에 저장되었습니다. 🥳" 
                 : "나의 타임테이블이 성공적으로 서버에서 삭제되었습니다. 🗑️";
@@ -381,11 +378,10 @@ export default function TimetableDetailPage() {
         } catch (error) {
             const errorMessage = (error as any).response?.data?.message || "알 수 없는 오류가 발생했습니다.";
             
-            // ⚠️ 실패 메시지를 console.error로 대체
             console.error(`❌ 타임테이블 저장/삭제 실패 (${HTTP_METHOD} ${API_ENDPOINT}):`, errorMessage, error); 
             return false;
         }
-    };
+    }, [getPayloadAndCheckSelection]);
     
     // 뒤로 가기 버튼 클릭 시 저장 로직이 포함된 handleGoBack 연결
     const handleGoBack = async () => {
@@ -395,7 +391,6 @@ export default function TimetableDetailPage() {
                 // 저장 성공 시에만 뒤로 이동
                 navigate(-1);
             } else {
-                // 저장 실패 시 사용자에게 알림 없이 콘솔에만 기록하고 이동 취소
                 console.log("저장 실패로 인해 페이지 이동을 취소합니다.");
             }
         } else {
@@ -403,42 +398,60 @@ export default function TimetableDetailPage() {
         }
     };
     
-    // ⭐️⭐️ [FIX] handleRefresh 수정: 기본 데이터 재로드 로직 제거 ⭐️⭐️
+    // ⭐️⭐️ Refresh 로직: 현재 로컬 선택 상태 초기화 ⭐️⭐️
     const handleRefresh = () => {
-        // 변경: 현재 로컬에서 선택된 내용만 즉시 모두 해제(false)하도록 수정합니다.
         console.log("🔄 Refresh 버튼 클릭: 현재 로컬에서 선택된 모든 스케줄을 초기화합니다.");
         
         setActiveScheduleKeys(new Set()); // 모든 선택 상태를 빈 Set으로 초기화
         setIsDropdownOpen(false); // 드롭다운 닫기
     };
 
-    // ⭐️⭐️ [추가] 캡처 로직 (Download 버튼에 연결) ⭐️⭐️
+    // ⭐️⭐️ [FIX] 캡처 로직 (순수 타임테이블 영역만 캡처 최종) ⭐️⭐️
     const handleCaptureAndDownload = async () => {
-        console.log("📸 이미지 캡처 시작...");
+        console.log("📸 이미지 캡처 시작 (순수 타임테이블 영역)...");
         
-        // TimetableGrid를 감싸는 고유 ID를 가진 요소
         const inputElement = document.getElementById('timetable-capture-area');
 
         if (!inputElement) {
             console.error("⚠️ 캡처 대상 요소를 찾을 수 없습니다. (ID: timetable-capture-area)");
+            // 사용자에게 피드백 제공
+            alert("캡처 대상 요소를 찾을 수 없습니다. 개발자에게 문의하거나 페이지를 새로고침 해보세요.");
             return;
         }
         
-        // 캡처 실행 (긴 콘텐츠를 위해 scroll, scale 옵션 사용)
+        // 캡처 대상 요소의 정확한 스크롤 크기를 가져옴
+        const contentWidth = inputElement.scrollWidth;
+        const contentHeight = inputElement.scrollHeight;
+
         try {
             const canvas = await html2canvas(inputElement, {
-                useCORS: true, // 외부 이미지 (포스터 등) 로드를 위해 필수
-                scale: 2,       // 고해상도 출력을 위해 스케일 조정 (선택 사항)
-                // 긴 타임테이블이 컨테이너 내부에 스크롤되어도 전체를 캡처하도록 설정
-                windowWidth: inputElement.scrollWidth,
-                windowHeight: inputElement.scrollHeight,
+                useCORS: true, 
+                scale: 2,       
+                
+                // ⭐️ 캡처할 영역의 실제 콘텐츠 크기만 지정 (잘림 방지) ⭐️
+                width: contentWidth,
+                height: contentHeight,
+                
+                // 캡처 시작점을 요소의 왼쪽 상단(0, 0)으로 고정
+                scrollX: 0,
+                scrollY: 0,
+                
+                // ⭐️ 배경색을 흰색으로 명시하여 주변의 불필요한 투명 여백 방지 ⭐️
+                backgroundColor: '#ffffff', 
+                
+                // 캡처가 뷰포트 크기에 종속되지 않도록 콘텐츠 크기로 뷰포트 옵션을 대체
+                windowWidth: contentWidth, 
+                windowHeight: contentHeight, 
             });
 
             // 다운로드 링크 생성 및 클릭
             const image = canvas.toDataURL('image/png');
             const a = document.createElement('a');
             a.href = image;
-            a.download = `${detailData?.festivalTitle || 'Timetable'}_${formatDayAndDayOfWeek(selectedDayData.date).replace(/[\.()]/g, '')}.png`;
+            
+            const dateStr = selectedDayData ? formatDayAndDayOfWeek(selectedDayData.date).replace(/[\.()]/g, '_') : '';
+            a.download = `${detailData?.festivalTitle || 'Timetable'}_${dateStr}.png`;
+            
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
@@ -447,6 +460,7 @@ export default function TimetableDetailPage() {
             
         } catch (error) {
             console.error("❌ 이미지 캡처 중 오류 발생:", error);
+            alert("이미지 캡처 중 오류가 발생했습니다. 브라우저 호환성 또는 CSS 설정을 확인해 주세요.");
         }
     };
     
@@ -496,11 +510,11 @@ export default function TimetableDetailPage() {
                             )}
                         </div>
                         <div className={timetableStyles.actionButtonWrapper}>
-                            {/* ⭐️ [수정] Download 아이콘에 캡처 함수 연결 ⭐️ */}
+                            {/* ⭐️ Download 아이콘에 캡처 함수 연결 ⭐️ */}
                             <button className={timetableStyles.actionButton} onClick={handleCaptureAndDownload}>
                                 <img src={download} alt="이미지 캡처 및 다운로드" />
                             </button>
-                            {/* Refresh 버튼에 수정된 handleRefresh 연결 */}
+                            {/* Refresh 버튼 (로컬 선택 초기화) */}
                             <button className={timetableStyles.actionButton} onClick={handleRefresh}>
                                 <img src={refresh} alt="되돌리기"/>
                             </button>
@@ -510,7 +524,7 @@ export default function TimetableDetailPage() {
 
                 {currentDayIndex !== -1 && (
                 <div className={timetableStyles.timetableScrollWrapper}>
-                    {/* ⭐️ [추가] 캡처를 위한 ID 부여 ⭐️ */}
+                    {/* ⭐️ [캡처 대상] 순수한 TimetableGrid 콘텐츠 전체를 포함하는 영역 ⭐️ */}
                     <div id="timetable-capture-area" className={timetableStyles.scheduleArea}>
                         <TimetableGrid 
                             stageMap={schedulesByStage.stageMap} 
