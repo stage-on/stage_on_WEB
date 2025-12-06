@@ -1,4 +1,4 @@
-// src/pages/timetable/TimetableMainPage.tsx (전체 코드 - likeCount 제거 후)
+// src/pages/timetable/TimetableMainPage.tsx (날짜 형식 수정 최종 버전)
 
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
@@ -14,27 +14,27 @@ export interface KopisFestivalItem {
   id: number;
   mt20id: string; 
   prfnm: string; 
-  prfpdfrom: string; 
-  prfpdto: string; 
+  prfpdfrom: string; // 시작일 (YYYY-MM-DD)
+  prfpdto: string;   // 종료일 (YYYY-MM-DD)
   fcltynm: string; 
   poster: string; 
   
   performanceId?: number; 
   title?: string; 
   posterUrl?: string; 
-
-  isLiked?: boolean; 
-  likeCount?: number; // API 응답에는 포함될 수 있지만, UI 로직에서는 사용하지 않음
+  
+  newstate?: boolean; 
+  isLiked?: boolean; // 이전 필드는 옵셔널로 유지
+  likeCount?: number; 
 }
 
-// ⭐️ [UI 타입] 최종 FestivalItem 타입 (likeCount 제거) ⭐️
+// ⭐️ [UI 타입] 최종 FestivalItem 타입 ⭐️
 export interface FestivalItem {
   id: number;
   title: string;
-  // likeCount: number; // UI에서 사용하지 않으므로 제거
   isLiked: boolean; 
   location: string;
-  date: string; 
+  date: string; // YYYY.MM.DD - MM.DD 형식으로 저장됨
   thumbnailUrl: string;
 }
 
@@ -88,9 +88,10 @@ const TimetableMainPage = () => {
       const transformedData: FestivalItem[] = apiData.map(item => ({
           id: item.performanceId,
           title: item.title,
-          isLiked: true, // 이 목록은 무조건 좋아요 상태임
+          isLiked: true, 
           location: item.fcltynm,
-          date: `${item.prfpdfrom.replace(/-/g, '.')} - ${item.prfpdto.replace(/-/g, '.')}`, 
+          // ⚠️ 날짜 형식 수정 적용
+          date: `${item.prfpdfrom.replace(/-/g, '.')} - ${item.prfpdto.slice(5).replace(/-/g, '.')}`, 
           thumbnailUrl: item.posterUrl,
       }));
 
@@ -108,7 +109,7 @@ const TimetableMainPage = () => {
   }, []); 
 
   
-  const fetchMyTimetables = async () => {
+  const fetchMyTimetables = useCallback(async () => {
     setIsMyListLoading(true);
     setMyListError(null);
     
@@ -121,9 +122,10 @@ const TimetableMainPage = () => {
       const transformedData: FestivalItem[] = apiData.map(item => ({
           id: item.id,
           title: item.prfnm,
-          isLiked: item.isLiked || false, 
+          isLiked: item.isLiked ?? item.newstate ?? false, 
           location: item.fcltynm, 
-          date: `${item.prfpdfrom.replace(/-/g, '.')} - ${item.prfpdto.replace(/-/g, '.')}`, 
+          // ⚠️ 날짜 형식 수정 적용
+          date: `${item.prfpdfrom.replace(/-/g, '.')} - ${item.prfpdto.slice(5).replace(/-/g, '.')}`, 
           thumbnailUrl: item.poster, 
       }));
 
@@ -135,52 +137,81 @@ const TimetableMainPage = () => {
     } finally {
       setIsMyListLoading(false);
     }
-  };
+  }, []);
 
 
-  // 더 많은 페스티벌 목록 조회
+  // ⭐️ 더 많은 페스티벌 목록 조회 (좋아요 상태 영구 유지를 위해 사용자 좋아요 정보 병합) ⭐️
   const fetchMoreFestivals = useCallback(async (sortKey: string) => {
     setIsLoading(true);
     setError(null);
     
+    // 1. 좋아요 상태 확인을 위해 사용자의 관심 목록 ID를 가져옵니다.
+    let userLikedIds: Set<number> = new Set();
     try {
-      // ⭐️ 핵심 GET 요청: 이 응답에서 isLiked가 true로 와야 함 ⭐️
-      const response = await api.get(`/kopis/performances/festivals?sort=${sortKey}`); 
-      const apiData: KopisFestivalItem[] = response.data; 
-      
-      const transformedData: FestivalItem[] = apiData.map(item => ({
-          id: item.id,
-          title: item.prfnm, 
-          isLiked: item.isLiked || false, 
-          location: item.fcltynm, 
-          date: `${item.prfpdfrom.replace(/-/g, '.')} - ${item.prfpdto.replace(/-/g, '.')}`, 
-          thumbnailUrl: item.poster, 
-      }));
-
-      setMorefestival(transformedData);
-      
+        const likesResponse = await api.get('/likes/my/festivals');
+        const likedApiData: any[] = likesResponse.data.data || likesResponse.data;
+        userLikedIds = new Set(likedApiData.map(item => item.performanceId || item.id)); 
     } catch (err) {
-      console.error("페스티벌 목록을 불러오는 중 오류 발생:", err);
-      setError("데이터를 불러오는 데 실패했습니다. 다시 시도해 주세요.");
-      setMorefestival([]);
+        console.warn("⚠️ 관심 목록 로드 실패: 메인 목록은 기본 isLiked=false로 진행됩니다.");
+    }
+
+    try {
+        // 2. 메인 페스티벌 목록을 가져옵니다.
+        const response = await api.get(`/kopis/performances/festivals?sort=${sortKey}`); 
+        const apiData: KopisFestivalItem[] = response.data.data || response.data; 
+        
+        // 3. 메인 목록에 사용자 좋아요 상태를 병합(Merge)합니다.
+        const transformedData: FestivalItem[] = apiData.map(item => ({
+            id: item.id,
+            title: item.prfnm, 
+            isLiked: userLikedIds.has(item.id), 
+            location: item.fcltynm, 
+            // ⚠️ 날짜 형식 수정 적용
+            date: `${item.prfpdfrom.replace(/-/g, '.')} - ${item.prfpdto.slice(5).replace(/-/g, '.')}`, 
+            thumbnailUrl: item.poster, 
+        }));
+
+        setMorefestival(transformedData);
+        
+    } catch (err) {
+        console.error("페스티벌 목록을 불러오는 중 오류 발생:", err);
+        setError("데이터를 불러오는 데 실패했습니다. 다시 시도해 주세요.");
+        setMorefestival([]);
     } finally {
-      setIsLoading(false);
+        setIsLoading(false);
     }
   }, []); 
 
 
-  // 좋아요 상태 변경 시 목록 전체 새로고침 콜백
-  const handleLikeChangeSuccess = useCallback(() => {
-    // 좋아요가 성공하면 관련 목록을 모두 새로고침
+  // 좋아요 상태 변경 성공 콜백: 모든 목록에 로컬 업데이트를 적용합니다.
+  const handleLikeChangeSuccess = useCallback((festivalId: number, newIsLikedState: boolean) => {
+    
+    // 1. '더 많은 페스티벌' 목록 (morefestival) 로컬 업데이트 (즉시 반영)
+    setMorefestival(prevList => {
+        const newList = prevList.map(item => 
+            item.id === festivalId ? { ...item, isLiked: newIsLikedState } : item
+        );
+        return newList;
+    });
+    
+    // 2. '나의 타임테이블' 목록 (myTimetables) 로컬 업데이트 (즉시 반영)
+    setMyTimetables(prevList => {
+        const newList = prevList.map(item => 
+            item.id === festivalId ? { ...item, isLiked: newIsLikedState } : item
+        );
+        return newList;
+    });
+    
+    // 3. '나의 관심 페스티벌' 목록을 API로 새로고침 (이 목록은 항목 자체가 추가/제거되므로 API 호출이 필요)
     fetchMyFavorites(); 
-    fetchMoreFestivals(currentSort); 
-  }, [fetchMyFavorites, fetchMoreFestivals, currentSort]);
+    
+  }, [fetchMyFavorites]);
 
 
   useEffect(() => {
     fetchMyTimetables();
     fetchMyFavorites(); 
-  }, [fetchMyFavorites]); 
+  }, [fetchMyFavorites, fetchMyTimetables]); 
   
   useEffect(() => {
     fetchMoreFestivals(currentSort);
@@ -213,7 +244,7 @@ const TimetableMainPage = () => {
                   key={item.id}
                   itemData={item}
                   onClick={() => handleMyTimetableClick(item.id)}
-                  onLikeChangeSuccess={handleLikeChangeSuccess} 
+                  onLikeChangeSuccess={(id, newState) => handleLikeChangeSuccess(id, newState)} 
                 />
               ))}
             </ul>
@@ -286,7 +317,7 @@ const TimetableMainPage = () => {
                   key={item.id}
                   itemData={item}
                   onClick={() => handleCustomizeClick(item.id)}
-                  onLikeChangeSuccess={handleLikeChangeSuccess} 
+                  onLikeChangeSuccess={(id, newState) => handleLikeChangeSuccess(id, newState)} 
                 />
               ))}
             </ul>

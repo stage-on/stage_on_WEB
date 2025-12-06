@@ -1,4 +1,4 @@
-// src/pages/timetable/TimetableDetailPage.tsx (최종 수정 완료 버전 - my-detail 적용)
+// src/pages/timetable/TimetableDetailPage.tsx (Alert 및 모달 기능 완전히 제거)
 
 import { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
@@ -48,7 +48,6 @@ export interface KopisFestivalItem {
 }
 
 // ⭐️ 서버의 /festivals/{mt20id}/my-detail 응답 타입 정의 ⭐️
-// (사용자님이 제공해주신 응답 스키마와 일치하도록 반영)
 export interface CustomDetailAPIItem {
     mt20id: string; 
     prfnm: string; 
@@ -64,7 +63,7 @@ export interface CustomDetailAPIItem {
         stageName: string; 
         stageOrder: number; 
         artist: string; 
-        start: TimeObject | string; // TimeObject 또는 string 처리
+        start: TimeObject | string; 
         end: TimeObject | string; 
         minutes: number; 
         img: string | null; 
@@ -196,24 +195,19 @@ async function fetchCustomSlots(
     mt20id: string,
     setActiveScheduleKeys: (keys: Set<string>) => void
 ): Promise<void> {
-    // ⭐️ API URL 변경 적용: detail -> my-detail (요청하신 대로) ⭐️
     const API_URL = `/festivals/${mt20id}/my-detail`; 
     
     try {
         const response = await api.get(API_URL);
-        // 응답 데이터가 배열이 아닌 CustomDetailAPIItem 형식이라고 가정합니다.
         const apiData: CustomDetailAPIItem = response.data.data || response.data; 
         
         const initialActiveKeys = new Set<string>();
 
-        // hasCustom이 true이고 slots가 존재하며, slots가 배열인지 확인
         if (apiData.hasCustom && Array.isArray(apiData.slots)) {
             apiData.slots.forEach(slot => {
                 const startString = timeToTimeString(slot.start); // 헬퍼 함수 사용
                 
                 if (slot.inverted === true) {
-                     // ScheduleItem의 키 생성 방식과 동일하게 구성
-                     // slot.artist가 없을 경우를 대비해 artist 필드가 있음을 확인
                      if (slot.artist) {
                          const scheduleKey = `${slot.date}-${slot.stageId}-${slot.artist}-${startString}`;
                          initialActiveKeys.add(scheduleKey);
@@ -241,7 +235,7 @@ export default function TimetableDetailPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [currentDayIndex, setCurrentDayIndex] = useState(-1);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-
+    
     const [activeScheduleKeys, setActiveScheduleKeys] = useState<Set<string>>(new Set());
     
     const handleScheduleToggle = (schedule: ScheduleItem) => {
@@ -267,19 +261,11 @@ export default function TimetableDetailPage() {
 
 
     const currentMode: TimetableMode = useMemo(() => {
-        // 커스텀 내역은 'my' 모드와 'customize' 모드에서 모두 필요하지만,
-        // 사용자 데이터를 가져오는 것은 'my'와 'customize' 모드가 구분되지 않는 경우가 많습니다.
-        // 현재 로직은 'my' 모드에서만 fetchCustomSlots을 호출하지만,
-        // 요청의 의도("나의 타임테이블 뿐 아니라 더많은 타임테이블에서도 보고싶어서")에 따라
-        // API 호출은 모든 커스텀 가능한 페이지에서 필요할 수 있습니다.
-        // 일단 기존 로직대로 'my'/'customize'를 구분하되, fetchCustomSlots을 호출하도록 유지합니다.
-        
         if (location.pathname.includes('/my/')) return 'my';
         if (location.pathname.includes('/customize/')) return 'customize';
         return 'view'; 
     }, [location.pathname]);
     
-    // getPayloadAndCheckSelection 함수는 이전과 동일
     const getPayloadAndCheckSelection = (): { payload: { mt20id: string; invertedSlots: any[] } | null, hasSelections: boolean } => {
         if (!detailData || !detailData.mt20id) return { payload: null, hasSelections: false };
         
@@ -346,20 +332,16 @@ export default function TimetableDetailPage() {
         }
     }, [festivalId]);
     
-    // ⭐️ 2. detailData 로드 후, 커스텀 슬롯 API 호출 (my-detail API는 인증된 사용자의 데이터만 가져옴) ⭐️
+    // ⭐️ 2. detailData 로드 후, 커스텀 슬롯 API 호출 ⭐️
     useEffect(() => {
-        // 'my' 모드뿐 아니라 'customize' 모드에서도 커스텀 내역을 가져와야
-        // 사용자가 이전에 선택한 것을 기반으로 수정을 시작할 수 있습니다.
         if (detailData && detailData.mt20id && (currentMode === 'my' || currentMode === 'customize')) { 
-            // 커스텀 내역을 불러와 activeScheduleKeys에 설정합니다.
             fetchCustomSlots(detailData.mt20id, setActiveScheduleKeys);
         } else if (currentMode === 'view') {
-            // view 모드에서는 커스텀 내역이 필요 없으므로 초기화
             setActiveScheduleKeys(new Set());
         }
     }, [detailData, currentMode]); 
 
-    // saveTimetableData 함수는 이전과 동일 (선택 상태가 없어도 POST 요청을 보내어 삭제 명령을 서버에 전달)
+    // ⭐️⭐️ [Alert 제거] 저장/삭제 성공 메시지를 console.log로 대체 ⭐️⭐️
     const saveTimetableData = async (): Promise<boolean> => { 
         
         const { payload, hasSelections } = getPayloadAndCheckSelection(); 
@@ -382,14 +364,19 @@ export default function TimetableDetailPage() {
         try {
             const response = await api.post(API_ENDPOINT, payload); 
 
-            console.log(`✅ 타임테이블 저장/삭제 성공 (${HTTP_METHOD} ${API_ENDPOINT}):`, response.data);
-            alert(hasSelections ? "나의 타임테이블이 성공적으로 서버에 저장되었습니다!" : "나의 타임테이블에서 성공적으로 삭제되었습니다.");
+            // ⚠️ 성공 메시지를 console.log로 대체
+            const successMessage = hasSelections 
+                ? "나의 타임테이블이 성공적으로 서버에 저장되었습니다. 🥳" 
+                : "나의 타임테이블이 성공적으로 서버에서 삭제되었습니다. 🗑️";
+                
+            console.log(`✅ 타임테이블 저장/삭제 성공 (${HTTP_METHOD} ${API_ENDPOINT}):`, successMessage, response.data);
             return true;
 
         } catch (error) {
             const errorMessage = (error as any).response?.data?.message || "알 수 없는 오류가 발생했습니다.";
-            console.error(`❌ 타임테이블 저장/삭제 실패 (${HTTP_METHOD} ${API_ENDPOINT}):`, error); 
-            alert(`타임테이블 저장/삭제 중 오류가 발생했습니다: ${errorMessage}`);
+            
+            // ⚠️ 실패 메시지를 console.error로 대체
+            console.error(`❌ 타임테이블 저장/삭제 실패 (${HTTP_METHOD} ${API_ENDPOINT}):`, errorMessage, error); 
             return false;
         }
     };
@@ -401,6 +388,7 @@ export default function TimetableDetailPage() {
              if (saveSuccessful) {
                 navigate(-1);
             } else {
+                // 저장 실패 시 사용자에게 알림 없이 콘솔에만 기록하고 이동 취소
                 console.log("저장 실패로 인해 페이지 이동을 취소합니다.");
             }
         } else {
@@ -463,8 +451,9 @@ export default function TimetableDetailPage() {
                             )}
                         </div>
                         <div className={timetableStyles.actionButtonWrapper}>
-                            <button className={timetableStyles.actionButton} onClick={() => console.log("저장 기능이 뒤로 가기 버튼으로 이동했습니다.")}>
-                                <img src={download} alt="저장 기능 제거됨"/>
+                            {/* 저장 버튼은 기능이 뒤로 가기에 통합되었고, 모달/alert이 제거되었으므로 콘솔 로그만 남깁니다. */}
+                            <button className={timetableStyles.actionButton} onClick={() => console.log("저장 기능이 뒤로 가기 버튼에 통합되었으며, 모든 알림 창이 제거되었습니다.")}>
+                                <img src={download} alt="저장 기능" />
                             </button>
                             <button className={timetableStyles.actionButton} onClick={handleRefresh}>
                                 <img src={refresh} alt="되돌리기"/>
@@ -485,6 +474,7 @@ export default function TimetableDetailPage() {
                     </div></div>
                     
                 )}
+                
             </main>
         </div>
     );
