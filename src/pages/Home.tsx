@@ -8,6 +8,7 @@ import type { KopisBand, KopisPerformance } from "../api/kopisApi";
 
 // 콘서트 타입 정의
 type Concert = {
+  mt20id: string;
   id: number;     
   name: string;
   date: string;
@@ -29,7 +30,7 @@ const mapPerformanceToConcert = (perf: KopisPerformance): Concert => {
 
   return {
   id: Number(perf.mt20id),        
-
+ mt20id: perf.mt20id, 
     name: perf.prfnm,
     date: period,
     image: perf.poster || concertimage, 

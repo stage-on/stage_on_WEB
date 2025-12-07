@@ -3,6 +3,7 @@ import BandCard from "./BandCard";
 
 type Concert = {
   id: number;
+  mt20id: string;
   name: string;
   date: string;
   image: string;
