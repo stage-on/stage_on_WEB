@@ -21,6 +21,10 @@ type LocationState = {
   liked?: boolean;
 };
 
+// ⭐️ [유지] 페스티벌을 나타내는 typeofcon 값 정의 (2로 가정) ⭐️
+const FESTIVAL_TYPE_CODE = 2; 
+
+
 const formatDateRange = (from?: string, to?: string) => {
   if (!from || !to) return "";
   const [fromY, fromM, fromD] = from.split("-");
@@ -63,10 +67,18 @@ const ConcertProfile = () => {
     }
   };
 
-  // ⭐️ [추가] 타임테이블 커스텀 페이지로 이동하는 핸들러 ⭐️
+  // ⭐️ [수정] handleCustomizeClick 함수: 페스티벌이 아닐 경우 모달(alert) 띄우고 종료 ⭐️
   const handleCustomizeClick = () => {
     if (!detail) return;
-    // 경로: /main/timetable/customize/{festivalId}
+    
+    // detail.typeofcon이 FESTIVAL_TYPE_CODE(2)가 아닐 경우
+    if (detail.typeofcon !== FESTIVAL_TYPE_CODE) {
+        // 페이지 이동 대신 알림 (모달) 창 띄우기
+        alert("이 공연은 타임테이블 구성이 불가능합니다.");
+        return; 
+    }
+    
+    // typeofcon이 2인 경우에만 타임테이블 커스텀 페이지로 이동
     navigate(`/main/timetable/customize/${detail.id}`);
   };
 
@@ -131,6 +143,7 @@ const ConcertProfile = () => {
     styurls,
     relates,
     locationUrl,
+    typeofcon, // typeofcon 값을 가져옵니다.
   } = detail;
 
   const ticketSite = relates?.[0];
@@ -147,9 +160,12 @@ const ConcertProfile = () => {
     }
   };
 
+  // ⭐️ [유지] 페스티벌 여부를 확인하는 플래그 (렌더링 스타일 변경에 사용하지 않음) ⭐️
+  const isFestival = typeofcon === FESTIVAL_TYPE_CODE;
+
   return (
     <div className={concertProfileStyle.page}>
-      {/* 헤더 */}
+     
       <div className={concertProfileStyle.header}>
         <HiChevronLeft
           className={concertProfileStyle.Vector}
@@ -158,7 +174,7 @@ const ConcertProfile = () => {
         <span className={concertProfileStyle.concertName}>{prfnm}</span>
       </div>
 
-      {/* 포스터 */}
+     
       <img
         src={poster || posterPlaceholder}
         className={concertProfileStyle.posterImg}
@@ -201,7 +217,7 @@ const ConcertProfile = () => {
           </div>
         </div>
 
-        {/* 상세 정보 섹션 */}
+    
         <div className={concertProfileStyle.infoSection2}>
         <div className={concertProfileStyle.detailSection}>
           <div className={concertProfileStyle.detailLeft}>
@@ -233,13 +249,16 @@ const ConcertProfile = () => {
           </div>
 
           <div className={concertProfileStyle.detailRight}>
+            
+            {/* ⭐️ [수정] 버튼은 항상 같은 텍스트와 스타일로 렌더링됩니다. ⭐️ */}
             <button 
               className={concertProfileStyle.detailButton}
-              // ⭐️ [수정] 타임테이블 커스텀 버튼에 핸들러 연결 ⭐️
+              // ⭐️ [수정] 클릭 시 handleCustomizeClick이 페스티벌 여부를 판단하여 페이지 이동 또는 알림을 실행합니다. ⭐️
               onClick={handleCustomizeClick}
             >
               타임테이블 커스텀
             </button>
+
 
             <button
               className={concertProfileStyle.detailButton}
@@ -257,7 +276,7 @@ const ConcertProfile = () => {
           </div>
         </div>
 
-        {/* 밴드 라인업 */}
+  
         <div className={concertProfileStyle.bandLineupSection}>
           <div className={concertProfileStyle.bandLineupTitle}>
             출연 밴드 라인업
