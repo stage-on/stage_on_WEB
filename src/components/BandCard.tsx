@@ -1,7 +1,9 @@
+import { useNavigate } from "react-router-dom";
 import bandcardStyle from "../css/components/bandcard.module.css";
 import NewCard from "./NewCard";
 
 type Concert = {
+  mt20id: string;
   id: number;
   name: string;
   date: string;
@@ -14,9 +16,20 @@ type BandCardProps = {
 };
 
 const BandCard = ({ concert }: BandCardProps) => {
+  console.log("BandCard render", concert.mt20id); 
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    console.log("card clicked!", concert.mt20id);
+    navigate(`/main/concert/${concert.mt20id}`);
+  };
+
   return (
-    <div className={bandcardStyle.bandcardContainer}>
-    
+    <div className={bandcardStyle.bandcardContainer}
+    onClick={handleClick}
+      role="button"
+    >
+      
       <div className={bandcardStyle.imageWrapper}>
         <img
           src={concert.image}
