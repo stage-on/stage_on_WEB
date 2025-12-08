@@ -1,12 +1,9 @@
-
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import type { Location } from "react-router-dom";
-//캡쳐도구
-import html2canvas from "html2canvas";
+
 import leftarrow from "../../assets/timetable/arrow-left.svg";
 import downarrow from "../../assets/timetable/arrow-down.svg";
-import download from "../../assets/timetable/download.svg";
 import refresh from "../../assets/timetable/refresh.svg";
 import timetableStyles from "../../css/pages/timetable/timetabledetail.module.css";
 import TimetableGrid from "../../components/timetable/TimetableGrid";
@@ -39,7 +36,7 @@ export interface KopisFestivalItem {
   locationUrl: string;
   styurls: { relatenm: string; relateurl: string }[];
   relates: { relatenm: string; relateurl: string }[];
-  days: { date: string; open: TimeObject; close: TimeObject }[]; // Kopis days 타입
+  days: { date: string; open: TimeObject; close: TimeObject }[]; 
   slots: {
     date: string;
     stageId: string;
@@ -51,7 +48,7 @@ export interface KopisFestivalItem {
     minutes: number;
     img: string;
     note: string;
-  }[]; // Kopis slots 타입
+  }[]; 
   fesLinks: { relatenm: string; relateurl: string }[];
   artistPics: { date: string; relatenm: string; url: string }[];
 }
@@ -63,8 +60,8 @@ export interface CustomDetailAPIItem {
   prfpdto: string;
   fcltynm: string;
   locationUrl: string;
-  hasCustom: boolean; // 커스텀 내역 존재 여부
-  days: { date: string; open: TimeObject; close: TimeObject }[]; // my-detail days 타입
+  hasCustom: boolean; 
+  days: { date: string; open: TimeObject; close: TimeObject }[]; 
   slots: {
     date: string;
     stageId: string;
@@ -76,7 +73,7 @@ export interface CustomDetailAPIItem {
     minutes: number;
     img: string | null;
     note: string | null;
-    inverted?: boolean; // 사용자가 선택했는지 여부
+    inverted?: boolean; 
   }[];
   artistPics: { date: string; relatenm: string; url: string }[];
 }
@@ -120,7 +117,7 @@ const formatDayAndDayOfWeek = (dateString: string): string => {
 
 type TimetableMode = "customize" | "my" | "view";
 
-// ⭐️ TimeObject 또는 string을 "HH:MM:SS" 문자열로 변환하는 헬퍼 함수 ⭐️
+
 const timeToTimeString = (time: any): string => {
   if (typeof time === "string") return time;
   const hour = time?.hour ?? 0;
@@ -130,7 +127,7 @@ const timeToTimeString = (time: any): string => {
     .padStart(2, "0")}:00`;
 };
 
-// ⭐️ 1. Kopis API 호출 및 데이터 변환 함수 (기본 데이터 로드) ⭐️
+
 async function fetchAndProcessTimetableDetail(
   festivalId: string | undefined,
   setCurrentDayIndex: (index: number) => void,
@@ -217,7 +214,7 @@ async function fetchAndProcessTimetableDetail(
   return processedData;
 }
 
-// ⭐️ 2. 사용자 커스텀 슬롯만 가져오는 함수 (my-detail API 사용) ⭐️
+
 async function fetchCustomSlots(
   mt20id: string,
   setActiveScheduleKeys: (keys: Set<string>) => void
@@ -463,53 +460,6 @@ export default function TimetableDetailPage() {
     setIsDropdownOpen(false); 
   };
 
-  
-  const handleCaptureAndDownload = async () => {
-    const inputElement = document.getElementById("timetable-capture-area");
-
-    if (!inputElement) {
-      alert(
-        "캡처 대상 요소를 찾을 수 없습니다."
-      );
-      return;
-    }
-
-   
-    const contentWidth = inputElement.scrollWidth;
-    const contentHeight = inputElement.scrollHeight;
-
-    try {
-      const canvas = await html2canvas(inputElement, {
-        useCORS: true,
-        scale: 2,
-        width: contentWidth,
-        height: contentHeight,
-        scrollX: 0,
-        scrollY: 0,
-        backgroundColor: "#ffffff",
-        windowWidth: contentWidth,
-        windowHeight: contentHeight,
-      });
-
-   
-      const image = canvas.toDataURL("image/png");
-      const a = document.createElement("a");
-      a.href = image;
-
-      const dateStr = selectedDayData
-        ? formatDayAndDayOfWeek(selectedDayData.date).replace(/[\.()]/g, "_")
-        : "";
-      a.download = `${detailData?.festivalTitle || "Timetable"}_${dateStr}.png`;
-
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    } catch (error) {
-      alert(
-        "이미지 캡처 중 오류가 발생했습니다."
-      );
-    }
-  };
 
   const handleDaySelect = (index: number) => {
     setCurrentDayIndex(index);
@@ -602,12 +552,7 @@ export default function TimetableDetailPage() {
               )}
             </div>
             <div className={timetableStyles.actionButtonWrapper}>
-              <button
-                className={timetableStyles.actionButton}
-                onClick={handleCaptureAndDownload}
-              >
-                <img src={download} alt="이미지 캡처 및 다운로드" />
-              </button>
+              {/* 이미지 캡처/다운로드 버튼 제거됨 */}
               <button
                 className={timetableStyles.actionButton}
                 onClick={handleRefresh}
