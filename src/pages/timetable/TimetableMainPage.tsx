@@ -25,6 +25,7 @@ export interface KopisFestivalItem {
 
 export interface FestivalItem {
   id: number;
+  mt20id: string;
   title: string;
   isLiked: boolean;
   location: string;
@@ -39,15 +40,15 @@ const TimetableMainPage = () => {
   const [myTimetables, setMyTimetables] = useState<FestivalItem[]>([]);
   const [recommendedFestivals, setRecommendedFestivals] = useState<RecommendItem[]>([]);
   const [morefestival, setMorefestival] = useState<FestivalItem[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+
+  const [isMoreLoading, setIsMoreLoading] = useState(false);
   const [isMyListLoading, setIsMyListLoading] = useState(true);
-  const [isFavoritesLoading, setIsFavoritesLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [isFavoritesLoading, setIsFavoritesLoading] = useState(true);
+
+  const [moreError, setMoreError] = useState<string | null>(null);
   const [myListError, setMyListError] = useState<string | null>(null);
   const [favoritesError, setFavoritesError] = useState<string | null>(null);
   
-
-
   const handleCustomizeClick = (festivalId: number) => {
     navigate(`/main/timetable/customize/${festivalId}`);
   };
@@ -56,16 +57,23 @@ const TimetableMainPage = () => {
     navigate(`/main/timetable/my/${festivalId}`);
   };
 
-
-  const fetchMyFavorites = useCallback(async () => {
+  const handleConcertDetailClick = (mt20id: string) => {
+    navigate(`/main/concert/${mt20id}`); 
+  };
+  
+  const fetchUserLikedIdsAndFavorites = useCallback(async () => {
     setIsFavoritesLoading(true);
     setFavoritesError(null);
     const API_ENDPOINT = "/likes/my/festivals";
     try {
       const response = await api.get(API_ENDPOINT);
       const apiData: any[] = response.data.data || response.data;
-      const transformedData: FestivalItem[] = apiData.map((item) => ({
-        id: item.performanceId,
+      
+      const likedIds = new Set(apiData.map((item) => item.performanceId || item.id));
+      
+      const transformedData: RecommendItem[] = apiData.map((item) => ({
+        id: item.performanceId || item.id,
+        mt20id: item.mt20id,
         title: item.title,
         isLiked: true,
         location: item.fcltynm,
@@ -74,30 +82,22 @@ const TimetableMainPage = () => {
           .replace(/-/g, ".")}`,
         thumbnailUrl: item.posterUrl,
       }));
-
-    
-      setRecommendedFestivals(transformedData as RecommendItem[]);
+      setRecommendedFestivals(transformedData);
+      
+      return likedIds;
     } catch (err) {
       setFavoritesError("관심 목록을 불러오는 데 실패했습니다.");
-
       setRecommendedFestivals([]);
+      return new Set<number>();
     } finally {
       setIsFavoritesLoading(false);
     }
   }, []);
 
-  const fetchMyTimetables = useCallback(async () => {
+
+  const fetchMyTimetables = useCallback(async (likedIds: Set<number>) => {
     setIsMyListLoading(true);
     setMyListError(null);
-
-    let userLikedIds: Set<number> = new Set();
-    try {
-      const likesResponse = await api.get("/likes/my/festivals");
-      const likedApiData: any[] = likesResponse.data.data || likesResponse.data;
-      userLikedIds = new Set(
-        likedApiData.map((item) => item.performanceId || item.id)
-      );
-    } catch (err) {}
 
     const API_ENDPOINT = "/festivals/custom";
 
@@ -107,8 +107,9 @@ const TimetableMainPage = () => {
 
       const transformedData: FestivalItem[] = apiData.map((item) => ({
         id: item.id,
+        mt20id: item.mt20id,
         title: item.prfnm,
-        isLiked: userLikedIds.has(item.id),
+        isLiked: likedIds.has(item.id), 
         location: item.fcltynm,
         date: `${item.prfpdfrom.replace(/-/g, ".")} - ${item.prfpdto
           .slice(5)
@@ -127,18 +128,9 @@ const TimetableMainPage = () => {
     }
   }, []);
 
-  const fetchMoreFestivals = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-
-    let userLikedIds: Set<number> = new Set();
-    try {
-      const likesResponse = await api.get("/likes/my/festivals");
-      const likedApiData: any[] = likesResponse.data.data || likesResponse.data;
-      userLikedIds = new Set(
-        likedApiData.map((item) => item.performanceId || item.id)
-      );
-    } catch (err) {}
+  const fetchMoreFestivals = useCallback(async (likedIds: Set<number>) => {
+    setIsMoreLoading(true);
+    setMoreError(null);
 
     try {
       const response = await api.get(`/kopis/performances/festivals`);
@@ -146,8 +138,9 @@ const TimetableMainPage = () => {
 
       const transformedData: FestivalItem[] = apiData.map((item) => ({
         id: item.id,
+        mt20id: item.mt20id,
         title: item.prfnm,
-        isLiked: userLikedIds.has(item.id),
+        isLiked: likedIds.has(item.id), 
         location: item.fcltynm,
         date: `${item.prfpdfrom.replace(/-/g, ".")} - ${item.prfpdto
           .slice(5)
@@ -157,13 +150,13 @@ const TimetableMainPage = () => {
 
       setMorefestival(transformedData);
     } catch (err) {
-      setError("데이터를 불러오는 데 실패했습니다. 다시 시도해 주세요.");
+      setMoreError("데이터를 불러오는 데 실패했습니다. 다시 시도해 주세요.");
       setMorefestival([]);
     } finally {
-      setIsLoading(false);
+      setIsMoreLoading(false);
     }
   }, []);
-
+  
   const handleLikeChangeSuccess = useCallback(
     (festivalId: number, newIsLikedState: boolean) => {
       setMorefestival((prevList) =>
@@ -177,19 +170,36 @@ const TimetableMainPage = () => {
         )
       );
      
-      fetchMyFavorites(); 
+      setRecommendedFestivals((prevList) => {
+        if (newIsLikedState) {
+          const itemToAdd = morefestival.find(item => item.id === festivalId);
+          if (itemToAdd) {
+            return [
+              ...prevList,
+              {...itemToAdd, isLiked: true} as RecommendItem
+            ];
+          }
+          return prevList;
+        } else {
+          return prevList.filter(item => item.id !== festivalId) as RecommendItem[];
+        }
+      });
+      
     },
-    [fetchMyFavorites]
+    [morefestival] 
   );
-
+  
   useEffect(() => {
-    fetchMyTimetables();
-    fetchMyFavorites();
-  }, [fetchMyFavorites, fetchMyTimetables]);
+    const loadData = async () => {
+      const likedIds = await fetchUserLikedIdsAndFavorites();
+      
+      fetchMyTimetables(likedIds);
+      fetchMoreFestivals(likedIds);
+    };
 
-  useEffect(() => {
-    fetchMoreFestivals();
-  }, [fetchMoreFestivals]);
+    loadData();
+  }, [fetchUserLikedIdsAndFavorites, fetchMyTimetables, fetchMoreFestivals]);
+
 
   const myTimetableDisplayData = myTimetables;
   const recommendData = recommendedFestivals;
@@ -246,7 +256,6 @@ const TimetableMainPage = () => {
           </section>
         )}
 
-        {/* ⭐️ 관심 목록 섹션은 recommendData를 사용하므로 변경 없음 ⭐️ */}
         {(isFavoritesLoading || favoritesError || recommendData.length > 0) && (
           <section className={timetablestyles.check}>
 
@@ -298,21 +307,21 @@ const TimetableMainPage = () => {
             boldParts={[0]}
           />
 
-          {isLoading && (
+          {isMoreLoading && (
             <p className={timetablestyles.loadingText}>
               페스티벌 목록을 불러오는 중...
             </p>
           )}
 
-          {error && <p className={timetablestyles.errorText}>{error}</p>}
+          {moreError && <p className={timetablestyles.errorText}>{moreError}</p>}
 
-          {!isLoading && !error && displayFestivalData.length > 0 && (
+          {!isMoreLoading && !moreError && displayFestivalData.length > 0 && (
             <ul className={timetablestyles.timetableList}>
               {displayFestivalData.map((item) => (
                 <FestivalListItem
                   key={item.id}
                   itemData={item}
-                  onClick={() => handleCustomizeClick(item.id)}
+                  onClick={() => handleConcertDetailClick(item.mt20id)} 
                   onLikeChangeSuccess={(id, newState) =>
                     handleLikeChangeSuccess(id, newState)
                   }
@@ -321,7 +330,7 @@ const TimetableMainPage = () => {
             </ul>
           )}
 
-          {!isLoading && !error && displayFestivalData.length === 0 && (
+          {!isMoreLoading && !moreError && displayFestivalData.length === 0 && (
             <p className={timetablestyles.noDataText}>
               해당 조건에 맞는 페스티벌이 없습니다.
             </p>
