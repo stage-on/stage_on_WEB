@@ -21,7 +21,6 @@ type LocationState = {
   liked?: boolean;
 };
 
-// ⭐️ [유지] 페스티벌을 나타내는 typeofcon 값 정의 (2로 가정) ⭐️
 const FESTIVAL_TYPE_CODE = 2; 
 
 
@@ -160,8 +159,8 @@ const ConcertProfile = () => {
     }
   };
 
-  // ⭐️ [유지] 페스티벌 여부를 확인하는 플래그 (렌더링 스타일 변경에 사용하지 않음) ⭐️
   const isFestival = typeofcon === FESTIVAL_TYPE_CODE;
+  console.log(isFestival);
 
   return (
     <div className={concertProfileStyle.page}>
@@ -250,10 +249,10 @@ const ConcertProfile = () => {
 
           <div className={concertProfileStyle.detailRight}>
             
-            {/* ⭐️ [수정] 버튼은 항상 같은 텍스트와 스타일로 렌더링됩니다. ⭐️ */}
+     
             <button 
               className={concertProfileStyle.detailButton}
-              // ⭐️ [수정] 클릭 시 handleCustomizeClick이 페스티벌 여부를 판단하여 페이지 이동 또는 알림을 실행합니다. ⭐️
+          
               onClick={handleCustomizeClick}
             >
               타임테이블 커스텀
