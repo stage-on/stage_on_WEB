@@ -1,0 +1,197 @@
+.pageContainer {
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0 0 0;
+}
+
+.backButton {
+  all: unset;
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  outline: none;
+}
+
+.backButton img {
+    width: 24px;
+    height: 28px;
+    flex-shrink: 0;
+}
+
+.pageTitle {
+  flex-grow: 1;
+  text-align: center;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--g-100, #1a1a1a);
+  font-family: Inter;
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: -0.48px;
+}
+
+.emptyBox{
+    width: 24px;
+    height: 24px;
+    display: block;
+}
+
+.timetableControlBar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+    padding: 16px 0px;
+}
+
+.dropdownWrapper {
+    position: relative;
+    display: block;
+}
+
+.dayDropdownToggle {
+    all: unset;
+    box-sizing: border-box;
+    width: 83px;
+    display: flex;
+    padding: 6px 8px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-shrink: 0;
+    border-radius: 4px;
+    border: 1px solid var(--p-20, #C66CD9);
+    background: var(--g-0, #FFF);
+    cursor: pointer;
+    transition: border-color 0.2s;
+    color: var(--p-20, #C66CD9);
+    font-family: Inter;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: -0.36px;
+}
+
+.dayDropdownToggle.open {
+    border: 1px solid var(--p-20, #C66CD9);
+}
+
+.dayDropdownToggle span {
+    flex-grow: 1;
+}
+
+.fontSet {
+    color: var(--p-20, #C66CD9);
+    font-family: Inter;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: -0.36px;
+    white-space: nowrap;
+}
+
+.placeholderText {
+    color: var(--g-40, #D1D1D1);
+    font-family: Inter;
+    font-size: 12px;
+    font-weight: 400;
+    letter-spacing: -0.36px;
+    white-space: nowrap;
+}
+
+.dayDropdownToggle img {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    transition: transform 0.3s ease;
+}
+
+.arrowClosed {
+    transform: rotate(0deg);
+}
+
+.arrowOpen {
+    transform: rotate(180deg);
+}
+
+.dayDropdownList {
+    position: absolute;
+    left: 0px;
+    z-index: 300;
+    width: 83px;
+    padding: 0;
+    margin: 4px 0 0 0;
+    border: 1px solid var(--p-20, #C66CD9);
+    border-radius: 4px;
+    background-color: white;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.dayDropdownItem {
+    width: 83px;
+}
+
+.dayDropdownOption {
+    all: unset;
+    display: block;
+    width: 83px;
+    padding: 8px 0px;
+    cursor: pointer;
+    font-family: Inter;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: -0.36px;
+    color: #333;
+}
+
+.textSpace {
+    padding-left:8px;
+}
+
+.dayDropdownOption:hover {
+    background-color: #f7f7f7;
+}
+
+.dayDropdownOption.active {
+    background: var(--b-210, rgba(198, 108, 217, 0.10));
+    color: var(--p-20, #C66CD9);
+    font-family: Inter;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: -0.36px;
+}
+
+.actionButtonWrapper {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.actionButton {
+    all: unset;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+
+.actionButton img {
+    width: 24px;
+    height: 24px;
+    display: block;
+}
+
+.selectedDateTextWrapper {
+   width: 67px;
+   flex-shrink: 0;
+   margin-left:8px;
+}

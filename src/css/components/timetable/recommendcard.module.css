@@ -11,9 +11,9 @@
   justify-content: center;
   align-items: center;
   aspect-ratio: 3/4;
+  width: 132px;
+  height: 176px;
 }
-
-
 
 .cardInfo {
   margin-bottom: 8px;
@@ -30,7 +30,7 @@
   width: 132px;
   margin: 0;
   align-self: stretch;
-  margin-bottom:3px;
+  margin-bottom: 3px;
 }
 
 .cardDate {
@@ -46,7 +46,7 @@
 }
 
 .customButton {
-  cursor:pointer;
+  cursor: pointer;
   display: flex;
   width: 132px;
   padding: 8px 0;

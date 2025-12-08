@@ -61,6 +61,13 @@
   letter-spacing: -0.3px;
 }
 
+.location{
+  max-width: 80px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .arrowIcon {
   width: 20px;
   height: 20px;
